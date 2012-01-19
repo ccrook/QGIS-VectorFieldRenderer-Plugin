@@ -1,0 +1,355 @@
+<html>
+<head><title>Vector field renderer help</title></head>
+<style type="text/css">
+body {
+     background-color: #ffffff;
+     font-family:verdana, arial, sans-serif;
+     font-size: 80%;
+     }
+
+h1 {
+     font-size: 120%;
+   }
+
+h2 {
+     font-size: 100%;
+   }
+
+td {
+     padding: 10px 5px 2px 5px;
+     vertical-align: top;
+     font-size: 75%;
+   }
+
+table.details, table.buttonlist {
+   margin-left: 15px;
+   }
+
+table.details tr td {
+     padding: 2px 5px 2px 5px;
+   }
+
+img {
+   border-color: #000000;
+   border-style: solid;
+   border-width: 1px;
+   }
+
+img.button {
+   background-color: #CCCCCC;
+   height: 32px;
+   width: 32px;
+   }
+
+pre {
+   border-style: solid;
+   border-width: 1px;
+   border-color: #CCCCFF;
+   background-color: #EEEEEE;
+   color: #000044;
+   margin: 2em;
+   padding: 2em;
+   }
+
+pre span.comment {
+   color: #008800;
+   }
+
+</style>
+<body>
+<h1>Vector field renderer</h1>
+<h2>Contents</h2>
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#rendering">Rendering a vector field</a></li>
+<li><a href="#toolbar">Modifying the vector field - the vector field toolbar</a></li>
+<li><a href="#scalebox">Configuring the scale box<a></li>
+<li><a href="#python">Configuring the renderer from python<a></li>
+<li><a href="#history">Change history</a></li>
+</ul>
+<h2><a name="introduction">Introduction</a></h2>
+
+<p>The vector field renderer is used to display vector field data such as earth deformation, tidal flows, and the like.  It displays the vectors as arrows that are scaled and oriented according selected attributes of data points. 
+It can only be used to render point data - line and polygon layers are not derawn by this symbology.
+</p>
+<p>The vector field is defined by attributes in the data, which can represent the field either by cartesian components (x and y components of the field), or polar coordinates. If polar coordinates are used, the angle may be meaured either eastwards from north, or northwards from east, and may be either in degrees or radians. The magnitude of field can be scaled up or down to an appropriate size for viewing the field.</p.
+<p>As a special case the renderer can also display "height only" data, which displays a vertical arrow scaled usign an attribute of the data.  This is appropriate for displaying the vertical component of deformation, for example.
+</p>
+<img src="VectorScaleBox.png" alt="Scale box" style="float:right" />
+<p>
+The renderer also displays a scale box on the map showing how the arrow size relates to the corresponding vector length.
+</p>
+<p>Note that the renderer does not take account of on-the-fly projection of the map - the arrows are drawn assuming that north is towards the top of the map.
+</p>
+<h2><a name="rendering">Rendering a vector field</a></h2>
+<img src="RendererDialog.png" alt="Renderer dialog" style="float:right" />
+<p>
+A vector field is displayed by changing its symbology.  Right click on the layer in the 
+layers list, and select the symbology tab.  In the renderer drop down select "Vector field".  This will display the options for configuring the symbology. (Note: to see the renderer in the drop down the "new symbology" must be selected.)
+</p>
+<p>The dialog has two main sections - the top section defines how the vector field is expressed in the data, and the bottom section defines characteristics of the arrow symbology.
+</p>
+<p>The fields in the dialog are:</p>
+<div style="clear:both"/>
+<table>
+
+<tr>
+<td>Vector field type
+</td>
+<td>Selects the field type - cartesian, polar, or height only, as described above.
+</td>
+</tr>
+
+<tr>
+<td>... attribute
+</td>
+<td>Selects the data attributes which define the vector field, either X/Y for cartesian fields, length/angle for polar fields, or height for the height only field
+</td>
+</tr>
+
+<tr>
+<td>Scale/units
+</td>
+<td>Defines how the vector field will be scaled when it is represented on the map.  This can be either in map units, or in the units in which the arrow format is defined (see below).  Note that if the arrow is defined in map units, then these are the same.  The length of each vector will be multiplied by this scale for representing on the map.
+</td>
+</tr>
+
+<tr>
+<td>Scale group
+</td>
+<td>Defines a scale group label for the layer.  Layers rendered with the same scale group will be forced to use the same scale.  This must be a simple name, for example "displacement".  The name can optionally followed by "*" and a mupltiple, which scale the arrow at the specified multiple of the group scale (for example "displacement*2").
+</td>
+</tr>
+
+<tr>
+<td>Angle orientation/units
+</td>
+<td>Defines how the angle is defined in the data.  The orientation is one of North from East (North is 0&deg;, East is 90&deg;) or East from North (East is 0&deg;, North is 90&deg;).  The units are either degrees or radians.
+</td>
+</tr>
+
+<tr>
+<td>Arrow format - units
+</td>
+<td>Selects either millimetres, or map units.  Defines the units define the arrow sizes.  If millimetres are selected, then the arrow sizes are defined in millimetres on the plotted map, and will not change as the map scale changes.  If map units, then the arrow will scale up and down as the map scale changes.
+</td>
+</tr>
+
+<tr>
+<td>Arrow size
+</td>
+<td>Defines the size of the components of the arrow.  The arrow has three components - the arrow head, the shaft, and the base.  The head may change size according to the length of the vector - the shaft width and base size are fixed.  The sizes are:
+<table class="details">
+<tr>
+<td>Head (relative)</td>
+<td>The size of the head relative to the length of the arrow</td>
+</tr>
+<tr>
+<td>Head (maximum)</td>
+<td>The maximum size of the head, overrides the relative size</td>
+</tr>
+<tr>
+<td>Base</td>
+<td>The size of the base of the arrow</td>
+</tr>
+<tr>
+<td>Width</td>
+<td>The width of the arrow shaft</td>
+</tr>
+</table>
+</td>
+</tr>
+
+<tr>
+<td>Colours
+</td>
+<td>Selects the colours of components of the arrows.  The components are:
+<table class="details">
+<tr><td>Arrow</td><td>The head and shaft of the arrow</td></tr>
+<tr><td>Base</td><td>The fill colour of the base of the arrow</td></tr>
+<tr><td>Base border</td><td>The border line colour of the base of the arrow</td></tr>
+
+</table>
+</td>
+</tr>
+
+<tr>
+<td>Legend text
+</td>
+<td>Defines text that will displayed alongside the symbology on the legend
+</td>
+</tr>
+
+<tr>
+<td>Scale box text/Show
+</td>
+<td>The scale box text is displayed alongside the scale arrow in the scale box.  If the show box is not ticked then the layer will not be included in the scale box.
+</td>
+</tr>
+</table>
+<h2><a name="toolbar">Modifying the vector field - the vector field toolbar</a></h2>
+<p>
+The renderer installs a toolbar with buttons for controlling the size of the arrows.  These rescale the arrows of the currently selected vector layer.  They are only enabled if the layer is rendered with the Vector field renderer.
+</p>
+<table class="buttonlist">
+<tr>
+<td>
+<img src="RescaleRendererIcon.png" class="button">
+</td>
+<td>
+Rescale the arrows of the current layer to an appropriate view.  The scaling is based on the maximum size and the number of arrows in the current view. 
+</td>
+</tr>
+<tr>
+<td>
+<img src="EnlargeRendererIcon.png" class="button">
+</td>
+<td>
+Increase the scale of the arrows.
+</td>
+</tr>
+<tr>
+<td>
+<img src="ShrinkRendererIcon.png" class="button">
+</td>
+<td>
+Reduce the scale of the arrows.
+</td>
+</tr>
+<tr>
+<td>
+<img src="VectorScaleBoxOptionsIcon.png" class="button">
+</td>
+<td>
+Configure the scale box - see below
+</td>
+</tr>
+<tr>
+<td>
+<img src="RendererHelpIcon.png" class="button">
+</td>
+<td>
+Display this help information
+</td>
+</tr>
+</table>
+<h2><a name="scalebox">Configuring the scale box<a></h2>
+<img src="VectorScaleBoxOptions.png" alt="Vector scale box options dialog" style="float:right" />
+<p>
+The scale box can be configured using the Vector scale box options dialog.  This has the following options:
+</p>
+<!-- div style="clear:both"/ -->
+<table>
+
+<tr>
+<td>Position
+</td>
+<td>Defines the corner of the map where the scale box will be plotted
+</td>
+</tr>
+
+<tr>
+<td>OffsetX/Y
+</td>
+<td>Defines offset of the box from the corner
+</td>
+</tr>
+
+<tr>
+<td>Approx arrow size
+</td>
+<td>Defines the approximate size of the scale arrow as a percentage of the width of the map
+</td>
+</tr>
+
+<tr>
+<td>Draw box?
+</td>
+<td>If checked then a rectangular box will be drawn around the vector scale arrows
+</td>
+</tr>
+
+<tr>
+<td>Fill box
+</td>
+<td>If checked then the box will be filled (features underneath will be hidden).
+</td>
+</tr>
+
+<tr>
+<td>Border/Fill color
+</td>
+<td>Defines the colour of the border and fill of the box
+</td>
+</tr>
+
+<tr>
+<td>Title
+</td>
+<td>Displays the title that will be displayed at the top of the box
+</td>
+</tr>
+
+<tr>
+<td>Title/scale font
+</td>
+<td>Select the font used for the scale box title, and for the legend beside each scale arrow.
+</td>
+</tr>
+</table>
+<h2><a name="python">Configuring the renderer from python<a></h2>
+
+<p>The following example code shows how to configure the renderer for a layer
+from python code.</p>
+
+<pre>
+    <span class="comment"># Obtain a vector field renderer metadata object vm</span>
+
+    vm=QgsRendererV2Registry.instance().rendererMetadata("VectorFieldRenderer")
+
+    <span class="comment"># Create a renderer</span>
+
+    r = vm.createRenderer(None)
+
+    <span class="comment"># Set the mode for the renderer - possible values are</span>
+    <span class="comment"># Cartesian vector (0), Polar vector (1), height only (2)</span>
+    <span class="comment"># And set the attributes defining the vector field</span>
+
+    r.setMode(0)
+    r.setFields('dx','dy')
+
+    <span class="comment"># Get the arrow symbol and assign its colors</span>
+
+    arrow = r.arrow()
+    arrow.setColor(QColor.fromRgb(255,0,0))
+    arrow.setBaseColor(QColor.fromRgb(255,0,0))
+    arrow.setBaseBorderColor(QColor.fromRgb(0,0,0))
+
+    <span class="comment"># Set other symbology properties</span>
+    r.setScaleGroup('deformation')
+    r.setLegendText(' horizontal')
+    r.setScaleBoxText(' hor')
+
+    <span class="comment"># Assign the renderer to the layer and refresh the symbology</span>
+    <span class="comment"># Not sure whether clearing the image cache is necessary, should be </span>
+    <span class="comment"># done by QGis on setting the renderer</span>
+
+    layer.setRendererV2(r)
+    layer.setCacheImage(None)
+    self._iface.legendInterface().refreshLayerSymbology(layer)
+
+    <span class="comment"># If the scale is to be automatically set based on the visible</span>
+    <span class="comment"># vectors, then the following rather obscure code will do it.</span>
+
+    self._iface.mapCanvas().refresh()
+    mapsize = self._iface.mapCanvas().extent()
+    layer.rendererV2().autoRescale(mapsize)
+    layer.setCacheImage(None)
+</pre>
+
+<h2><a name="history">Change history</a></h2>
+<p><i>Version 0.12: 8 March 2011:</i>Bug fix causing QGis crash when fields not selected.  Added functions to simplify programming from python.  Improved documentation.</p>
+<p><i>Version 0.10: 8 April 2010:</i> Changed activated() signals to triggered() in readiness for removal of qt3 support.</p>
+<p><i>Version 0.9: 2 April 2010:</i> Fixed autoscaling of vector layers when using on the fly projection.</p>
+</body>
+</html>

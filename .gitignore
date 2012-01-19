@@ -1,0 +1,4 @@
+*.pyc
+Thumbs.db
+.svn
+*.swp

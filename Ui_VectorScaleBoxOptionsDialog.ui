@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>VectorScaleBoxOptionsDialog</class>
+ <widget class="QDialog" name="VectorScaleBoxOptionsDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>399</width>
+    <height>274</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Vector scale box options</string>
+  </property>
+  <layout class="QVBoxLayout" name="uMainLayout">
+   <item>
+    <widget class="QGroupBox" name="uLocationGroup">
+     <property name="title">
+      <string>Location</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <layout class="QVBoxLayout" name="uLocationLayout">
+        <item>
+         <layout class="QHBoxLayout" name="uPositionLayout_2">
+          <item>
+           <widget class="QLabel" name="uPositionLabel">
+            <property name="text">
+             <string>Position:</string>
+            </property>
+            <property name="buddy">
+             <cstring>uRadioTL</cstring>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="uRadioTL">
+            <property name="text">
+             <string>Top left</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="uRadioTR">
+            <property name="text">
+             <string>Top right</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="uRadioBL">
+            <property name="text">
+             <string>Bottom left</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="uRadioBR">
+            <property name="text">
+             <string>Bottom right</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="uPositionSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="uPositionLayout">
+        <item>
+         <widget class="QLabel" name="uOffsetXLabel">
+          <property name="text">
+           <string>Offset: X</string>
+          </property>
+          <property name="buddy">
+           <cstring>uOffsetX</cstring>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="uOffsetX">
+          <property name="maximum">
+           <number>300</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="uOffsetYLabel">
+          <property name="text">
+           <string>   Y</string>
+          </property>
+          <property name="buddy">
+           <cstring>uOffsetY</cstring>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="uOffsetY">
+          <property name="maximum">
+           <number>300</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="uArrowSizeLabel">
+          <property name="text">
+           <string>     Approx arrow size (%)</string>
+          </property>
+          <property name="buddy">
+           <cstring>uArrowSizePercent</cstring>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="uArrowSizePercent">
+          <property name="maximum">
+           <number>30</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="uPositionSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="uBoxGroup">
+     <property name="title">
+      <string>Box</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_6">
+      <item>
+       <widget class="QLabel" name="uShowBoxLabel">
+        <property name="text">
+         <string>Draw box?</string>
+        </property>
+        <property name="buddy">
+         <cstring>uShowBox</cstring>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="uShowBox">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="uFillBoxLabel">
+        <property name="text">
+         <string>Fill box?</string>
+        </property>
+        <property name="buddy">
+         <cstring>uFillBox</cstring>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="uFillBox">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="uBoxSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QgsColorButtonV2" name="uPenColor">
+        <property name="text">
+         <string>Border color</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QgsColorButtonV2" name="uBrushColor">
+        <property name="text">
+         <string>Fill color</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="uTextGroup">
+     <property name="title">
+      <string>Text</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <item>
+       <widget class="QLabel" name="uTitleLabel">
+        <property name="text">
+         <string>Title: </string>
+        </property>
+        <property name="buddy">
+         <cstring>uTitle</cstring>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="uTitle"/>
+      </item>
+      <item>
+       <widget class="QPushButton" name="uTitleFont">
+        <property name="text">
+         <string>Title font</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="uScaleFont">
+        <property name="text">
+         <string>Scale font</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="uButtonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Help|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QgsColorButtonV2</class>
+   <extends>QPushButton</extends>
+   <header>qgis.gui</header>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>uRadioTL</tabstop>
+  <tabstop>uRadioTR</tabstop>
+  <tabstop>uRadioBL</tabstop>
+  <tabstop>uRadioBR</tabstop>
+  <tabstop>uOffsetX</tabstop>
+  <tabstop>uOffsetY</tabstop>
+  <tabstop>uArrowSizePercent</tabstop>
+  <tabstop>uShowBox</tabstop>
+  <tabstop>uFillBox</tabstop>
+  <tabstop>uPenColor</tabstop>
+  <tabstop>uBrushColor</tabstop>
+  <tabstop>uTitle</tabstop>
+  <tabstop>uTitleFont</tabstop>
+  <tabstop>uScaleFont</tabstop>
+  <tabstop>uButtonBox</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>uButtonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>VectorScaleBoxOptionsDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>uButtonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>VectorScaleBoxOptionsDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
