@@ -11,10 +11,12 @@ from Ui_VectorFieldRendererWidget import Ui_VectorFieldRendererWidget
 
 # Color button class - connects up QgsColorButton with a color dialog
 
-class ColorButton:
+class ColorButton( QObject ):
+
    def __init__(self,button):
+      QObject.__init__(self)
       self._button = button
-      QObject.connect(button,SIGNAL("clicked()"),self.clicked)
+      button.clicked.connect( self.clicked )
 
    def color(self):
       return self._button.color()
@@ -26,12 +28,16 @@ class ColorButton:
    def clicked(self):
       self.setColor(QColorDialog.getColor(self.color()))
 
-class UnitButton:
+class UnitButton( QObject ):
+
+   valueChanged = pyqtSignal(name='valueChanged')
+
    def __init__(self,button,mmtext="Millimetres"):
+      QObject.__init__(self)
       self._button = button
       self._mmLabel = mmtext
       self.setUnits(QgsSymbolV2.MM)
-      QObject.connect(button,SIGNAL("clicked()"),self.clicked)
+      button.clicked.connect(self.clicked)
 
    def units(self):
       return self._units
@@ -52,6 +58,7 @@ class UnitButton:
           self.setUnits(QgsSymbolV2.MapUnit)
       else:
           self.setUnits(QgsSymbolV2.MM)
+      self.valueChanged.emit()
 
    def clicked(self):
       self.setIsMapUnit( not self.isMapUnit())
@@ -75,6 +82,7 @@ class VectorFieldRendererWidget(QgsRendererV2Widget,Ui_VectorFieldRendererWidget
            return
 
         self._mode = VectorFieldRenderer.Cartesian
+        self._ellipsemode = VectorFieldRenderer.NoEllipse
         self.buildWidget()
         self.setupLayer(layer)
         self.loadFromRenderer()
@@ -94,9 +102,12 @@ class VectorFieldRendererWidget(QgsRendererV2Widget,Ui_VectorFieldRendererWidget
         self.arrowColor = ColorButton(self.uArrowColor)
         self.baseColor = ColorButton(self.uBaseColor)
         self.baseBorderColor = ColorButton(self.uBaseBorderColor)
+        self.ellipseBorderColor = ColorButton(self.uEllipseBorderColor)
+        self.ellipseFillColor = ColorButton(self.uEllipseFillColor)
 
-        self.outputUnits = UnitButton(self.uOutputUnits)
         self.scaleUnits = UnitButton(self.uScaleUnits,"Arrow unit")
+        self.outputUnits = UnitButton(self.uOutputUnits)
+        self.ellipseOutputUnits = UnitButton(self.uEllipseOutputUnits )
 
         re = QRegExp("\\d+\\.?\\d*(?:[Ee][+-]?\\d+)?")
         self.uArrowScale.setValidator(QRegExpValidator(re,self))
@@ -104,60 +115,122 @@ class VectorFieldRendererWidget(QgsRendererV2Widget,Ui_VectorFieldRendererWidget
         resg = QRegExp("(\\w+(\\*\\d+(\\.\\d*)?)?)?")
         self.uScaleGroup.setValidator(QRegExpValidator(resg,self))
 
-        QObject.connect(self.uFieldTypeCartesian, SIGNAL("toggled(bool)"), self.setFieldTypeCartesian )
-        QObject.connect(self.uFieldTypePolar, SIGNAL("toggled(bool)"), self.setFieldTypePolar )
-        QObject.connect(self.uFieldTypeHeight, SIGNAL("toggled(bool)"), self.setFieldTypeHeight )
-        QObject.connect(self.uHelpButton, SIGNAL("clicked()"), self.showHelp )
+        ft = QButtonGroup()
+        ft.addButton(self.uFieldTypeCartesian,VectorFieldRenderer.Cartesian)
+        ft.addButton(self.uFieldTypePolar,VectorFieldRenderer.Polar)
+        ft.addButton(self.uFieldTypeHeight,VectorFieldRenderer.Height)
+        ft.addButton(self.uFieldTypeNone,VectorFieldRenderer.NoArrow)
+        ft.buttonClicked[int].connect(self.setMode)
+        self.fieldTypeGroup = ft
+
+        et = QButtonGroup()
+        et.addButton(self.uEllipseTypeCovariance,VectorFieldRenderer.CovarianceEllipse)
+        et.addButton(self.uEllipseTypeAxes,VectorFieldRenderer.AxesEllipse)
+        et.addButton(self.uEllipseTypeCircular,VectorFieldRenderer.CircularEllipse)
+        et.addButton(self.uEllipseTypeHeight,VectorFieldRenderer.HeightEllipse)
+        et.addButton(self.uEllipseTypeNone,VectorFieldRenderer.NoEllipse)
+        et.buttonClicked[int].connect(self.setEllipseMode)
+        self.ellipseTypeGroup = et
+        
+        self.uHelpButton.clicked.connect( self.showHelp )
+
+        # Keep output units in sync in each tab page...
+        self.outputUnits.valueChanged.connect( lambda: self.ellipseOutputUnits.setUnits( self.outputUnits.units()))
+        self.ellipseOutputUnits.valueChanged.connect( lambda: self.outputUnits.setUnits( self.ellipseOutputUnits.units()))
 
     # event handlers
 
     def showHelp(self):
         VectorFieldRenderer.showHelp()
 
-    def setFieldTypeCartesian( self, isset):
-        if isset:
-           self.setMode( VectorFieldRenderer.Cartesian )
-
-    def setFieldTypePolar( self, isset):
-        if isset:
-           self.setMode( VectorFieldRenderer.Polar )
-
-    def setFieldTypeHeight( self, isset):
-        if isset:
-           self.setMode( VectorFieldRenderer.Height )
-
-    def mode(self):
+    def mode( self ):
         return self._mode
 
     def setMode(self,mode):
+        fields = 2
         if mode == VectorFieldRenderer.Height:
             self.uFieldTypeHeight.setChecked(True)
-            self.uXFieldLabel.setText("Height attribute")
-            self.uYFieldLabel.setText("")
-            self.uYField.setCurrentIndex(-1)
+            fields=["Height attribute"]
         elif mode == VectorFieldRenderer.Polar:
             self.uFieldTypePolar.setChecked(True)
-            self.uXFieldLabel.setText("Length attribute")
-            self.uYFieldLabel.setText("Angle attribute")
+            fields=["Length attribute","Angle attribute"]
+        elif mode == VectorFieldRenderer.NoArrow:
+            self.uFieldTypeNone.setChecked(True)
+            fields=[]
         else:
             self.uFieldTypeCartesian.setChecked(True)
             mode == VectorFieldRenderer.Cartesian
-            self.uXFieldLabel.setText("X attribute")
-            self.uYFieldLabel.setText("Y attribute")
+            fields=["X attribute","Y attribute"]
         self._mode = mode
-        self.uYField.setEnabled(mode != VectorFieldRenderer.Height)
-        isPolar = (mode == VectorFieldRenderer.Polar)
+        nfields=len(fields)
+        self.uXField.setEnabled( nfields > 0 )
+        self.uYField.setEnabled( nfields > 1 )
+        self.uXFieldLabel.setText( fields[0] if nfields > 0 else '' )
+        self.uYFieldLabel.setText( fields[1] if nfields > 1 else '' )
+        if fields < 1:
+            self.uXField.setCurrentIndex(-1)
+        if fields < 2:
+            self.uYField.setCurrentIndex(-1)
+        isPolar = mode == VectorFieldRenderer.Polar
         self.uAngleUnitsGroupBox.setEnabled( isPolar )
         self.uOrientationGroupBox.setEnabled( isPolar )
+        self.uArrowFormatGroup.setEnabled( mode != VectorFieldRenderer.NoArrow )
+
+    def ellipseMode(self):
+        return self._ellipseMode
+
+    def setEllipseMode(self,mode):
+        if mode == VectorFieldRenderer.HeightEllipse:
+            self.uEllipseTypeHeight.setChecked(True)
+            fields = ["Height error"]
+        elif mode == VectorFieldRenderer.CircularEllipse:
+            self.uEllipseTypeCircular.setChecked(True)
+            fields = ["X/Y error"]
+        elif mode == VectorFieldRenderer.AxesEllipse:
+            self.uEllipseTypeAxes.setChecked(True)
+            fields=["Semi-major axis","Semi-minor axis","Major axis orientation"]
+        elif mode == VectorFieldRenderer.CovarianceEllipse:
+            self.uEllipseTypeCovariance.setChecked(True)
+            fields=["Cxx covariance","Cxy covariance","Cyy covariance"]
+        else:
+            self.uEllipseTypeNone.setChecked(True)
+            mode == VectorFieldRenderer.NoEllipse
+            fields = []
+
+        self._ellipseMode = mode
+        nfields = len(fields)
+        self.uCxxField.setEnabled(nfields>0)
+        self.uCxyField.setEnabled(nfields>1)
+        self.uCyyField.setEnabled(nfields>2)
+        self.uCxxFieldLabel.setText(fields[0] if nfields > 0 else '')
+        self.uCxyFieldLabel.setText(fields[1] if nfields > 1 else '')
+        self.uCyyFieldLabel.setText(fields[2] if nfields > 2 else '')
+        if fields < 1:
+            self.uCxxField.setCurrentIndex(-1)
+        if fields < 2:
+            self.uCxyField.setCurrentIndex(-1)
+        if fields < 3:
+            self.uCyyField.setCurrentIndex(-1)
+
+        isPolar = mode == VectorFieldRenderer.AxesEllipse
+        self.uAngleUnitsGroupBox.setEnabled( isPolar )
+        self.uOrientationGroupBox.setEnabled( isPolar )
+        self.uEllipseFormatGroup.setEnabled( mode != VectorFieldRenderer.NoEllipse )
  
     def setupLayer( self, layer ):
         self.layer = layer
         self.uXField.clear()
         self.uYField.clear()
+        self.uCxxField.clear()
+        self.uCxyField.clear()
+        self.uCyyField.clear()
         if layer:
            for f in self.getLayerFields(layer):
              self.uXField.addItem(f)
              self.uYField.addItem(f)
+             self.uCxxField.addItem(f)
+             self.uCxyField.addItem(f)
+             self.uCyyField.addItem(f)
  
     def getLayerFields( self, layer ):
          provider = layer.dataProvider()
@@ -180,20 +253,30 @@ class VectorFieldRendererWidget(QgsRendererV2Widget,Ui_VectorFieldRendererWidget
     def loadFromRenderer( self ):
         vfr = self.r
         self.setMode( vfr.mode())
+        self.setEllipseMode( vfr.ellipseMode())
         self.uXField.setCurrentIndex( self.uXField.findText(vfr.xFieldName()))
         self.uYField.setCurrentIndex( self.uYField.findText(vfr.yFieldName()))
+        self.uCxxField.setCurrentIndex( self.uCxxField.findText(vfr.cxxFieldName()))
+        self.uCxyField.setCurrentIndex( self.uCxyField.findText(vfr.cxyFieldName()))
+        self.uCyyField.setCurrentIndex( self.uCyyField.findText(vfr.cyyFieldName()))
         self.uAngleUnitsDegrees.setChecked( vfr.degrees())
         self.uAngleUnitsRadians.setChecked( not vfr.degrees())
         self.uAngleOrientationNorth.setChecked( vfr.angleFromNorth())
         self.uAngleOrientationEast.setChecked( not vfr.angleFromNorth())
+        self.uEllipseAngleUnitsDegrees.setChecked( vfr.ellipseDegrees())
+        self.uEllipseAngleUnitsRadians.setChecked( not vfr.ellipseDegrees())
+        self.uEllipseOrientationNorth.setChecked( vfr.ellipseAngleFromNorth())
+        self.uEllipseOrientationEast.setChecked( not vfr.ellipseAngleFromNorth())
         self.scaleUnits.setIsMapUnit(vfr.useMapUnit())
         self.uArrowScale.setText( str(vfr.scale()))
+        self.uEllipseScale.setText( str(vfr.ellipseScale()))
         group = vfr.scaleGroup()
         factor = vfr.scaleGroupFactor()
         if group and factor != 1.0:
            group = group + "*" + str(factor)
         self.uScaleGroup.setText(group)
         self.outputUnits.setUnits(vfr.outputUnit())
+        self.ellipseOutputUnits.setUnits(vfr.outputUnit())
         arrow = vfr.arrow()
         self.uArrowHeadSize.setValue( arrow.headSize())
         self.uArrowHeadMaxSize.setValue( arrow.maxHeadSize())
@@ -202,6 +285,10 @@ class VectorFieldRendererWidget(QgsRendererV2Widget,Ui_VectorFieldRendererWidget
         self.arrowColor.setColor( arrow.color())
         self.baseColor.setColor( arrow.baseColor())
         self.baseBorderColor.setColor( arrow.baseBorderColor())
+        self.uEllipseBorderWidth.setValue( arrow.ellipseBorderWidth())
+        self.ellipseBorderColor.setColor( arrow.ellipseBorderColor())
+        self.uFillEllipse.setChecked( arrow.fillEllipse())
+        self.ellipseFillColor.setColor( arrow.ellipseFillColor())
         self.uLegendText.setText( vfr.legendText())
         self.uScaleBoxText.setText( vfr.scaleBoxText())
         self.uShowInScaleBox.setChecked( vfr.showInScaleBox())
@@ -212,12 +299,22 @@ class VectorFieldRendererWidget(QgsRendererV2Widget,Ui_VectorFieldRendererWidget
         # set the new scale group
         vfr.setScaleGroup("")
         vfr.setMode( self.mode())
+        vfr.setEllipseMode( self.ellipseMode())
         vfr.setXFieldName( self.uXField.currentText())
         vfr.setYFieldName( self.uYField.currentText())
+        vfr.setCxxFieldName( self.uCxxField.currentText())
+        vfr.setCxyFieldName( self.uCxyField.currentText())
+        vfr.setCyyFieldName( self.uCyyField.currentText())
         vfr.setDegrees( self.uAngleUnitsDegrees.isChecked())
         vfr.setAngleFromNorth(self.uAngleOrientationNorth.isChecked())
+        vfr.setEllipseDegrees( self.uEllipseAngleUnitsDegrees.isChecked())
+        vfr.setEllipseAngleFromNorth(self.uEllipseOrientationNorth.isChecked())
         try:
            vfr.setScale( float(self.uArrowScale.text()))
+        except:
+           pass
+        try:
+           vfr.setEllipseScale( float(self.uEllipsseScale.text()))
         except:
            pass
         vfr.setUseMapUnit( self.scaleUnits.isMapUnit())
@@ -240,6 +337,10 @@ class VectorFieldRendererWidget(QgsRendererV2Widget,Ui_VectorFieldRendererWidget
         arrow.setColor( self.arrowColor.color())
         arrow.setBaseColor( self.baseColor.color())
         arrow.setBaseBorderColor( self.baseBorderColor.color())
+        arrow.setEllipseBorderWidth( self.uEllipseBorderWidth.value())
+        arrow.setEllipseBorderColor( self.ellipseBorderColor.color())
+        arrow.setFillEllipse( self.uFillEllipse.isChecked())
+        arrow.setEllipseFillColor( self.ellipseFillColor.color())
         vfr.setLegendText( self.uLegendText.text())
         vfr.setScaleBoxText( self.uScaleBoxText.text())
         vfr.setShowInScaleBox( self.uShowInScaleBox.isChecked())

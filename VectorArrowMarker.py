@@ -26,8 +26,13 @@ class VectorArrowMarker(QgsMarkerSymbolLayerV2):
         self.setColor( QColor(0,0,0))
         self.setBaseColor( QColor(0,0,0))
         self.setBaseBorderColor( QColor(0,0,0))
+        self.setEllipseBorderWidth(0.7)
+        self.setEllipseBorderColor( QColor(0,0,0))
+        self.setEllipseFillColor( QColor(0,0,0))
+        self.setFillEllipse( False )
 
-        self.setVector( 10.0, 0.0 )
+        self.setVector( 10.0, 0.0, True )
+        self.setEllipse( 0.0, 0.0, 0.0, False )
         self._head = [ [0.5,0.0], [-0.4, 0.4], [-0.1,0.0], [-0.4, -0.4] ]
 
     def width( self ):
@@ -45,9 +50,16 @@ class VectorArrowMarker(QgsMarkerSymbolLayerV2):
     def setMaxHeadSize(self,maxHeadSize):
         self._maxHeadSize = maxHeadSize
     
-    def setVector( self, size, angle ):
+    def setVector( self, size, angle, drawVector=True ):
         self._vectorSize = size
         self._vectorAngle = angle
+        self._drawVector = drawVector
+    
+    def setEllipse( self, emax, emin, eangle, drawEllipse=True ):
+        self._ellipseEmax = emax
+        self._ellipseEmin = emin
+        self._ellipseAngle = eangle
+        self._drawEllipse = drawEllipse
 
     def baseSize(self):
         return self._baseSize
@@ -58,6 +70,36 @@ class VectorArrowMarker(QgsMarkerSymbolLayerV2):
         return self._baseColor
     def setBaseColor(self,color):
         self._baseColor = color
+
+    def baseBorderColor(self):
+        return self._baseBorderColor
+    def setBaseBorderColor(self,color):
+        self._baseBorderColor = color
+
+    def ellipseBorderColor(self):
+        return self._ellipseBorderColor
+    def setEllipseBorderColor(self,color):
+        self._ellipseBorderColor = color
+
+    def ellipseFillColor(self):
+        return self._ellipseFillColor
+    def setEllipseFillColor(self,color):
+        self._ellipseFillColor = color
+
+    def ellipseBorderWidth( self ):
+        return self._ellipseBorderWidth
+    def setEllipseBorderWidth( self, width ):
+        self._ellipseBorderWidth = width;
+
+    def fillEllipse( self ):
+        return self._fillEllipse
+    def setFillEllipse( self, fill ):
+        self._fillEllipse = fill
+
+    def baseBorderColor(self):
+        return self._baseBorderColor
+    def setBaseBorderColor(self,color):
+        self._baseBorderColor = color
 
     def baseBorderColor(self):
         return self._baseBorderColor
@@ -119,6 +161,33 @@ class VectorArrowMarker(QgsMarkerSymbolLayerV2):
 
     def renderArrow( self, point, painter, pixelFactor, selColor=None ): 
 
+        if self._drawVector:
+            length = self._vectorSize*pixelFactor
+            cosangle = math.cos(self._vectorAngle)
+            sinangle = math.sin(self._vectorAngle)
+            endpoint = QPointF( 
+               point.x()+length*cosangle, 
+               point.y()-length*sinangle 
+               )
+        else:
+            endpoint = point
+
+        if self._drawEllipse:
+           pen = QPen( selColor or self.ellipseBorderColor())
+           pen.setWidth(self.ellipseBorderWidth()*pixelFactor)
+           pen.setWidth(1.0)
+           painter.setPen(pen)
+           if self._fillEllipse:
+               brush = QBrush(selColor or self.ellipseFillColor())
+               painter.setBrush(brush)
+           else:
+               painter.setBrush(Qt.NoBrush)
+           painter.translate(endpoint.x(),endpoint.y())
+           painter.rotateRadians(self._ellipseAngle)
+           painter.drawEllipse( QPointF(0.0,0.0), self._ellipseEmax*pixelFactor, self._ellipseEmin*pixelFactor )
+           painter.rotateRadians(-self._ellipseAngle)
+           painter.translate(-endpoint.x(),-endpoint.y())
+    
         if self.baseSize() > 0:
            pen = QPen( selColor or self.baseBorderColor())
            pen.setWidth(1.0)
@@ -128,31 +197,25 @@ class VectorArrowMarker(QgsMarkerSymbolLayerV2):
            radius = self.baseSize()*pixelFactor/2.0
            painter.drawEllipse(point,radius,radius)
 
-        length = self._vectorSize*pixelFactor
-        if length <= 0:
-           return
-        pen = QPen( selColor or self.color())
-        pen.setWidth(self.width()*pixelFactor)
-        painter.setPen(pen)
-        width = self.width()
-        headsize = min(self.headSize()*length, self.maxHeadSize()*pixelFactor)
-        cosangle = math.cos(self._vectorAngle)
-        sinangle = math.sin(self._vectorAngle)
-        endpoint = QPointF( 
-           point.x()+length*cosangle, 
-           point.y()-length*sinangle 
-           )
-        painter.drawLine(point, endpoint)
-        if headsize > width:
-           pts = [ QPointF(
-                    endpoint.x() + p[0]*cosangle*headsize - p[1]*sinangle*headsize,
-                    endpoint.y() - p[0]*sinangle*headsize - p[1]*cosangle*headsize )
-                  for p in self._head ]
-           pen.setWidth(0)
-           painter.setPen(pen)
-           brush = QBrush(selColor or self.color())
-           painter.setBrush(brush)
-           painter.drawPolygon(*pts)
+        if self._drawVector:
+            if length <= 0:
+               return
+            pen = QPen( selColor or self.color())
+            pen.setWidth(self.width()*pixelFactor)
+            painter.setPen(pen)
+            width = self.width()
+            headsize = min(self.headSize()*length, self.maxHeadSize()*pixelFactor)
+            painter.drawLine(point, endpoint)
+            if headsize > width:
+               pts = [ QPointF(
+                        endpoint.x() + p[0]*cosangle*headsize - p[1]*sinangle*headsize,
+                        endpoint.y() - p[0]*sinangle*headsize - p[1]*cosangle*headsize )
+                      for p in self._head ]
+               pen.setWidth(0)
+               painter.setPen(pen)
+               brush = QBrush(selColor or self.color())
+               painter.setBrush(brush)
+               painter.drawPolygon(*pts)
               
 
     def layerType(self):
@@ -169,6 +232,10 @@ class VectorArrowMarker(QgsMarkerSymbolLayerV2):
         clone.setBaseSize(self.baseSize())
         clone.setBaseColor(self.baseColor())
         clone.setBaseBorderColor(self.baseBorderColor())
+        clone.setEllipseBorderWidth(self.ellipseBorderWidth())
+        clone.setEllipseBorderColor(self.ellipseBorderColor())
+        clone.setFillEllipse(self.fillEllipse())
+        clone.setEllipseFillColor(self.ellipseFillColor())
         return clone
 
     def properties(self):
