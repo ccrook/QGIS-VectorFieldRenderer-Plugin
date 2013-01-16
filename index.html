@@ -62,6 +62,7 @@ pre span.comment {
 <ul>
 <li><a href="#introduction">Introduction</a></li>
 <li><a href="#rendering">Rendering a vector field</a></li>
+<li><a href="#ellipse">Rendering error ellipses</a></li>
 <li><a href="#toolbar">Modifying the vector field - the vector field toolbar</a></li>
 <li><a href="#scalebox">Configuring the scale box<a></li>
 <li><a href="#python">Configuring the renderer from python<a></li>
@@ -72,9 +73,28 @@ pre span.comment {
 <p>The vector field renderer is used to display vector field data such as earth deformation, tidal flows, and the like.  It displays the vectors as arrows that are scaled and oriented according selected attributes of data points. 
 It can only be used to render point data - line and polygon layers are not derawn by this symbology.
 </p>
-<p>The vector field is defined by attributes in the data, which can represent the field either by cartesian components (x and y components of the field), or polar coordinates. If polar coordinates are used, the angle may be meaured either eastwards from north, or northwards from east, and may be either in degrees or radians. The magnitude of field can be scaled up or down to an appropriate size for viewing the field.</p.
-<p>As a special case the renderer can also display "height only" data, which displays a vertical arrow scaled usign an attribute of the data.  This is appropriate for displaying the vertical component of deformation, for example.
+<p>The vector field is defined by attributes in the data, which can represent the field either by cartesian components (x and y components of the field), or polar coordinates. If polar coordinates are used, the angle may be measured either eastwards from north, or northwards from east, and may be either in degrees or radians. The magnitude of field can be scaled up or down to an appropriate size for viewing the field.</p>
+<p>As a special case the renderer can also display "height only" data, which displays a vertical arrow scaled using an attribute of the data.  This is appropriate for displaying the vertical component of deformation, for example.
 </p>
+<p>
+The renderer also has options for displaying an error ellipse associated with the vector.  The error
+ellipse is displayed centred on the end of the arrow.  It is defined by attributes of the data which can be
+one of 
+</p>
+<ul>
+    <li>Covariance components.  These represent the variance of the X component (Cxx), the variance of the 
+    Y component (Cyy), and the covariance of the X and Y components (Cxy).</li>
+    <li>Error ellipse axes.  The ellipse is defined in terms of the length of the semi-major and 
+    semi-minor axes, and the orientation of the semi-major axis.  In the same way as the vector orientation,
+    this can be measured eastwards from north, or northwards from east, and can be in degrees or radians.</li>
+    <li>Circular.  The error is circular and defined just by the radius (ie the standard error of the X and Y components).  </li>
+    <li>Height.  The &quot;ellipse&quot; is defined by the error of a height component.  In this case the
+    error is displayed as a vertical bar rather than an ellipse.  This corresponds to the height type
+    vector field.</li>
+</ul>
+<p>Whichever form of error ellipse is used, it can be scaled by a constant value, for example multiplying by 2.45 to convert variances to a 95% confidence limit.</p>
+<p>The renderer can be used to display just the error ellipse, but selecting an vector field type of &quot;No Arrow&quot;.</p>
+
 <img src="VectorScaleBox.png" alt="Scale box" style="float:right" />
 <p>
 The renderer also displays a scale box on the map showing how the arrow size relates to the corresponding vector length.
@@ -87,7 +107,8 @@ The renderer also displays a scale box on the map showing how the arrow size rel
 A vector field is displayed by changing its symbology.  Right click on the layer in the 
 layers list, and select the symbology tab.  In the renderer drop down select "Vector field".  This will display the options for configuring the symbology. (Note: to see the renderer in the drop down the "new symbology" must be selected.)
 </p>
-<p>The dialog has two main sections - the top section defines how the vector field is expressed in the data, and the bottom section defines characteristics of the arrow symbology.
+<p>The dialog has two main sections - the top section defines how the vector field is expressed in the data, and the bottom section defines characteristics of the arrow symbology.  The dialog also has a tab for
+configuring the error ellipse.
 </p>
 <p>The fields in the dialog are:</p>
 <div style="clear:both"/>
@@ -106,11 +127,45 @@ layers list, and select the symbology tab.  In the renderer drop down select "Ve
 <td>Selects the data attributes which define the vector field, either X/Y for cartesian fields, length/angle for polar fields, or height for the height only field
 </td>
 </tr>
+<tr>
+<td>Angle orientation/units
+</td>
+<td>Defines how the angle is defined in the data.  The orientation is one of North from East (North is 0&deg;, East is 90&deg;) or East from North (East is 0&deg;, North is 90&deg;).  The units are either degrees or radians.
+</td>
+</tr>
+
+
+<tr>
+<td>Arrow size
+</td>
+<td>Defines the size of the components of the arrow.  The arrow has three components - the arrow head, the shaft, and the base.  The head may change size according to the length of the vector - the shaft width and base size are fixed.  The sizes are:
+<table class="details">
+<tr>
+<td>Head (relative)</td>
+<td>The size of the head relative to the length of the arrow </td>
+</tr>
+<tr>
+<td>Head (maximum)</td>
+<td>The maximum size of the head, overrides the relative size.  The size is in terms of the symbol units (see below)</td>
+</tr>
+<tr>
+<td>Width</td>
+<td>The width of the arrow shaft.  The size is in terms of the symbol units (see below)</td>
+</tr>
+</table>
+</td>
+</tr>
+
+<tr>
+<td>Arrow colour
+</td>
+<td>Defines the colour of the arrow shaft and head
+</tr>
 
 <tr>
 <td>Scale/units
 </td>
-<td>Defines how the vector field will be scaled when it is represented on the map.  This can be either in map units, or in the units in which the arrow format is defined (see below).  Note that if the arrow is defined in map units, then these are the same.  The length of each vector will be multiplied by this scale for representing on the map.
+<td>Defines how the vector field will be scaled when it is represented on the map.  This can be either in map units, or in the units in which the symbol format is defined (see below).  Note that if the arrow is defined in map units, then these are the same.  The length of each vector will be multiplied by this scale for representing on the map.
 </td>
 </tr>
 
@@ -122,55 +177,24 @@ layers list, and select the symbology tab.  In the renderer drop down select "Ve
 </tr>
 
 <tr>
-<td>Angle orientation/units
-</td>
-<td>Defines how the angle is defined in the data.  The orientation is one of North from East (North is 0&deg;, East is 90&deg;) or East from North (East is 0&deg;, North is 90&deg;).  The units are either degrees or radians.
-</td>
-</tr>
-
-<tr>
-<td>Arrow format - units
-</td>
+    <td>Symbol units</td>
 <td>Selects either millimetres, or map units.  Defines the units define the arrow sizes.  If millimetres are selected, then the arrow sizes are defined in millimetres on the plotted map, and will not change as the map scale changes.  If map units, then the arrow will scale up and down as the map scale changes.
 </td>
 </tr>
 
 <tr>
-<td>Arrow size
-</td>
-<td>Defines the size of the components of the arrow.  The arrow has three components - the arrow head, the shaft, and the base.  The head may change size according to the length of the vector - the shaft width and base size are fixed.  The sizes are:
-<table class="details">
-<tr>
-<td>Head (relative)</td>
-<td>The size of the head relative to the length of the arrow</td>
-</tr>
-<tr>
-<td>Head (maximum)</td>
-<td>The maximum size of the head, overrides the relative size</td>
-</tr>
-<tr>
-<td>Base</td>
-<td>The size of the base of the arrow</td>
-</tr>
-<tr>
-<td>Width</td>
-<td>The width of the arrow shaft</td>
-</tr>
-</table>
-</td>
+<td>Base size</td>
+<td>The size of the base symbol (the symbol at the base of the arrow or the centre of the ellipse)</td>
 </tr>
 
 <tr>
-<td>Colours
-</td>
-<td>Selects the colours of components of the arrows.  The components are:
-<table class="details">
-<tr><td>Arrow</td><td>The head and shaft of the arrow</td></tr>
-<tr><td>Base</td><td>The fill colour of the base of the arrow</td></tr>
-<tr><td>Base border</td><td>The border line colour of the base of the arrow</td></tr>
+<td>Base border</td>
+<td>The border of the base symbol</td>
+</tr>
 
-</table>
-</td>
+<tr>
+<td>Base fill</td>
+<td>The colour of fill for the base symbol/td>
 </tr>
 
 <tr>
@@ -187,6 +211,87 @@ layers list, and select the symbology tab.  In the renderer drop down select "Ve
 </td>
 </tr>
 </table>
+
+<div style="clear:both"/>
+<h2><a name="ellipse">Rendering error ellipses</a></h2>
+<img src="RendererEllipseDialog.png" alt="Renderer ellipse dialog" style="float:right" />
+<p>
+An error ellipse can be displayed for the vector by configuring using the Error ellipse tab of the
+symbology properties.  
+</p>
+<p>In the same way as the vector field tab this has two main sections - the top section defines how the error ellipse is expressed in the data, and the bottom section defines characteristics of the ellipse symbology 
+</p>
+<p>The fields in the dialog are:</p>
+<div style="clear:both"/>
+<table>
+
+<tr>
+<td>Error ellipse type
+</td>
+<td>Selects the ellipse type - covariance, axes, circular, height as described above, or none.
+</td>
+</tr>
+<tr>
+    <td>Attribute fields</td>
+    <td>Depending on the ellipse type up to three attributes must be selected to define the 
+        ellipse size and shape.  
+    </td>
+</tr>
+
+<tr>
+    <td>Ellipse scale factor</td>
+    <td>This is a number by which the ellipse size defined by the attributes is multiplied.  Note that the plot scale and scale group defined at the bottom of the dialog still apply to the error ellipse.</td>
+</tr>
+
+<tr>
+<td>Ellipse axis orientation/units
+</td>
+<td>Defines how the orientation of the error ellipse axes are defined in the data (for ellipses defined 
+    in terms of axes).  The orientation is one of North from East (North is 0&deg;, East is 90&deg;) or East from North (East is 0&deg;, North is 90&deg;).  The units are either degrees or radians.
+</td>
+</tr>
+
+<tr>
+<td>Border width
+</td>
+<td>Defines the plotted width of the ellipse border in terms of the symbol units.
+</td>
+</tr>
+
+<tr>
+<td>Tick size
+</td>
+<td>When plotting height &quot;ellipses&quot; or ellipses in which the semi-minor axis is zero the 
+    ellipse is instead plotted as a line with a tick at each end.  This setting defines the size of the
+    tick.
+</td>
+</tr>
+
+<tr>
+<td>Fill ellipse
+</td>
+<td>Defines whether the ellipse is filled or just the outline is plotted.
+</td>
+</tr>
+
+<tr>
+<td>Border colour
+</td>
+<td>Defines the colour of the border an tick marks
+</td>
+</tr>
+
+<tr>
+<td>Fill colour
+</td>
+<td>Defines the colour used to fill the ellipse (if it is filled)
+</td>
+</tr>
+
+</table>
+<p>The settings for scale, base symbol, and legend and scale box text are common with the settings for the
+vector field.</p>
+<div style="clear:both"/>
 <h2><a name="toolbar">Modifying the vector field - the vector field toolbar</a></h2>
 <p>
 The renderer installs a toolbar with buttons for controlling the size of the arrows.  These rescale the arrows of the currently selected vector layer.  They are only enabled if the layer is rendered with the Vector field renderer.
@@ -233,6 +338,7 @@ Display this help information
 </td>
 </tr>
 </table>
+<div style="clear:both"/>
 <h2><a name="scalebox">Configuring the scale box<a></h2>
 <img src="VectorScaleBoxOptions.png" alt="Vector scale box options dialog" style="float:right" />
 <p>
@@ -297,6 +403,7 @@ The scale box can be configured using the Vector scale box options dialog.  This
 </td>
 </tr>
 </table>
+<div style="clear:both"/>
 <h2><a name="python">Configuring the renderer from python<a></h2>
 
 <p>The following example code shows how to configure the renderer for a layer
@@ -347,6 +454,7 @@ from python code.</p>
     layer.setCacheImage(None)
 </pre>
 
+<div style="clear:both"/>
 <h2><a name="history">Change history</a></h2>
 <p><i>Version 0.12: 8 March 2011:</i>Bug fix causing QGis crash when fields not selected.  Added functions to simplify programming from python.  Improved documentation.</p>
 <p><i>Version 0.10: 8 April 2010:</i> Changed activated() signals to triggered() in readiness for removal of qt3 support.</p>

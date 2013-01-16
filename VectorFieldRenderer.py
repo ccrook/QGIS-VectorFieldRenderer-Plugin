@@ -36,7 +36,7 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
     
     NEllipseFields={NoEllipse:0,CovarianceEllipse:3,AxesEllipse:3,CircularEllipse:1,HeightEllipse:1}
 
-    NEllipseField0=2
+    EllipseField0=2
     NFields=5
 
     XField=0
@@ -185,12 +185,12 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
         self._fieldname[self.CxxField] = cxxfieldname
 
     def cxyFieldName(self):
-        return self._fieldname[self.XField]
+        return self._fieldname[self.CxyField]
     def setCxyFieldName(self,cxyfieldname):
         self._fieldname[self.CxyField] = cxyfieldname
 
     def cyyFieldName(self):
-        return self._fieldname[self.XField]
+        return self._fieldname[self.CyyField]
     def setCyyFieldName(self,cyyfieldname):
         self._fieldname[self.CyyField] = cyyfieldname
 
@@ -330,6 +330,7 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
         re.setAttribute("arrowMaxHeadSize",str(arrow.maxHeadSize()))
         re.setAttribute("ellipseBorderColor",arrow.ellipseBorderColor().name())
         re.setAttribute("ellipseBorderWidth",str(arrow.ellipseBorderWidth()))
+        re.setAttribute("ellipseTickSize",str(arrow.ellipseTickSize()))
         re.setAttribute("ellipseFillColor",arrow.ellipseFillColor().name())
         re.setAttribute("fillEllipse",str(arrow.fillEllipse()))
         if( VectorFieldRenderer.plugin ):
@@ -388,7 +389,8 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
            color.setNamedColor( element.attribute("ellipseFillColor","black"))
            arrow.setEllipseFillColor( color )
            self.setFillEllipse( element.attribute("fillEllipse","True") == "True" )
-           arrow.setEllipseBorderWidth( float( element.attribute("ellipseBorderWidth")))
+           arrow.setEllipseBorderWidth( float( element.attribute("ellipseBorderWidth","0.0")))
+           arrow.setEllipseTickSize( float( element.attribute("ellipseTickSize","2.0")))
 
            # Placed at end as not present in old project files
            self.setScaleGroup(element.attribute("scalegroup"))
@@ -430,7 +432,7 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
                       if self._fieldno[i] == -1:
                           self._isvalid=False
         except:
-          self._isvalid = False 
+            self._isvalid = False 
 
         # Scale factors
         # _vectorscale        is factor to multiply vector when calling arrow symbol
@@ -471,12 +473,14 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
         v2 =(cxx-cyy)/2.0
         v3 = cxy
         v4 = math.sqrt(v2*v2+v3*v3)
+        if cxx < 0.0 or cyy < 0.0 or v4 > 1.0000001 * v1:
+            return 0.0,0.0,0.0,False
         eangle = math.atan2(v3,v2)/2.0 if (v1 > 0.0 and v4 > 0.0001*v1) else 0.0
         v2 = v1-v4
         v1 = v1+v4
         emax = math.sqrt(max(v1+v4,0.0))
         emin = math.sqrt(max(v1-v4,0.0))
-        return emax, emin, angle
+        return emax, emin, eangle, True
 
     def symbolForFeature( self, feature ):
         am = feature.attributeMap()
@@ -485,12 +489,13 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
         emax = 0.0
         emin = 0.0
         eangle= 0.0
-        values=[0.0]*self.NFields
+        value=[0.0]*self.NFields
+        drawEllipse = self._ellipseMode != self.NoEllipse
         if self._isvalid:
           try:
-             for i in range[self.NFields]:
+             for i in range(self.NFields):
                  if self._usedfield[i]:
-                     values[i] = am[self._fieldno[i]].toDouble()[0]
+                     value[i] = am[self._fieldno[i]].toDouble()[0]
              if self._mode == self.Cartesian:
                   x=value[self.XField]
                   y=value[self.YField]
@@ -511,32 +516,39 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
                      r = -r
                      a = -a
 
-             if self._ellipsemode == self.NoEllipse:
+    
+             if self._ellipseMode == self.NoEllipse:
                  pass
-             elif self._ellipsemode == self.CovarianceEllipse:
-                 emax, emin, eangle = self.calcErrorEllipse(
+             elif self._ellipseMode == self.CovarianceEllipse:
+                 emax, emin, eangle, drawEllipse = self.calcErrorEllipse(
                      value[self.CxxField],
                      value[self.CxyField],
                      value[self.CyyField])
                  emax *= self._ellipseScale
                  emin *= self._ellipseScale
-             elif self._ellipsemode == self.AxesEllipse:
-                 emax = value[self.EmaxField]*self._ellipseScale
-                 emin = value[self.EminField]*self._ellipseScale
-                 eangle = value[EAngleField]
+             elif self._ellipseMode == self.AxesEllipse:
+                 emax = abs(value[self.EmaxField]*self._ellipseScale)
+                 emin = abs(value[self.EminField]*self._ellipseScale)
+                 eangle = value[self.EAngleField]
                  if self._ellipseDegrees:
                     eangle = eangle * math.pi/180.0
                  if self._ellipseAngleFromNorth:
                     eangle = math.pi/2.0 - eangle
-             elif self._ellipsemode == self.HeightEllipse:
-                 emax = value[self.ERadiusField]*self._ellipseScale
+                 if emax < emin:
+                    temp=emax
+                    emax=emin
+                    emin=temp
+                    eangle += math.pi/2.0
+             elif self._ellipseMode == self.HeightEllipse:
+                 emax = abs(value[self.EHeightField]*self._ellipseScale)
                  emin = 0.0
                  eangle = math.pi/2.0
-             elif self._ellipsemode == self.CircularEllipse:
-                 emax = value[self.ERadiusField]*self._ellipseScale
+             elif self._ellipseMode == self.CircularEllipse:
+                 emax = abs(value[self.ERadiusField]*self._ellipseScale)
                  emin = emax
 
           except:
+             raise
              r = 0.0
              a = 0.0
              emax = 0.0
@@ -545,15 +557,14 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
 
         vscale = self._vectorscale
         self.arrow().setVector( r * vscale, a, self._mode != self.NoArrow )
-        self.arrow().setEllipse( emax*vscale, emin*vscale, eangle, 
-                                self._mode != self.NoEllipse )
+        self.arrow().setEllipse( emax*vscale, emin*vscale, eangle, drawEllipse )
 
         if self._rendering:
             vlen = r + emax
             self._nFeatures += 1
-            self._sumLength += r
-            self._sumLength2 += r*r
-            self._maxLength = max(self._maxLength,r)
+            self._sumLength += vlen
+            self._sumLength2 += vlen*vlen
+            self._maxLength = max(self._maxLength,vlen)
 
         return self._symbol
 
@@ -613,17 +624,29 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
     # Get the actual plot size of the arrow
     def arrowSize(self,veclen):
         arrow = self.arrow()
-        arrow.setVector(veclen*self._vectorscale,0.0)
+        if self._mode != self.NoArrow:
+            arrow.setVector(veclen*self._vectorscale,0.0,True)
+            arrow.setEllipse(0.0,0.0,0.0,False)
+        else:
+            arrow.setVector(0.0,0.0,False)
+            arrow.setEllipse(veclen*self._vectorscale,0.0,0.0,True)
         return arrow.arrowSize(self._pixelScaleFactor)
 
     def renderScaleBoxSymbol(self,veclen,point,painter):
         arrow = self.arrow()
-        arrow.setVector(veclen*self._vectorscale,0.0)
-        arrow.setEllipse(0.0,0.0,0.0,False)
+        if self._mode != self.NoArrow:
+            arrow.setVector(veclen*self._vectorscale,0.0,True)
+            arrow.setEllipse(0.0,0.0,0.0,False)
+        else:
+            arrow.setVector(0.0,0.0,False)
+            arrow.setEllipse(veclen*self._vectorscale,0.0,0.0,True)
         arrow.renderArrow(point,painter,self._pixelScaleFactor)
 
     def legendSymbologyItems( self, size ):
-        icon = self.arrow().legendIcon(size)
+        arrow = self._mode != self.NoArrow
+        ellipse = not arrow
+        tickEllipse =  ellipse and self._ellipseMode==self.HeightEllipse
+        icon = self.arrow().legendIcon(size,arrow,ellipse,tickEllipse)
         return [[self._legendText,icon]]
 
     # Display the help information for this renderer

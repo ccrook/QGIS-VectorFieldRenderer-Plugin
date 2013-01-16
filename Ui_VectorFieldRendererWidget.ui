@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>664</width>
-    <height>477</height>
+    <width>702</width>
+    <height>458</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,11 +19,11 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0,0">
+  <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0,0,0">
    <item>
     <widget class="QTabWidget" name="uTabManager">
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="uVectorTab">
       <attribute name="title">
@@ -80,7 +80,7 @@
         </widget>
        </item>
        <item>
-        <layout class="QGridLayout" name="uVectorFieldGrid" columnstretch="0,0,0">
+        <layout class="QGridLayout" name="uVectorFieldGrid" columnstretch="0,1,0">
          <item row="0" column="0">
           <widget class="QLabel" name="uXFieldLabel">
            <property name="text">
@@ -88,13 +88,6 @@
            </property>
            <property name="buddy">
             <cstring>uXField</cstring>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="2">
-          <widget class="QComboBox" name="uXField">
-           <property name="toolTip">
-            <string>Select the X/length field</string>
            </property>
           </widget>
          </item>
@@ -108,55 +101,19 @@
            </property>
           </widget>
          </item>
-         <item row="1" column="2">
+         <item row="1" column="1">
           <widget class="QComboBox" name="uYField">
            <property name="toolTip">
             <string>Select the y/angle field</string>
            </property>
           </widget>
          </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="uArrowScaleLabel">
-           <property name="text">
-            <string>Scale:  </string>
-           </property>
-           <property name="buddy">
-            <cstring>uArrowScale</cstring>
+         <item row="0" column="1">
+          <widget class="QComboBox" name="uXField">
+           <property name="toolTip">
+            <string>Select the X/length field</string>
            </property>
           </widget>
-         </item>
-         <item row="2" column="2">
-          <layout class="QHBoxLayout" name="uArrowScaleLayout">
-           <item>
-            <widget class="QLineEdit" name="uArrowScale"/>
-           </item>
-           <item>
-            <widget class="QPushButton" name="uScaleUnits">
-             <property name="minimumSize">
-              <size>
-               <width>100</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Millimeter</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="uScaleGroupLabel">
-             <property name="text">
-              <string>    Scale group</string>
-             </property>
-             <property name="buddy">
-              <cstring>uScaleGroup</cstring>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="uScaleGroup"/>
-           </item>
-          </layout>
          </item>
         </layout>
        </item>
@@ -171,7 +128,7 @@
          <item>
           <widget class="QGroupBox" name="uOrientationGroupBox">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="title">
             <string>Angle orientation</string>
@@ -212,7 +169,7 @@
          <item>
           <widget class="QGroupBox" name="uAngleUnitsGroupBox">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="title">
             <string>Angle units</string>
@@ -240,7 +197,7 @@
             <item>
              <widget class="QRadioButton" name="uAngleUnitsRadians">
               <property name="enabled">
-               <bool>false</bool>
+               <bool>true</bool>
               </property>
               <property name="toolTip">
                <string>Select the angle units</string>
@@ -276,9 +233,6 @@
              <widget class="QLabel" name="uArrowSizeLayoutLabel">
               <property name="text">
                <string>Size:</string>
-              </property>
-              <property name="buddy">
-               <cstring>uArrowHeadSize</cstring>
               </property>
              </widget>
             </item>
@@ -345,16 +299,6 @@
               </property>
              </widget>
             </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="uArrowColorLayout" stretch="0,0,0">
-            <property name="sizeConstraint">
-             <enum>QLayout::SetDefaultConstraint</enum>
-            </property>
-            <property name="topMargin">
-             <number>0</number>
-            </property>
             <item>
              <widget class="QLabel" name="uArrowColorLabel">
               <property name="sizePolicy">
@@ -364,7 +308,7 @@
                </sizepolicy>
               </property>
               <property name="text">
-               <string>Arrow colour:</string>
+               <string>Colour:</string>
               </property>
               <property name="buddy">
                <cstring>uArrowColor</cstring>
@@ -473,7 +417,7 @@
             <string>Cxx attribute</string>
            </property>
            <property name="buddy">
-            <cstring>uXField</cstring>
+            <cstring>uCxxField</cstring>
            </property>
           </widget>
          </item>
@@ -483,7 +427,7 @@
             <string>Cxy attribute</string>
            </property>
            <property name="buddy">
-            <cstring>uYField</cstring>
+            <cstring>uCxyField</cstring>
            </property>
           </widget>
          </item>
@@ -497,10 +441,10 @@
          <item row="3" column="0">
           <widget class="QLabel" name="uEllipseScaleLabel">
            <property name="text">
-            <string>Relative scale</string>
+            <string>Ellipse scale factor</string>
            </property>
            <property name="buddy">
-            <cstring>uArrowScale</cstring>
+            <cstring>uEllipseScale</cstring>
            </property>
           </widget>
          </item>
@@ -508,13 +452,6 @@
           <layout class="QHBoxLayout" name="uArrowScaleLayout_2">
            <item>
             <widget class="QLineEdit" name="uEllipseScale"/>
-           </item>
-           <item>
-            <widget class="QLabel" name="uEllipseScaleLabel2">
-             <property name="text">
-              <string>(ie relative to arrow scale)</string>
-             </property>
-            </widget>
            </item>
            <item>
             <spacer name="horizontalSpacer">
@@ -544,7 +481,7 @@
             <string>Cyy attribute</string>
            </property>
            <property name="buddy">
-            <cstring>uYField</cstring>
+            <cstring>uCyyField</cstring>
            </property>
           </widget>
          </item>
@@ -565,7 +502,7 @@
          <item>
           <widget class="QGroupBox" name="uAxisOrientationGroupBox">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="title">
             <string>Ellipse axis orientation</string>
@@ -600,7 +537,7 @@
          <item>
           <widget class="QGroupBox" name="uAxisAngleUnitsGroupBox">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="title">
             <string>Angle units</string>
@@ -628,7 +565,7 @@
             <item>
              <widget class="QRadioButton" name="uEllipseAngleUnitsRadians">
               <property name="enabled">
-               <bool>false</bool>
+               <bool>true</bool>
               </property>
               <property name="toolTip">
                <string>Select the angle units</string>
@@ -669,7 +606,7 @@
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
               <property name="buddy">
-               <cstring>uArrowWidth</cstring>
+               <cstring>uEllipseBorderWidth</cstring>
               </property>
              </widget>
             </item>
@@ -681,9 +618,26 @@
              </widget>
             </item>
             <item>
+             <widget class="QLabel" name="uTickSizeLabel">
+              <property name="text">
+               <string>Tick size </string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QDoubleSpinBox" name="uEllipseTickSize">
+              <property name="toolTip">
+               <string>Width of the arrow shaft</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QLabel" name="label">
               <property name="text">
                <string>Fill ellipse: </string>
+              </property>
+              <property name="buddy">
+               <cstring>uFillEllipse</cstring>
               </property>
              </widget>
             </item>
@@ -695,51 +649,12 @@
              </widget>
             </item>
             <item>
-             <spacer name="uArrowUnitSpacer_2">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="uEllipseArrowColorLayout" stretch="0,0,0,0,0,0">
-            <property name="sizeConstraint">
-             <enum>QLayout::SetDefaultConstraint</enum>
-            </property>
-            <property name="topMargin">
-             <number>0</number>
-            </property>
-            <item>
              <widget class="QLabel" name="uEllipseColorLayoutLabel">
               <property name="text">
-               <string>Ellipse olours:</string>
+               <string>Colours: Border</string>
               </property>
               <property name="buddy">
-               <cstring>uArrowColor</cstring>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLabel" name="uEllipseBorderColorLabel">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>Border</string>
-              </property>
-              <property name="buddy">
-               <cstring>uArrowColor</cstring>
+               <cstring>uEllipseBorderColor</cstring>
               </property>
              </widget>
             </item>
@@ -759,7 +674,7 @@
                <string>Fill</string>
               </property>
               <property name="buddy">
-               <cstring>uBaseColor</cstring>
+               <cstring>uEllipseFillColor</cstring>
               </property>
              </widget>
             </item>
@@ -774,7 +689,7 @@
              </widget>
             </item>
             <item>
-             <spacer name="horizontalSpacer_2">
+             <spacer name="uArrowUnitSpacer_2">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
@@ -796,9 +711,55 @@
     </widget>
    </item>
    <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="uArrowScaleLabel">
+       <property name="text">
+        <string>Scale:  </string>
+       </property>
+       <property name="buddy">
+        <cstring>uArrowScale</cstring>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="uArrowScale"/>
+     </item>
+     <item>
+      <widget class="QPushButton" name="uScaleUnits">
+       <property name="minimumSize">
+        <size>
+         <width>100</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Millimeter</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="uScaleGroupLabel">
+       <property name="text">
+        <string>    Scale group</string>
+       </property>
+       <property name="buddy">
+        <cstring>uScaleGroup</cstring>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="uScaleGroup"/>
+     </item>
+    </layout>
+   </item>
+   <item>
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <property name="topMargin">
-      <number>9</number>
+      <number>0</number>
      </property>
      <item>
       <widget class="QLabel" name="uOutputUnitLabel">
@@ -844,26 +805,6 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="uBaseColorLabel">
-       <property name="text">
-        <string>Base fill:</string>
-       </property>
-       <property name="buddy">
-        <cstring>uBaseColor</cstring>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QgsColorButtonV2" name="uBaseColor">
-       <property name="toolTip">
-        <string>Change the base symbol colour</string>
-       </property>
-       <property name="text">
-        <string>change</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QLabel" name="uBaseBorderColorLabel">
        <property name="text">
         <string>Base border:</string>
@@ -877,6 +818,26 @@
       <widget class="QgsColorButtonV2" name="uBaseBorderColor">
        <property name="toolTip">
         <string>Change the base border colour</string>
+       </property>
+       <property name="text">
+        <string>change</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="uBaseColorLabel">
+       <property name="text">
+        <string>Base fill:</string>
+       </property>
+       <property name="buddy">
+        <cstring>uBaseColor</cstring>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QgsColorButtonV2" name="uBaseColor">
+       <property name="toolTip">
+        <string>Change the base symbol colour</string>
        </property>
        <property name="text">
         <string>change</string>
@@ -967,11 +928,6 @@
  <tabstops>
   <tabstop>uFieldTypeCartesian</tabstop>
   <tabstop>uFieldTypePolar</tabstop>
-  <tabstop>uXField</tabstop>
-  <tabstop>uYField</tabstop>
-  <tabstop>uArrowScale</tabstop>
-  <tabstop>uScaleUnits</tabstop>
-  <tabstop>uScaleGroup</tabstop>
   <tabstop>uAngleOrientationEast</tabstop>
   <tabstop>uAngleOrientationNorth</tabstop>
   <tabstop>uAngleUnitsDegrees</tabstop>
@@ -979,7 +935,6 @@
   <tabstop>uArrowHeadSize</tabstop>
   <tabstop>uArrowHeadMaxSize</tabstop>
   <tabstop>uArrowWidth</tabstop>
-  <tabstop>uArrowColor</tabstop>
  </tabstops>
  <resources/>
  <connections/>
