@@ -476,8 +476,6 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
         if cxx < 0.0 or cyy < 0.0 or v4 > 1.0000001 * v1:
             return 0.0,0.0,0.0,False
         eangle = math.atan2(v3,v2)/2.0 if (v1 > 0.0 and v4 > 0.0001*v1) else 0.0
-        v2 = v1-v4
-        v1 = v1+v4
         emax = math.sqrt(max(v1+v4,0.0))
         emin = math.sqrt(max(v1-v4,0.0))
         return emax, emin, eangle, True
