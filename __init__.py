@@ -34,8 +34,11 @@ def version():
 def qgisMinimumVersion():
     return "1.6"
 
-def authorName():
+def email():
     return "ccrook@linz.govt.nz <Chris Crook>"
+
+def author():
+    return "Chris Crook"
 
 def icon():
     return "./VectorFieldRenderer.png"
