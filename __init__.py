@@ -44,6 +44,6 @@ def icon():
     return "./VectorFieldRenderer.png"
 
 def classFactory(iface):
-    return Plugin(iface,name(),version(),authorName())
+    return Plugin(iface,name(),version(),email())
 
 
