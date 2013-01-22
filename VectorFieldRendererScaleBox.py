@@ -352,3 +352,8 @@ class VectorScaleBoxPluginLayerType(QgsPluginLayerType):
 
     # indicate that we have shown the properties dialog
     return True
+
+
+QgsPluginLayerRegistry.instance().addPluginLayerType(VectorScaleBoxPluginLayerType())
+
+# QgsPluginLayerRegistry.instance().removePluginLayerType(VectorScaleBoxPluginLayer.LAYER_TYPE)
