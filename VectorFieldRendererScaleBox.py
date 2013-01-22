@@ -6,51 +6,52 @@ from qgis.core import *
 
 from VectorFieldRenderer import VectorFieldRenderer
 
-class ScaleBoxLayer:
-    def __init__(self,renderer):
-       self._r = renderer
-
-    def setup(self,arrowlen,font):
-       r = self._r
-
-       veclen = max(0.0,r.arrowPixelLength(1.0))
-       if veclen > 0:
-           preflen = arrowlen/veclen
-           veclen = 1.0
-           while veclen < preflen:
-               veclen *= 10.0
-           while veclen > preflen:
-               veclen /= 10.0
-           for x in (5,2):
-               if veclen*x < preflen:
-                   veclen *= x
-                   break
-       if veclen >= 1:
-           veclen = int(veclen)
-       self._veclen = veclen
-       self._label = str(veclen) + r.scaleBoxText()
-       self._arrowBox = r.arrowSize(veclen)
-       self._textBox = QFontMetrics(font).boundingRect(self._label)
-
-    def arrowBox(self):
-       return self._arrowBox
-
-    def textBox(self):
-       return self._textBox
-    
-    def height(self):
-       return max(self._arrowBox.height(),self._textBox.height())
-
-    def render(self,arrowx,textx,topy,painter):
-       arrowx -= self._arrowBox.left()
-       arrowy = topy + self.height()/2.0
-       painter.save()
-       self._r.renderScaleBoxSymbol(self._veclen,QPointF(arrowx,arrowy),painter)
-       painter.restore()
-       topy += (self.height() - self._textBox.height())/2.0 - self._textBox.top()
-       painter.drawText(QPointF(textx,topy),self._label)
-
 class VectorFieldRendererScaleBox:
+
+    class Layer:
+        def __init__(self,renderer):
+           self._r = renderer
+    
+        def setup(self,arrowlen,font):
+           r = self._r
+    
+           veclen = max(0.0,r.arrowPixelLength(1.0))
+           if veclen > 0:
+               preflen = arrowlen/veclen
+               veclen = 1.0
+               while veclen < preflen:
+                   veclen *= 10.0
+               while veclen > preflen:
+                   veclen /= 10.0
+               for x in (5,2):
+                   if veclen*x < preflen:
+                       veclen *= x
+                       break
+           if veclen >= 1:
+               veclen = int(veclen)
+           self._veclen = veclen
+           self._label = str(veclen) + r.scaleBoxText()
+           self._arrowBox = r.arrowSize(veclen)
+           self._textBox = QFontMetrics(font).boundingRect(self._label)
+    
+        def arrowBox(self):
+           return self._arrowBox
+    
+        def textBox(self):
+           return self._textBox
+        
+        def height(self):
+           return max(self._arrowBox.height(),self._textBox.height())
+    
+        def render(self,arrowx,textx,topy,painter):
+           arrowx -= self._arrowBox.left()
+           arrowy = topy + self.height()/2.0
+           painter.save()
+           self._r.renderScaleBoxSymbol(self._veclen,QPointF(arrowx,arrowy),painter)
+           painter.restore()
+           topy += (self.height() - self._textBox.height())/2.0 - self._textBox.top()
+           painter.drawText(QPointF(textx,topy),self._label)
+    
 
     def __init__(self,iface):
        self._iface = iface
@@ -252,12 +253,6 @@ class VectorFieldRendererScaleBox:
 
        
     def getVectorLayers(self):
-       ''' 
-       Currently not working properly - as layers excluded by
-       scale (ie only drawn at range of scales) show in the list of 
-       layers, but don't get their renderedCount() reset as they are 
-       not redrawn
-       '''
        layers = []
        mc = self._iface.mapCanvas()
        for i in range(mc.layerCount()):
@@ -274,7 +269,7 @@ class VectorFieldRendererScaleBox:
                or not v.showInScaleBox()
                or not v.renderedCount()): 
                continue
-           layers.append(ScaleBoxLayer(v))
+           layers.append(self.Layer(v))
        return layers
 
        
