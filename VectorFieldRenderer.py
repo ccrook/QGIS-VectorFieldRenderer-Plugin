@@ -641,10 +641,15 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
         arrow.renderArrow(point,painter,self._pixelScaleFactor)
 
     def legendSymbologyItems( self, size ):
-        arrow = self._mode != self.NoArrow
-        ellipse = not arrow
-        tickEllipse =  ellipse and self._ellipseMode==self.HeightEllipse
-        icon = self.arrow().legendIcon(size,arrow,ellipse,tickEllipse)
+        iconType = VectorArrowMarker.IconArrow
+        if self._mode == self.NoArrow:
+            if self._ellipseMode == self.CircularEllipse:
+                iconType = VectorArrowMarker.IconCircle
+            elif self._ellipseMode == self.HeightEllipse:
+                iconType = VectorArrowMarker.IconTickVertical
+            else:
+                iconType = VectorArrowMarker.IconEllipse
+        icon = self.arrow().legendIcon(size,iconType)
         return [[self._legendText,icon]]
 
     # Display the help information for this renderer

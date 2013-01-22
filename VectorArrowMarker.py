@@ -18,6 +18,12 @@ class VectorArrowMarker(QgsMarkerSymbolLayerV2):
     symbolLayerName = "VectorArrowMarker"
     minEllipseRatio = 0.001
 
+    IconArrow=0
+    IconEllipse=1
+    IconCircle=2
+    IconTickVertical=3
+    IconTickHorizontal=4
+
     def __init__(self):
         QgsMarkerSymbolLayerV2.__init__(self)
         self.setWidth(0.7)
@@ -35,7 +41,7 @@ class VectorArrowMarker(QgsMarkerSymbolLayerV2):
 
         self.setVector( 10.0, 0.0, True )
         self.setEllipse( 0.0, 0.0, 0.0, False )
-        self._head = [ [0.5,0.0], [-0.4, 0.4], [-0.1,0.0], [-0.4, -0.4] ]
+        self._head = [ [0.0,0.0], [-0.9, 0.4], [-0.6,0.0], [-0.9, -0.4] ]
 
     def width( self ):
         return self._width
@@ -119,40 +125,47 @@ class VectorArrowMarker(QgsMarkerSymbolLayerV2):
     def stopRender( self, context ):
         pass
 
-    def legendIcon( self, size, arrow=True, ellipse=False, tickEllipse=False ):
+    def legendIcon( self, size, iconType):
         px = QPixmap(size)
         px.fill(Qt.transparent)
         y = size.height()/2
         msize = size.width()/5
-        if ellipse:
-            xb = size.width()/2
-        else:
+        if iconType == self.IconArrow:
             xb = msize
+        else:
+            xb = size.width()/2
 
         xa = size.width()-xb
         p = QPainter()
         p.begin(px)
         p.setRenderHint(QPainter.Antialiasing)
 
-        if ellipse:
+        if iconType != self.IconArrow:
             p.setPen(QPen( self.ellipseBorderColor()))
-            if tickEllipse:
+            if iconType == self.IconTickVertical:
                 p.drawLine(xb-msize,0,xb+msize,0)
                 p.drawLine(xb-msize,size.height(),xb+msize,size.height())
                 p.drawLine(xb,0,xb,size.height())
+            elif iconType == self.IconTickHorizontal:
+                p.drawLine(0,y-msize,0,y+msize,0)
+                p.drawLine(size.width(),y-msize,size.width(),y+msize)
+                p.drawLine(0,y,size.width(),y)
             else:
                 if self.fillEllipse():
                     p.setBrush(QBrush(self.ellipseFillColor()))
                 else:
                     p.setBrush(Qt.NoBrush)
-                p.drawEllipse(QPointF(y,xb),size.width()/2.0,size.height()/3.0)
+                height = size.width()/2.0
+                if iconType == self.IconEllipse:
+                    height *= 0.6
+                p.drawEllipse(QPointF(y,xb),size.width()/2.0,height)
 
         if self.baseSize() > 0:
             p.setPen(QPen( self.baseBorderColor()))
             p.setBrush(QBrush(self.baseColor()))
             p.drawEllipse(QPoint(xb,y),msize,msize)
 
-        if arrow:
+        if iconType == self.IconArrow:
             p.setPen(QPen(self.color()))
             p.setBrush(QBrush(self.color()))
             if self.headSize() > 0 and self.maxHeadSize() > 0:
