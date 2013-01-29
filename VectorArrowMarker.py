@@ -1,9 +1,10 @@
 #
-# Render a vector point layer using arrows to represent the a vector 
+# Render a vector point layer using arrows to represent the a vector
 # quantity.
-# 
+#
 
 import math
+import sys
 from qgis.core import *
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
@@ -24,59 +25,107 @@ class VectorArrowMarker(QgsMarkerSymbolLayerV2):
     IconTickVertical=3
     IconTickHorizontal=4
 
+    DrawBasePart=0
+    DrawArrowPart=1
+    DrawEllipsePart=2
+
     def __init__(self):
         QgsMarkerSymbolLayerV2.__init__(self)
         self.setWidth(0.7)
-        self.setHeadSize(0.3)
+        self.setRelativeHeadSize(0.3)
+        self.setHeadWidth(0.0)
+        self.setHeadFillColor(QColor(0,0,0))
+        self.setFillHead(True)
+        self.setHeadShape((0.0,-1.0,-0.7))
         self.setMaxHeadSize(3.0)
         self.setBaseSize(2.0)
         self.setEllipseTickSize(2.0)
         self.setColor( QColor(0,0,0))
-        self.setBaseColor( QColor(0,0,0))
+        self.setFillBase( True )
+        self.setBaseFillColor( QColor(0,0,0))
+        self.setBaseBorderWidth(0.0)
         self.setBaseBorderColor( QColor(0,0,0))
         self.setEllipseBorderWidth(0.7)
         self.setEllipseBorderColor( QColor(0,0,0))
         self.setEllipseFillColor( QColor(0,0,0))
         self.setFillEllipse( False )
+        self.setDrawEllipse( True )
+        self.setDrawEllipseAxes( False )
 
         self.setVector( 10.0, 0.0, True )
         self.setEllipse( 0.0, 0.0, 0.0, False )
-        self._head = [ [0.0,0.0], [-0.9, 0.4], [-0.6,0.0], [-0.9, -0.4] ]
 
     def width( self ):
         return self._width
     def setWidth( self, width ):
         self._width = width;
+    # More meaningful alias
+    def shaftWidth( self ):
+        return self._width
+    def setShaftWidth( self, width ):
+        self.setWidth(width)
 
     def headSize( self ):
         return self._headSize
     def setHeadSize( self, headSize ):
         self._headSize = headSize
+    # More meaningful alias
+    def relativeHeadSize( self ):
+        return self._headSize
+    def setRelativeHeadSize( self, headSize ):
+        self._headSize = headSize
+
+    def headShape( self ):
+        return self._headshape
+    def headShapeStr( self ):
+        return ' '.join((str(x) for x in self._headshape))
+    def setHeadShape( self, *values ):
+        if len(values) == 1:
+            values=values[0]
+        if type(values) == str:
+            values = [float(x) for x in values.split()]
+        if len(values) != 3:
+            raise ValueError("Invalid value for arrow head shape")
+        self._headshape = values
+
+    def headWidth( self ):
+        return self._headWidth
+    def setHeadWidth( self, headWidth ):
+        self._headWidth = headWidth
+
+    def headFillColor(self):
+        return self._headColor
+    def setHeadFillColor(self,color):
+        self._headColor = color
+
+    def fillHead(self):
+        return self._fillHead
+    def setFillHead(self,fillHead):
+        self._fillHead = fillHead
 
     def maxHeadSize( self ):
         return self._maxHeadSize
     def setMaxHeadSize(self,maxHeadSize):
         self._maxHeadSize = maxHeadSize
-    
-    def setVector( self, size, angle, drawVector=True ):
-        self._vectorSize = size
-        self._vectorAngle = angle
-        self._drawVector = drawVector
-    
-    def setEllipse( self, emax, emin, eangle, drawEllipse=True ):
-        self._ellipseEmax = emax
-        self._ellipseEmin = emin
-        self._ellipseAngle = eangle
-        self._drawEllipse = drawEllipse
 
     def baseSize(self):
         return self._baseSize
     def setBaseSize(self,size):
         self._baseSize = size
 
-    def baseColor(self):
+    def baseBorderWidth(self):
+        return self._baseBorderWidth
+    def setBaseBorderWidth(self,baseBorderWidth):
+        self._baseBorderWidth = baseBorderWidth
+
+    def fillBase( self ):
+        return self._fillBase
+    def setFillBase( self, fillBase ):
+        self._fillBase = fillBase
+
+    def baseFillColor(self):
         return self._baseColor
-    def setBaseColor(self,color):
+    def setBaseFillColor(self,color):
         self._baseColor = color
 
     def baseBorderColor(self):
@@ -109,6 +158,16 @@ class VectorArrowMarker(QgsMarkerSymbolLayerV2):
     def setFillEllipse( self, fill ):
         self._fillEllipse = fill
 
+    def drawEllipse( self ):
+        return self._drawEllipse
+    def setDrawEllipse( self, drawEllipse):
+        self._drawEllipse = drawEllipse
+
+    def drawEllipseAxes( self ):
+        return self._drawEllipseAxes
+    def setDrawEllipseAxes( self, drawEllipseAxes):
+        self._drawEllipseAxes = drawEllipseAxes
+
     def baseBorderColor(self):
         return self._baseBorderColor
     def setBaseBorderColor(self,color):
@@ -118,14 +177,64 @@ class VectorArrowMarker(QgsMarkerSymbolLayerV2):
         return self._baseBorderColor
     def setBaseBorderColor(self,color):
         self._baseBorderColor = color
+
+    def setupMarker(self):
+        front, back, centre = self._headshape
+        small = 0.001
+        if abs(front - centre) > small:
+            self._head = ( (front,0.0),(back,0.5),(centre,0.0),(back,-0.5) )
+            self._headpoly = True
+        else:
+            self._head = ( (back,0.5),(front,0.0),(back,-0.5) )
+            self._headpoly = False
+        # If we want to have the tip of the arrow at the measurement point
+        # then we need to apply an offset to account for mitring the width
+        # of the arrow border.
+        self._mitreWidthOffset = 0.0
+        if abs(front) < small and back < -small:
+            self._mitreWidthOffset = -math.sqrt(back*back+0.25)
+
+        # Arrow shaft will need to end before the point to avoid squaring off
+        # the end.  Only applies if the
+        self._shaftBack = centre
+        self._shaftFront = front
+        self._shaftFrontOffset = 0.0
+        if back < front:
+            self._shaftFrontOffset = back-front
+
+        # If drawing the ellipse
+
+        parts = []
+        ellipse = self._drawEllipse or self._drawEllipseAxes
+        if self._drawEllipse and self._fillEllipse:
+            parts.append(self.DrawEllipsePart)
+            ellipse = False
+        if self._baseSize > 0:
+            parts.append(self.DrawBasePart)
+        parts.append(self.DrawArrowPart)
+        if ellipse:
+            parts.append(self.DrawEllipsePart)
+        self._drawparts = parts
 
     def startRender( self, context ):
-        pass
+        self.setupMarker()
 
     def stopRender( self, context ):
         pass
 
+    def setVector( self, size, angle, drawArrow=True ):
+        self._vectorSize = size
+        self._vectorAngle = angle
+        self._drawCurrentArrow = drawArrow
+
+    def setEllipse( self, emax, emin, eangle, drawEllipse=True ):
+        self._ellipseEmax = emax
+        self._ellipseEmin = emin
+        self._ellipseAngle = eangle
+        self._drawCurrentEllipse = drawEllipse
+
     def legendIcon( self, size, iconType):
+        self.setupMarker()
         px = QPixmap(size)
         px.fill(Qt.transparent)
         y = size.height()/2
@@ -162,44 +271,61 @@ class VectorArrowMarker(QgsMarkerSymbolLayerV2):
 
         if self.baseSize() > 0:
             p.setPen(QPen( self.baseBorderColor()))
-            p.setBrush(QBrush(self.baseColor()))
-            p.drawEllipse(QPoint(xb,y),msize,msize)
+            if self.fillBase():
+                p.setBrush(QBrush(self.baseFillColor()))
+            else:
+                p.setBrush(Qt.NoBrush)
+            p.drawEllipse(QPointF(xb,y),msize,msize)
 
         if iconType == self.IconArrow:
             p.setPen(QPen(self.color()))
             p.setBrush(QBrush(self.color()))
-            if self.headSize() > 0 and self.maxHeadSize() > 0:
-               pts = [ QPointF( xa + pt[0]*msize*2, y+pt[1]*msize*2 )
-                      for pt in self._head ]
-               p.drawPolygon(*pts)
-            
+            if self.relativeHeadSize() > 0 or self.maxHeadSize() > 0:
+                pts = [ QPointF( xa + pt[0]*msize*2, y+pt[1]*msize*2 )
+                       for pt in self._head ]
+                p.drawPolygon(*pts)
+
             p.setPen(QPen(self.color(),1))
             p.drawLine(xb,y,xa,y)
         p.end()
         return px
-         
+
+    def calcHeadSize( self, length, pixelFactor ):
+        headsize = 0.0
+        if self._maxHeadSize > 0.0:
+            headsize = self._maxHeadSize*pixelFactor
+        if self._headSize > 0.0:
+            relsize = self._headSize*length
+            headsize = relsize if headsize <= 0 else min(headsize,relsize)
+        return headsize
+
     def arrowSize( self, pixelFactor ):
-        basesize = self._baseSize*pixelFactor/2.0
+        self.setupMarker()
+        basesize = (self._baseSize+self._baseBorderWidth)*pixelFactor/2.0
         left = -basesize
         right = basesize
         bottom = -basesize
         top = basesize
-        if self._drawVector:
+        if self._drawCurrentArrow:
             length = self._vectorSize*pixelFactor
-            headsize = min(self.headSize()*length, self.maxHeadSize()*pixelFactor)
-            left = min(left,headsize*min([p[0] for p in self._head]))
-            right = max(right,length+headsize*max([p[0] for p in self._head]))
-            bottom = min(bottom,headsize*min([p[1] for p in self._head]))
-            top = max(bottom,headsize*max([p[1] for p in self._head]))
-        if self._drawEllipse:
-           emax = self._ellipseEmax * pixelFactor
-           emin = self._ellipseEmin * pixelFactor
-           if emin <= emax*self.minEllipseRatio:
-               ticksize = self.ellipseTickSize()*pixelFactor/2.0
-           left = min(left,-emax)
-           right = max(right,emax)
-           bottom = min(bottom,-emin)
-           top = min(bottom,emin)
+            headsize = self.calcHeadSize( length, pixelFactor )
+            hw = self._headWidth*pixelFactor
+            left = min(left,headsize*min([p[0] for p in self._head])-hw)
+            right = max(right,length+hw+headsize*max([p[0] for p in self._head]))
+            bottom = min(bottom,-0.5*self._width*pixelFactor,headsize*min([p[1] for p in self._head])-hw)
+            top = max(top,0.5*self._width*pixelFactor,headsize*max([p[1] for p in self._head])+hw)
+        if self._drawCurrentEllipse:
+            emax = abs(self._ellipseEmax * pixelFactor)
+            emin = abs(self._ellipseEmin * pixelFactor)
+            if emin <= emax*self.minEllipseRatio:
+                ticksize = self.ellipseTickSize()*pixelFactor/2.0
+                emin=ticksize
+            emin += self._ellipseBorderWidth*0.5*pixelFactor
+            emax += self._ellipseBorderWidth*0.5*pixelFactor
+            left = min(left,-emax)
+            right = max(right,emax)
+            bottom = min(bottom,-emin)
+            top = max(top,emin)
         return QRectF(left,bottom,right-left,top-bottom)
 
     def renderPoint( self, point, context ):
@@ -213,76 +339,104 @@ class VectorArrowMarker(QgsMarkerSymbolLayerV2):
         pixelFactor = context.outputPixelSize(1.0)/context.renderContext().rasterScaleFactor()
         self.renderArrow( point, painter, pixelFactor, selColor )
 
-    def renderArrow( self, point, painter, pixelFactor, selColor=None ): 
-
-        if self._drawVector:
+    def renderArrow( self, point, painter, pixelFactor, selColor=None ):
+        drawArrow = self._drawCurrentArrow
+        if drawArrow:
             length = self._vectorSize*pixelFactor
             cosangle = math.cos(self._vectorAngle)
             sinangle = math.sin(self._vectorAngle)
-            endpoint = QPointF( 
-               point.x()+length*cosangle, 
-               point.y()-length*sinangle 
-               )
+            px = point.x()
+            py = point.y()
+            endpoint = QPointF( px+length*cosangle, py-length*sinangle)
+            headsize = self.calcHeadSize( length, pixelFactor )
+
+            pts = None
+            shaftwidth = self._width*pixelFactor
+            headwidth = self._headWidth*pixelFactor
+            if headsize > shaftwidth:
+                length += self._mitreWidthOffset*headwidth
+                ch=cosangle*headsize
+                sh=sinangle*headsize
+                ex = px+length*cosangle
+                ey = py-length*sinangle
+                pts = [ QPointF( ex + p[0]*ch - p[1]*sh, ey - p[0]*sh - p[1]*ch )
+                       for p in self._head ]
+                length += min(self._shaftBack*headsize,
+                              self._shaftFront*headsize+self._shaftFrontOffset*shaftwidth )
+                if length > 0:
+                    lineend=QPointF(px+length*cosangle,py-length*sinangle)
+                else:
+                    lineend=None
+            else:
+                headsize=0
+                lineend = endpoint
         else:
             endpoint = point
 
-        if self._drawEllipse:
-           pen = QPen( selColor or self.ellipseBorderColor())
-           pen.setWidth(self.ellipseBorderWidth()*pixelFactor)
-           pen.setWidth(1.0)
-           painter.setPen(pen)
+        for p in self._drawparts:
 
-           painter.translate(endpoint.x(),endpoint.y())
-           angle=-math.degrees(self._ellipseAngle)
-           painter.rotate(angle)
-           emax = self._ellipseEmax * pixelFactor
-           emin = self._ellipseEmin * pixelFactor
-           if emin > emax*self.minEllipseRatio:
-               if self._fillEllipse:
-                   brush = QBrush(selColor or self.ellipseFillColor())
-                   painter.setBrush(brush)
-               else:
-                   painter.setBrush(Qt.NoBrush)
-               painter.drawEllipse( QPointF(0.0,0.0), 
-                   self._ellipseEmax*pixelFactor, self._ellipseEmin*pixelFactor )
-           else:
-               ticksize = self.ellipseTickSize()*pixelFactor/2.0
-               painter.drawLine(QPointF(-emax,0.0),QPointF(emax,0.0))
-               painter.drawLine(QPointF(-emax,-ticksize),QPointF(-emax,ticksize))
-               painter.drawLine(QPointF(emax,-ticksize),QPointF(emax,ticksize))
+            if p == self.DrawBasePart:
+                pen = QPen( selColor or self._baseBorderColor)
+                pen.setWidth(self._baseBorderWidth*pixelFactor)
+                painter.setPen(pen)
+                if self._fillBase:
+                    brush = QBrush(selColor or self._baseColor)
+                    painter.setBrush(brush)
+                else:
+                    painter.setBrush(Qt.NoBrush)
+                radius = self._baseSize*pixelFactor/2.0
+                painter.drawEllipse(point,radius,radius)
 
-           painter.rotate(-angle)
-           painter.translate(-endpoint.x(),-endpoint.y())
-    
-        if self.baseSize() > 0:
-           pen = QPen( selColor or self.baseBorderColor())
-           pen.setWidth(1.0)
-           painter.setPen(pen)
-           brush = QBrush(selColor or self.baseColor())
-           painter.setBrush(brush)
-           radius = self.baseSize()*pixelFactor/2.0
-           painter.drawEllipse(point,radius,radius)
+            if p == self.DrawArrowPart and drawArrow:
+                pen = QPen( selColor or self.color())
+                pen.setJoinStyle( Qt.MiterJoin )
+                pen.setCapStyle( Qt.FlatCap )
+                if lineend:
+                    pen.setWidth(shaftwidth)
+                    painter.setPen(pen)
+                    painter.drawLine(point, lineend)
+                if pts:
+                    pen.setWidth(headwidth)
+                    painter.setPen(pen)
+                    if self._headpoly:
+                        if self._fillHead:
+                            brush = QBrush(selColor or self._headColor)
+                            painter.setBrush(brush)
+                        else:
+                            painter.setBrush(Qt.NoBrush)
+                        painter.drawPolygon(*pts)
+                    else:
+                        painter.drawPolyline(*pts)
 
-        if self._drawVector:
-            if length <= 0:
-               return
-            pen = QPen( selColor or self.color())
-            pen.setWidth(self.width()*pixelFactor)
-            painter.setPen(pen)
-            width = self.width()
-            headsize = min(self.headSize()*length, self.maxHeadSize()*pixelFactor)
-            painter.drawLine(point, endpoint)
-            if headsize > width:
-               pts = [ QPointF(
-                        endpoint.x() + p[0]*cosangle*headsize - p[1]*sinangle*headsize,
-                        endpoint.y() - p[0]*sinangle*headsize - p[1]*cosangle*headsize )
-                      for p in self._head ]
-               pen.setWidth(0)
-               painter.setPen(pen)
-               brush = QBrush(selColor or self.color())
-               painter.setBrush(brush)
-               painter.drawPolygon(*pts)
-              
+            if p == self.DrawEllipsePart and self._drawCurrentEllipse:
+                pen = QPen( selColor or self._ellipseBorderColor)
+                pen.setWidth(self._ellipseBorderWidth*pixelFactor)
+                painter.setPen(pen)
+                painter.save()
+                painter.translate(endpoint.x(),endpoint.y())
+                angle=-math.degrees(self._ellipseAngle)
+                painter.rotate(angle)
+                emax = self._ellipseEmax * pixelFactor
+                emin = self._ellipseEmin * pixelFactor
+                if emin > emax*self.minEllipseRatio:
+                    if self._drawEllipse:
+                        if self._fillEllipse:
+                            brush = QBrush(selColor or self._ellipseFillColor)
+                            painter.setBrush(brush)
+                        else:
+                            painter.setBrush(Qt.NoBrush)
+                        painter.drawEllipse( QPointF(0.0,0.0),
+                            self._ellipseEmax*pixelFactor, self._ellipseEmin*pixelFactor )
+                    if self._drawEllipseAxes:
+                        painter.drawLine(QPointF(-emax,0.0),QPointF(emax,0.0))
+                        painter.drawLine(QPointF(0.0,-emin),QPointF(0.0,emin))
+                else:
+                    ticksize = self._ellipseTickSize*pixelFactor/2.0
+                    painter.drawLine(QPointF(-emax,0.0),QPointF(emax,0.0))
+                    painter.drawLine(QPointF(-emax,-ticksize),QPointF(-emax,ticksize))
+                    painter.drawLine(QPointF(emax,-ticksize),QPointF(emax,ticksize))
+                painter.restore()
+
 
     def layerType(self):
         return VectorArrowMarker.symbolLayerName
@@ -293,54 +447,149 @@ class VectorArrowMarker(QgsMarkerSymbolLayerV2):
         clone.setSize(self.size())
         clone.setAngle(self.angle())
         clone.setWidth(self.width())
-        clone.setHeadSize(self.headSize())
+        clone.setRelativeHeadSize(self.relativeHeadSize())
         clone.setMaxHeadSize(self.maxHeadSize())
+        clone.setHeadWidth(self.headWidth())
+        clone.setFillHead(self.fillHead())
+        clone.setHeadFillColor(self.headFillColor())
+        clone.setHeadShape(self.headShape())
         clone.setBaseSize(self.baseSize())
-        clone.setBaseColor(self.baseColor())
+        clone.setFillBase(self.fillBase())
+        clone.setBaseFillColor(self.baseFillColor())
+        clone.setBaseBorderWidth(self.baseBorderWidth())
         clone.setBaseBorderColor(self.baseBorderColor())
         clone.setEllipseBorderWidth(self.ellipseBorderWidth())
         clone.setEllipseTickSize(self.ellipseTickSize())
         clone.setEllipseBorderColor(self.ellipseBorderColor())
         clone.setFillEllipse(self.fillEllipse())
         clone.setEllipseFillColor(self.ellipseFillColor())
+        clone.setDrawEllipse(self.drawEllipse())
+        clone.setDrawEllipseAxes(self.drawEllipseAxes())
         return clone
 
     def properties(self):
         sm = {
+           "color": self.color().name(),
            "size": str(self.size()),
            "angle": str(self.angle()),
            "width": str(self.width()),
-           "headsize": str(self.headSize()),
+           "headsize": str(self.relativeHeadSize()),
            "maxheadsize": str(self.maxHeadSize()),
+           "headwidth": str(self.headWidth()),
+           "fillhead": str( self.fillHead()),
+           "headcolor": self.headFillColor().name(),
+           "headshape": self.headShapeStr(),
            "basesize": str(self.baseSize()),
-           "color": self.color().name(),
-           "basecolor": self.baseColor().name(),
+           "baseborderwidth": str(self.baseBorderWidth()),
            "basebordercolor": self.baseBorderColor().name(),
+           "fillbase": str( self.fillBase()),
+           "basecolor": self.baseFillColor().name(),
+           "drawellipse": str(self.drawEllipse()),
+           "drawellipseaxes": str(self.drawEllipseAxes()),
            "ellipseborderwidth": str(self.ellipseBorderWidth()),
            "ellipsebordercolor": self.ellipseBorderColor().name(),
-           "ellipseticksize": str(self.ellipseTickSize()),
            "fillellipse": str(self.fillEllipse()),
            "ellipsefillcolor": self.ellipseFillColor().name(),
+           "ellipseticksize": str(self.ellipseTickSize()),
             }
         return sm;
 
     def setProperties(self,props):
         try:
+            # Note properties here are ordered as they have been added
+            # to the symbol with each version, so that old versions can
+            # still be read (won't hit exceptions until old values have
+            # been read)
             self.setSize(float(props[QString("size")]))
             self.setAngle(float(props[QString("angle")]))
             self.setWidth(float(props[QString("width")]))
-            self.setHeadSize(float(props[QString("headsize")]))
+            self.setRelativeHeadSize(float(props[QString("headsize")]))
             self.setMaxHeadSize(float(props[QString("maxheadsize")]))
             self.setBaseSize(float(props[QString("basesize")]))
             self.setColor(QColor(str(props[QString("color")])))
-            self.setBaseColor(QColor(str(props[QString("basecolor")])))
+            # For backward compatibility
+            self.setHeadFillColor(QColor(str(props[QString("color")])))
+            self.setBaseFillColor(QColor(str(props[QString("basecolor")])))
             self.setBaseBorderColor(QColor(str(props[QString("basebordercolor")])))
             self.setEllipseBorderWidth(float(props[QString("ellipseborderwidth")]))
             self.setEllipseBorderColor(QColor(str(props[QString("ellipsebordercolor")])))
             self.setEllipseFillColor(QColor(str(props[QString("ellipsefillcolor")])))
             self.setFillEllipse(bool(str(props[QString("fillellipse")])))
             self.setEllipseTickSize(float(props[QString("ellipseticksize")]))
+            self.setDrawEllipse(bool(str(props[QString("drawellipse")])))
+            self.setDrawEllipseAxes(bool(str(props[QString("drawellipseaxes")])))
+            self.setBaseBorderWidth(float(props[QString("baseborderwidth")]))
+            self.setHeadWidth(float(props[QString("headwidth")]))
+            self.setHeadFillColor(QColor(str(props[QString("headcolor")])))
+            self.setFillHead(bool(str(props[QString("fillhead")])))
+            self.setHeadShape(str(props[QString("headshape")]))
+            self.setFillBase(bool(str(props[QString("fillbase")])))
         except:
             pass
-                 
 
+    def saveToXmlElement( self, element ):
+        element.setAttribute("baseSize",str(self.baseSize()))
+        element.setAttribute("baseBorderWidth",str(self.baseBorderWidth()))
+        element.setAttribute("baseBorderColor",self.baseBorderColor().name())
+        element.setAttribute("fillBase",str(self.fillBase()))
+        element.setAttribute("baseColor",self.baseFillColor().name())
+        element.setAttribute("arrowColor",self.color().name())
+        element.setAttribute("arrowWidth",str(self.width()))
+        element.setAttribute("arrowHeadSize",str(self.relativeHeadSize()))
+        element.setAttribute("arrowHeadWidth",str(self.headWidth()))
+        element.setAttribute("arrowHeadShape",self.headShapeStr())
+        element.setAttribute("arrowFillHead",str(self.fillHead()))
+        element.setAttribute("arrowHeadColor",self.headFillColor().name())
+        element.setAttribute("arrowMaxHeadSize",str(self.maxHeadSize()))
+        element.setAttribute("drawEllipse",str(self.drawEllipse()))
+        element.setAttribute("drawEllipseAxes",str(self.drawEllipseAxes()))
+        element.setAttribute("ellipseBorderColor",self.ellipseBorderColor().name())
+        element.setAttribute("ellipseBorderWidth",str(self.ellipseBorderWidth()))
+        element.setAttribute("ellipseTickSize",str(self.ellipseTickSize()))
+        element.setAttribute("ellipseFillColor",self.ellipseFillColor().name())
+        element.setAttribute("fillEllipse",str(self.fillEllipse()))
+
+
+    def readFromXmlElement( self, element ):
+       # Note properties here are ordered as they have been added
+       # to the symbol with each version, so that old versions can
+       # still be read (won't hit exceptions until old values have
+       # been read)
+        try:
+            color = QColor()
+            color.setNamedColor( element.attribute("baseColor"))
+            self.setBaseFillColor( color )
+            color = QColor()
+            color.setNamedColor( element.attribute("baseBorderColor"))
+            self.setBaseBorderColor( color )
+            self.setBaseSize( float( element.attribute("baseSize")))
+            self.setBaseBorderWidth( float( element.attribute("baseBorderWidth","0.0")))
+            self.setFillBase( element.attribute("fillBase","True") == "True" )
+
+            color = QColor()
+            color.setNamedColor( element.attribute("arrowColor"))
+            self.setColor( color )
+            self.setWidth( float( element.attribute("arrowWidth")))
+            self.setRelativeHeadSize( float( element.attribute("arrowHeadSize")))
+            self.setHeadWidth( float( element.attribute("arrowHeadWidth","0.0")))
+            self.setFillHead( element.attribute("arrowFillHead","True") == "True" )
+            color = QColor()
+            # Use color for compatibility with old XML (without head colour)
+            color.setNamedColor( element.attribute("arrowHeadColor",self.color().name()))
+            self.setHeadFillColor( color )
+            self.setMaxHeadSize( float( element.attribute("arrowMaxHeadSize")))
+            self.setHeadShape(str(element.attribute("arrowHeadShape",self.headShapeStr())))
+
+            color = QColor()
+            color.setNamedColor( element.attribute("ellipseBorderColor","black"))
+            self.setEllipseBorderColor( color )
+            color = QColor()
+            color.setNamedColor( element.attribute("ellipseFillColor","black"))
+            self.setEllipseFillColor( color )
+            self.setDrawEllipse( element.attribute("drawEllipse","True") == "True" )
+            self.setDrawEllipseAxes( element.attribute("drawEllipseAxes","False") == "True" )
+            self.setFillEllipse( element.attribute("fillEllipse","False") == "True" )
+            self.setEllipseBorderWidth( float( element.attribute("ellipseBorderWidth","0.0")))
+            self.setEllipseTickSize( float( element.attribute("ellipseTickSize","2.0")))
+        except:
+            pass

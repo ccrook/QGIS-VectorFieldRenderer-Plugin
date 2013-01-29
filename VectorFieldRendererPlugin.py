@@ -13,7 +13,7 @@ class Plugin:
     LongName=""
     Version=""
     Author=""
-    PluginUrl="http://pygqgis.org/repo/contributed"
+    PluginUrl="http://plugins.qgis.org/plugins/VectorFieldRenderer"
 
     def __init__( self, iface, longname, version, author ):
         self._iface = iface

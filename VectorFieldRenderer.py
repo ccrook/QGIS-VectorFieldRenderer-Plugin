@@ -141,11 +141,6 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
     def setEllipseDegrees(self,degrees):
         self._ellipseDegrees = degrees
 
-    def angleFromNorth(self):
-        return self._angleFromNorth
-    def setAngleFromNorth(self,angleFromNorth):
-        self._angleFromNorth = angleFromNorth
-
     def ellipseAngleFromNorth(self):
         return self._ellipseAngleFromNorth
     def setEllipseAngleFromNorth(self,angleFromNorth):
@@ -197,6 +192,11 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
     def setFields( self, xfieldname, yfieldname ):
         self._fieldname[self.XField] = xfieldname
         self._fieldname[self.YField] = yfieldname
+
+    def setEllipseFields( self, cxxfieldname, cxyfieldname="", cyyfieldname="" ):
+        self._fieldname[self.CxxField] = cxxfieldname
+        self._fieldname[self.CxyField] = cxyfieldname
+        self._fieldname[self.CyyField] = cyyfieldname
 
     def legendText(self):
         return self._legendText
@@ -320,19 +320,9 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
         re.setAttribute("outputunit", "MapUnit" 
             if self._symbol.outputUnit() == QgsSymbolV2.MapUnit 
             else "MM" )
-        arrow = self.arrow()
-        re.setAttribute("baseColor",arrow.baseColor().name())
-        re.setAttribute("baseBorderColor",arrow.baseBorderColor().name())
-        re.setAttribute("baseSize",str(arrow.baseSize()))
-        re.setAttribute("arrowColor",arrow.color().name())
-        re.setAttribute("arrowWidth",str(arrow.width()))
-        re.setAttribute("arrowHeadSize",str(arrow.headSize()))
-        re.setAttribute("arrowMaxHeadSize",str(arrow.maxHeadSize()))
-        re.setAttribute("ellipseBorderColor",arrow.ellipseBorderColor().name())
-        re.setAttribute("ellipseBorderWidth",str(arrow.ellipseBorderWidth()))
-        re.setAttribute("ellipseTickSize",str(arrow.ellipseTickSize()))
-        re.setAttribute("ellipseFillColor",arrow.ellipseFillColor().name())
-        re.setAttribute("fillEllipse",str(arrow.fillEllipse()))
+
+        self.arrow().saveToXmlElement(re)
+
         if( VectorFieldRenderer.plugin ):
             re.appendChild(VectorFieldRenderer.plugin.save(doc))
         return re
@@ -366,31 +356,7 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
                 if element.attribute("outputunit") == "MapUnit" 
                 else QgsSymbolV2.MM )
 
-           arrow = self.arrow()
-           color = QColor()
-           color.setNamedColor( element.attribute("baseColor"))
-           arrow.setBaseColor( color )
-           color = QColor()
-           color.setNamedColor( element.attribute("baseBorderColor"))
-           arrow.setBaseBorderColor( color )
-           arrow.setBaseSize( float( element.attribute("baseSize")))
-
-           color = QColor()
-           color.setNamedColor( element.attribute("arrowColor"))
-           arrow.setColor( color )
-           arrow.setWidth( float( element.attribute("arrowWidth")))
-           arrow.setHeadSize( float( element.attribute("arrowHeadSize")))
-           arrow.setMaxHeadSize( float( element.attribute("arrowMaxHeadSize")))
-
-           color = QColor()
-           color.setNamedColor( element.attribute("ellipseBorderColor","black"))
-           arrow.setEllipseBorderColor( color )
-           color = QColor()
-           color.setNamedColor( element.attribute("ellipseFillColor","black"))
-           arrow.setEllipseFillColor( color )
-           self.setFillEllipse( element.attribute("fillEllipse","True") == "True" )
-           arrow.setEllipseBorderWidth( float( element.attribute("ellipseBorderWidth","0.0")))
-           arrow.setEllipseTickSize( float( element.attribute("ellipseTickSize","2.0")))
+           self.arrow().readFromXmlElement(element)
 
            # Placed at end as not present in old project files
            self.setScaleGroup(element.attribute("scalegroup"))
@@ -399,6 +365,7 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
            self.setScaleBoxText(element.attribute("scaleboxtext"))
            self.setShowInScaleBox( element.attribute("showonscalebox") == "True" )
         except:
+           raise
            pass
 
     # startRender - looks up the field numbers in the layer for the
@@ -434,20 +401,8 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
         except:
             self._isvalid = False 
 
-        # Scale factors
-        # _vectorscale        is factor to multiply vector when calling arrow symbol
-        # _pixelScaleFactor   is the pixel scale factor for plotting the symbol
-        # _vectorpixelscale   is the vector to pixel conversion
-        # _scaleConversion    is relationship between the scale and a map units scale
 
-        self._vectorscale = self._scale 
-        self._pixelScaleFactor = self.pixelSizeScaleFactor(context,self.outputUnit())
-        self._vectorUnitsPerPixel = 1.0/self._pixelScaleFactor
-        self._mapUnitsPerPixel = context.mapToPixel().mapUnitsPerPixel()
-
-        if self.useMapUnit() and self.outputUnit() != QgsSymbolV2.MapUnit:
-            self._vectorUnitsPerPixel = 1.0/self.pixelSizeScaleFactor(context,QgsSymbolV2.MapUnit)
-            self._vectorscale = self._scale/(self._vectorUnitsPerPixel*self._pixelScaleFactor)
+        self._pixelScaleFactor,self._vectorscale,self._mapUnitsPerPixel,self._vectorUnitsPerPixel = self.scaleFactors(context)
 
         self._symbol.startRender(context)
 
@@ -464,6 +419,24 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
         if mup > 0:
             return context.rasterScaleFactor()/mup
         return
+
+    def scaleFactors(self,context):
+
+        # Scale factors
+        # _vectorscale        is factor to multiply vector when calling arrow symbol
+        # _pixelScaleFactor   is the pixel scale factor for plotting the symbol
+        # _vectorpixelscale   is the vector to pixel conversion
+
+        vectorscale = self._scale 
+        pixelScaleFactor = self.pixelSizeScaleFactor(context,self.outputUnit())
+        vectorUnitsPerPixel = 1.0/pixelScaleFactor
+        mapUnitsPerPixel = context.mapToPixel().mapUnitsPerPixel()
+
+        if self.useMapUnit() and self.outputUnit() != QgsSymbolV2.MapUnit:
+            vectorUnitsPerPixel = 1.0/self.pixelSizeScaleFactor(context,QgsSymbolV2.MapUnit)
+            vectorscale = self._scale/(vectorUnitsPerPixel*pixelScaleFactor)
+
+        return pixelScaleFactor,vectorscale,mapUnitsPerPixel,vectorUnitsPerPixel,
 
     # prepares the symbol to plot a feature (calculates arrow
     # size and direction) and returns the symbol
@@ -616,29 +589,36 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
     # been rendered, so scale information is available.
     #
     # Get the length of the arrow - not including head, base, etc.
-    def arrowPixelLength(self,veclen):
-        return veclen * self._vectorscale * self._pixelScaleFactor
+    def arrowPixelLength(self,veclen,context):
+        pixelScaleFactor,vectorscale,mupp,vupp = self.scaleFactors(context)
+        pixelFactor = pixelScaleFactor/context.rasterScaleFactor()
+        return veclen * vectorscale * pixelFactor
 
     # Get the actual plot size of the arrow
-    def arrowSize(self,veclen):
+    def arrowSize(self,veclen,context):
+        pixelScaleFactor,vectorscale,mupp,vupp = self.scaleFactors(context)
+        pixelFactor = pixelScaleFactor/context.rasterScaleFactor()
         arrow = self.arrow()
         if self._mode != self.NoArrow:
-            arrow.setVector(veclen*self._vectorscale,0.0,True)
+            arrow.setVector(veclen*vectorscale,0.0,True)
             arrow.setEllipse(0.0,0.0,0.0,False)
         else:
             arrow.setVector(0.0,0.0,False)
-            arrow.setEllipse(veclen*self._vectorscale,0.0,0.0,True)
-        return arrow.arrowSize(self._pixelScaleFactor)
+            arrow.setEllipse(veclen*vectorscale,0.0,0.0,True)
+        return arrow.arrowSize(pixelFactor)
 
-    def renderScaleBoxSymbol(self,veclen,point,painter):
+    def renderScaleBoxSymbol(self,veclen,point,context):
+        pixelScaleFactor,vectorscale,mupp,vupp = self.scaleFactors(context)
         arrow = self.arrow()
         if self._mode != self.NoArrow:
-            arrow.setVector(veclen*self._vectorscale,0.0,True)
+            arrow.setVector(veclen*vectorscale,0.0,True)
             arrow.setEllipse(0.0,0.0,0.0,False)
         else:
             arrow.setVector(0.0,0.0,False)
-            arrow.setEllipse(veclen*self._vectorscale,0.0,0.0,True)
-        arrow.renderArrow(point,painter,self._pixelScaleFactor)
+            arrow.setEllipse(veclen*vectorscale,0.0,0.0,True)
+        arrow.setupMarker()
+        pixelFactor = pixelScaleFactor/context.rasterScaleFactor()
+        arrow.renderArrow(point,context.painter(),pixelFactor)
 
     def legendSymbologyItems( self, size ):
         iconType = VectorArrowMarker.IconArrow

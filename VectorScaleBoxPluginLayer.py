@@ -28,10 +28,8 @@ class VectorScaleBoxPluginLayer(QgsPluginLayer):
         self._scalebox = None
     
     def draw(self, rendererContext):
-        print "Drawing vector scale box"
         if self._scalebox != None:
-            painter = rendererContext.painter()
-            self._scalebox.render( painter )
+            self._scalebox.render( rendererContext )
         return True
     
     def readXml(self, node):
@@ -48,6 +46,7 @@ class VectorScaleBoxPluginLayer(QgsPluginLayer):
     
     def setScaleBox(self, scalebox):
         self._scalebox = scalebox
+        self.repaintScaleBox()
 
     def repaintScaleBox( self ):
         self.setCacheImage(None)

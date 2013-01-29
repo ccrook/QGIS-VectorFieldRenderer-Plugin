@@ -71,7 +71,7 @@ pre span.comment {
 <h2><a name="introduction">Introduction</a></h2>
 
 <p>The vector field renderer is used to display vector field data such as earth deformation, tidal flows, and the like.  It displays the vectors as arrows that are scaled and oriented according selected attributes of data points. 
-It can only be used to render point data - line and polygon layers are not derawn by this symbology.
+It can only be used to render point data - line and polygon layers are not drawn by this symbology.
 </p>
 <p>The vector field is defined by attributes in the data, which can represent the field either by cartesian components (x and y components of the field), or polar coordinates. If polar coordinates are used, the angle may be measured either eastwards from north, or northwards from east, and may be either in degrees or radians. The magnitude of field can be scaled up or down to an appropriate size for viewing the field.</p>
 <p>As a special case the renderer can also display "height only" data, which displays a vertical arrow scaled using an attribute of the data.  This is appropriate for displaying the vertical component of deformation, for example.
@@ -93,7 +93,7 @@ one of
     vector field.</li>
 </ul>
 <p>Whichever form of error ellipse is used, it can be scaled by a constant value, for example multiplying by 2.45 to convert variances to a 95% confidence limit.</p>
-<p>The renderer can be used to display just the error ellipse, but selecting an vector field type of &quot;No Arrow&quot;.</p>
+<p>The renderer can be used to display just the error ellipse by selecting an vector field type of &quot;No Arrow&quot;.</p>
 
 <img src="VectorScaleBox.png" alt="Scale box" style="float:right" />
 <p>
@@ -142,14 +142,18 @@ configuring the error ellipse.
 <table class="details">
 <tr>
 <td>Head (relative)</td>
-<td>The size of the head relative to the length of the arrow </td>
+<td>The size of the head relative to the length of the arrow.  If this size is zero then the maximum head size is used for all arrow heads.</td>
 </tr>
 <tr>
-<td>Head (maximum)</td>
-<td>The maximum size of the head, overrides the relative size.  The size is in terms of the symbol units (see below)</td>
+<td>Head (max)</td>
+<td>The maximum size of the head, overrides the relative size.  The size is in terms of the symbol units (see below).  If this size is zero then no maximum applies.</td>
 </tr>
 <tr>
-<td>Width</td>
+<td>Head border width</td>
+<td>The width of the arrow head border.  The size is in terms of the symbol units (see below)</td>
+</tr>
+<tr>
+<td>Shaft width</td>
 <td>The width of the arrow shaft.  The size is in terms of the symbol units (see below)</td>
 </tr>
 </table>
@@ -159,22 +163,22 @@ configuring the error ellipse.
 <tr>
 <td>Arrow colour
 </td>
-<td>Defines the colour of the arrow shaft and head
+<td>Defines the colour of the arrow shaft and head, whether the head of the arrow is filled, and the colour used to fill the head of the arrow.
 </tr>
 
 <tr>
-<td>Scale/units
+<td>Arrow shape
 </td>
-<td>Defines how the vector field will be scaled when it is represented on the map.  This can be either in map units, or in the units in which the symbol format is defined (see below).  Note that if the arrow is defined in map units, then these are the same.  The length of each vector will be multiplied by this scale for representing on the map.
-</td>
+<td>
+<img src="ArrowHeadShape.png" alt="Renderer ellipse dialog" style="float:right" />
+    Defines the shape of the arrow.  The arrow is defined by three relative x values - these measured relative to the endpoint of the vector and in the direction of the 
+    vector.  They are scaled by the size of the arrow head to define the coordinates with which the arrow is plotted.  The three values are illustrated here.  They are based on
+    the end of the vector (&quot;base&quot;). The values define the coordinates of the middle of the arrow head border.  As a special case, if the front measurement is 0 (ie the 
+    tip of the arrow should be on the end of the vector) then the coordinates are adjusted to bring the actual tip of the arrow onto that point, rather than the middle of the 
+   arrow border.  Also if the centre measurement is the same as the front measurement, then the arrow head is a simple line, rather than a polygon.   
+   </td>
 </tr>
-
 <tr>
-<td>Scale group
-</td>
-<td>Defines a scale group label for the layer.  Layers rendered with the same scale group will be forced to use the same scale.  This must be a simple name, for example "displacement".  The name can optionally followed by "*" and a mupltiple, which scale the arrow at the specified multiple of the group scale (for example "displacement*2").
-</td>
-</tr>
 
 <tr>
     <td>Symbol units</td>
@@ -195,6 +199,20 @@ configuring the error ellipse.
 <tr>
 <td>Base fill</td>
 <td>The colour of fill for the base symbol/td>
+</tr>
+
+<tr>
+<td>Scale/units
+</td>
+<td>Defines how the vector field will be scaled when it is represented on the map.  This can be either in map units, or in the units in which the symbol format is defined (see below).  Note that if the arrow is defined in map units, then these are the same.  The length of each vector will be multiplied by this scale for representing on the map.
+</td>
+</tr>
+
+<tr>
+<td>Scale group
+</td>
+<td>Defines a scale group label for the layer.  Layers rendered with the same scale group will be forced to use the same scale.  This must be a simple name, for example "displacement".  The name can optionally followed by "*" and a mupltiple, which scale the arrow at the specified multiple of the group scale (for example "displacement*2").
+</td>
 </tr>
 
 <tr>
@@ -268,14 +286,14 @@ symbology properties.
 </tr>
 
 <tr>
-<td>Fill ellipse
+<td>Draw ellipse/axes
 </td>
-<td>Defines whether the ellipse is filled or just the outline is plotted.
+<td>Defines whether the ellipse is drawn, and whether the ellipse axes are drawn.  If neither are ticked, there will be no error ellipse!
 </td>
 </tr>
 
 <tr>
-<td>Border colour
+<td>Border/axes colour
 </td>
 <td>Defines the colour of the border an tick marks
 </td>
@@ -284,7 +302,7 @@ symbology properties.
 <tr>
 <td>Fill colour
 </td>
-<td>Defines the colour used to fill the ellipse (if it is filled)
+<td>Defines the colour used to fill the ellipse.  The checkbox is used to choose whether the ellipse should be filled. 
 </td>
 </tr>
 
@@ -326,7 +344,7 @@ Reduce the scale of the arrows.
 <img src="VectorScaleBoxOptionsIcon.png" class="button">
 </td>
 <td>
-Configure the scale box - see below
+Configure the scale box - see below - and create the scale box layer if it is not already defined.
 </td>
 </tr>
 <tr>
@@ -342,7 +360,8 @@ Display this help information
 <h2><a name="scalebox">Configuring the scale box<a></h2>
 <img src="VectorScaleBoxOptions.png" alt="Vector scale box options dialog" style="float:right" />
 <p>
-The scale box can be configured using the Vector scale box options dialog.  This has the following options:
+The scale box can be configured using the Vector scale box options dialog.  The dialog is available either from the scale box button in the toolbar, 
+or once the scale box layer has been created, by opening the layer properties.  It provides the following options:
 </p>
 <!-- div style="clear:both"/ -->
 <table>
@@ -419,23 +438,68 @@ from python code.</p>
     r = vm.createRenderer(None)
 
     <span class="comment"># Set the mode for the renderer - possible values are</span>
-    <span class="comment"># Cartesian vector (0), Polar vector (1), height only (2)</span>
+    <span class="comment"># Cartesian (0), Polar (1), Height (2), or NoArrow (3).</span>
     <span class="comment"># And set the attributes defining the vector field</span>
 
-    r.setMode(0)
+    r.setMode(r.Cartesian)
     r.setFields('dx','dy')
+    # r.setDegrees(True)
+    # r.setAngleFromNorth(True)
+
+    <span class="comment"># Set the ellipse mode for the renderer - possible values are</span>
+    <span class="comment"># CovarianceEllipse (1), AxesEllipse (2), CircularEllipse (3)</span>
+    <span class="comment"># HeightEllipse (4), or NoEllipse (0).</span>
+    <span class="comment"># And set the attributes defining the ellipse parameters</span>
+
+    r.setEllipseMode(r.AxesEllipse)
+    r.setEllipseFields('emax','emin','eangle')
+    r.setEllipseDegrees(True)
+    r.setEllipseAngleFromNorth(angleFromNorth)
+    r.setEllipseScale(2.45)
+
 
     <span class="comment"># Get the arrow symbol and assign its colors</span>
+    <span class="comment"># Units can be QgsSymbolV2.MapUnit or QgsSymbolV2.MM</span>
+
+    r.setOutputUnit(QgsSymbolV2.MapUnit)
 
     arrow = r.arrow()
-    arrow.setColor(QColor.fromRgb(255,0,0))
-    arrow.setBaseColor(QColor.fromRgb(255,0,0))
+
+    arrow.setBaseSize(2.0)
+    arrow.setBaseBorderWidth(0.2)
+    arrow.setBaseFillColor(QColor.fromRgb(255,0,0))
     arrow.setBaseBorderColor(QColor.fromRgb(0,0,0))
+    arrow.setFillBase(True)
+
+    arrow.setArrowColor(QColor.fromRgb(255,0,0))
+    arrow.setShaftWidth(0.7)
+    arrow.setRelativeHeadSize(0.3)
+    arrow.setMaxHeadSize(3.0)
+    arrow.setHeadShape(0.0,-1.0,-0.7)
+    arrow.setHeadWidth(0.0)
+    arrow.setHeadFillColor(QColor.fromRgb(0,0,0))
+    arrow.setFillHead(True)
+
+    arrow.setEllipseBorderColor(QColor.fromRgb(0,255,0))
+    arrow.setEllipseFillColor(QColor.fromRgb(0,0,0))
+    arrow.setEllipseTickSize(size)
+    arrow.setEllipseBorderWidth(width)
+    arrow.setFillEllipse(False)
+    arrow.setDrawEllipse(True)
+    arrow.setDrawEllipseAxes(False)
 
     <span class="comment"># Set other symbology properties</span>
+
+    r.setScale(100)
+    r.setUseMapUnit(False)
+
+    r.setScaleGroup('def')
+    r.setScaleGroupFactor(1.0)
+
     r.setScaleGroup('deformation')
     r.setLegendText(' horizontal')
-    r.setScaleBoxText(' hor')
+    r.setScaleBoxText(' hor (95% conf lim)')
+    r.setShowInScaleBox(True)
 
     <span class="comment"># Assign the renderer to the layer and refresh the symbology</span>
     <span class="comment"># Not sure whether clearing the image cache is necessary, should be </span>
@@ -456,6 +520,7 @@ from python code.</p>
 
 <div style="clear:both"/>
 <h2><a name="history">Change history</a></h2>
+<p><i>Version 2.4: 24 January 2013:</i>Added error ellipses. Changed scale box to be a plugin layer, so that it displays in the print composer.  Added much more customisation of drawing arrows.</p>
 <p><i>Version 0.12: 8 March 2011:</i>Bug fix causing QGis crash when fields not selected.  Added functions to simplify programming from python.  Improved documentation.</p>
 <p><i>Version 0.10: 8 April 2010:</i> Changed activated() signals to triggered() in readiness for removal of qt3 support.</p>
 <p><i>Version 0.9: 2 April 2010:</i> Fixed autoscaling of vector layers when using on the fly projection.</p>
