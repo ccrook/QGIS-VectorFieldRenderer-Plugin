@@ -454,7 +454,7 @@ from python code.</p>
     r.setEllipseMode(r.AxesEllipse)
     r.setEllipseFields('emax','emin','eangle')
     r.setEllipseDegrees(True)
-    r.setEllipseAngleFromNorth(angleFromNorth)
+    r.setEllipseAngleFromNorth(True)
     r.setEllipseScale(2.45)
 
 
@@ -465,13 +465,15 @@ from python code.</p>
 
     arrow = r.arrow()
 
+    <span class="comment"># Configure the base of the arrow</span>
     arrow.setBaseSize(2.0)
     arrow.setBaseBorderWidth(0.2)
     arrow.setBaseFillColor(QColor.fromRgb(255,0,0))
     arrow.setBaseBorderColor(QColor.fromRgb(0,0,0))
     arrow.setFillBase(True)
 
-    arrow.setArrowColor(QColor.fromRgb(255,0,0))
+    <span class="comment"># Configure the arrow - setColor applies to the shaft and outline of the arrow head.</span>
+    arrow.setColor(QColor.fromRgb(255,0,0))
     arrow.setShaftWidth(0.7)
     arrow.setRelativeHeadSize(0.3)
     arrow.setMaxHeadSize(3.0)
@@ -480,10 +482,11 @@ from python code.</p>
     arrow.setHeadFillColor(QColor.fromRgb(0,0,0))
     arrow.setFillHead(True)
 
+    <span class="comment"># Configure the error ellipse</span>
     arrow.setEllipseBorderColor(QColor.fromRgb(0,255,0))
     arrow.setEllipseFillColor(QColor.fromRgb(0,0,0))
-    arrow.setEllipseTickSize(size)
-    arrow.setEllipseBorderWidth(width)
+    arrow.setEllipseTickSize(2.0)
+    arrow.setEllipseBorderWidth(0.1)
     arrow.setFillEllipse(False)
     arrow.setDrawEllipse(True)
     arrow.setDrawEllipseAxes(False)

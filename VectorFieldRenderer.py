@@ -189,7 +189,7 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
     def setCyyFieldName(self,cyyfieldname):
         self._fieldname[self.CyyField] = cyyfieldname
 
-    def setFields( self, xfieldname, yfieldname ):
+    def setFields( self, xfieldname, yfieldname="" ):
         self._fieldname[self.XField] = xfieldname
         self._fieldname[self.YField] = yfieldname
 
