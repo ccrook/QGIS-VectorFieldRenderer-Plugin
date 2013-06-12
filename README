@@ -1,0 +1,10 @@
+Vector field renderer for QGIS
+
+Renderer to display vector field data as arrows, with optionally error ellipses.
+
+Plugin Chris Crook
+
+Zip the contents of the VectorFieldRenderer directory to create the plugin, i.e.
+
+zip -r VectorFieldRenderer VectorFieldRenderer
+
