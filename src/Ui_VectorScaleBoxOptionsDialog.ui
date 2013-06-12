@@ -207,14 +207,14 @@
        </spacer>
       </item>
       <item>
-       <widget class="QgsColorButtonV2" name="uPenColor">
+       <widget class="QgsColorButton" name="uPenColor">
         <property name="text">
          <string>Border color</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QgsColorButtonV2" name="uBrushColor">
+       <widget class="QgsColorButton" name="uBrushColor">
         <property name="text">
          <string>Fill color</string>
         </property>
@@ -273,7 +273,7 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QgsColorButtonV2</class>
+   <class>QgsColorButton</class>
    <extends>QPushButton</extends>
    <header>qgis.gui</header>
   </customwidget>

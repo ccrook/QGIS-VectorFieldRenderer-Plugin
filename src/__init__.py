@@ -29,10 +29,13 @@ def description():
     return "Render a point layer with arrows representing the size and direction of a vector field, an ellipse representing the errors of the arrow, with scale box and toolbar for rescaling arrows."
 
 def version():
-    return "2.5"
+    return "3.0"
 
 def qgisMinimumVersion():
-    return "1.6"
+    return "2.0"
+
+def qgisMaximumVersion():
+    return "99.9"
 
 def email():
     return "ccrook@linz.govt.nz <Chris Crook>"

@@ -229,15 +229,12 @@ class VectorFieldRendererWidget(QgsRendererV2Widget,Ui_VectorFieldRendererWidget
  
     def getLayerFields( self, layer ):
          provider = layer.dataProvider()
-         feat = QgsFeature()
-         attrs = provider.attributeIndexes()
-         provider.select(attrs)
          fields = provider.fields()
-         fieldlist = []
-         for i in fields:
+         fieldlist=[]
+         for f in fields:
              # type = str(fields[i].typeName()).lower()
              # if (type=="integer") or (type=="double") or (type=="real"):
-                 fieldlist.append(fields[i].name())
+                 fieldlist.append(f.name())
          return fieldlist 
  
     def renderer(self):

@@ -346,7 +346,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QgsColorButtonV2" name="uArrowColor">
+             <widget class="QgsColorButton" name="uArrowColor">
               <property name="toolTip">
                <string>Change the arrow colour</string>
               </property>
@@ -370,7 +370,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QgsColorButtonV2" name="uArrowHeadColor">
+             <widget class="QgsColorButton" name="uArrowHeadColor">
               <property name="toolTip">
                <string>Change the arrow colour</string>
               </property>
@@ -836,7 +836,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QgsColorButtonV2" name="uEllipseBorderColor">
+             <widget class="QgsColorButton" name="uEllipseBorderColor">
               <property name="toolTip">
                <string>Change the arrow colour</string>
               </property>
@@ -863,7 +863,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QgsColorButtonV2" name="uEllipseFillColor">
+             <widget class="QgsColorButton" name="uEllipseFillColor">
               <property name="toolTip">
                <string>Change the base symbol colour</string>
               </property>
@@ -953,7 +953,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QgsColorButtonV2" name="uBaseBorderColor">
+      <widget class="QgsColorButton" name="uBaseBorderColor">
        <property name="toolTip">
         <string>Change the base border colour</string>
        </property>
@@ -980,7 +980,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QgsColorButtonV2" name="uBaseColor">
+      <widget class="QgsColorButton" name="uBaseColor">
        <property name="toolTip">
         <string>Change the base symbol colour</string>
        </property>
@@ -1111,7 +1111,7 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QgsColorButtonV2</class>
+   <class>QgsColorButton</class>
    <extends>QPushButton</extends>
    <header>qgis.gui</header>
   </customwidget>

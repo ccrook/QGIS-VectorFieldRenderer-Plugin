@@ -1,5 +1,5 @@
 #
-# Render a vector point layer using arrows to represent the a vector 
+# Render a vector point layer using arrows to represent the vector 
 # quantity.
 # 
 
@@ -454,7 +454,6 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
         return emax, emin, eangle, True
 
     def symbolForFeature( self, feature ):
-        am = feature.attributeMap()
         r = 0.0
         a = 0.0
         emax = 0.0
@@ -466,7 +465,7 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
           try:
              for i in range(self.NFields):
                  if self._usedfield[i]:
-                     value[i] = am[self._fieldno[i]].toDouble()[0]
+                     value[i] = float(feature[self._fieldno[i]])
              if self._mode == self.Cartesian:
                   x=value[self.XField]
                   y=value[self.YField]
@@ -640,5 +639,5 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
             file = inspect.getsourcefile(VectorFieldRenderer) 
             file = 'file://' + path.join(path.dirname(file),'index.html')
             file = file.replace("\\","/")
-            iface.openURL(file,False)      
+            utils.showPluginHelp()
 
