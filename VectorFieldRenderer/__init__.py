@@ -22,30 +22,6 @@
 
 from VectorFieldRendererPlugin import Plugin
 
-def name():
-    return "Vector field renderer"
-
-def description():
-    return "Render a point layer with arrows representing the size and direction of a vector field, an ellipse representing the errors of the arrow, with scale box and toolbar for rescaling arrows."
-
-def version():
-    return "3.1"
-
-def qgisMinimumVersion():
-    return "2.0"
-
-def qgisMaximumVersion():
-    return "99.9"
-
-def email():
-    return "ccrook@linz.govt.nz <Chris Crook>"
-
-def author():
-    return "Chris Crook"
-
-def icon():
-    return "./VectorFieldRenderer.png"
-
 def classFactory(iface):
     return Plugin(iface,name(),version(),email())
 
