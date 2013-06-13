@@ -10,16 +10,10 @@ from VectorFieldRendererController import VectorFieldRendererController
 class Plugin:
 
     Name = "VectorFieldRenderer"
-    LongName=""
-    Version=""
-    Author=""
-    PluginUrl="http://plugins.qgis.org/plugins/VectorFieldRenderer"
+    Version="3.1"
 
-    def __init__( self, iface, longname, version, author ):
+    def __init__( self, iface ):
         self._iface = iface
-        Plugin.LongName = longname
-        Plugin.Version = version
-        Plugin.Author = author
         VectorFieldRenderer.iface = iface
         VectorFieldRenderer.plugin = self
 
@@ -39,7 +33,6 @@ class Plugin:
         pe = doc.createElement("plugin")
         pe.setAttribute("name",Plugin.Name)
         pe.setAttribute("version",Plugin.Version)
-        pe.setAttribute("url",Plugin.PluginUrl)
         return pe
 
 

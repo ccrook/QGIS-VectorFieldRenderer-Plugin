@@ -23,6 +23,6 @@
 from VectorFieldRendererPlugin import Plugin
 
 def classFactory(iface):
-    return Plugin(iface,name(),version(),email())
+    return Plugin(iface)
 
 
