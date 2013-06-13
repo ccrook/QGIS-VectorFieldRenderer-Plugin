@@ -29,7 +29,7 @@ def description():
     return "Render a point layer with arrows representing the size and direction of a vector field, an ellipse representing the errors of the arrow, with scale box and toolbar for rescaling arrows."
 
 def version():
-    return "3.0"
+    return "3.1"
 
 def qgisMinimumVersion():
     return "2.0"
