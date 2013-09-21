@@ -4,7 +4,7 @@ from PyQt4.QtGui import *
 
 from qgis.core import *
 
-from VectorFieldRenderer import VectorFieldRenderer
+from .VectorFieldRenderer import VectorFieldRenderer
  
 class VectorScaleBoxPluginLayer(QgsPluginLayer):
 

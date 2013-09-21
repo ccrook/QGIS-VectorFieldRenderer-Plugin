@@ -6,8 +6,8 @@ from PyQt4.QtGui import *
 from qgis.core import *
 from qgis.gui import *
 
-from Ui_VectorScaleBoxOptionsDialog import Ui_VectorScaleBoxOptionsDialog
-from VectorFieldRenderer import VectorFieldRenderer
+from .Ui_VectorScaleBoxOptionsDialog import Ui_VectorScaleBoxOptionsDialog
+from .VectorFieldRenderer import VectorFieldRenderer
 
 # Color button class - connects up QgsColorButton with a color dialog
 

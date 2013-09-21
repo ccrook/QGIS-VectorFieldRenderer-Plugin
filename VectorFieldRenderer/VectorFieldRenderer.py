@@ -11,7 +11,7 @@ from qgis import utils
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
-from VectorArrowMarker import VectorArrowMarker
+from .VectorArrowMarker import VectorArrowMarker
 
 class VectorFieldRenderer(QgsFeatureRendererV2):
 
@@ -465,7 +465,7 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
           try:
              for i in range(self.NFields):
                  if self._usedfield[i]:
-                     value[i] = float(feature[self._fieldno[i]])
+                    value[i] = float(feature[self._fieldno[i]])
              if self._mode == self.Cartesian:
                   x=value[self.XField]
                   y=value[self.YField]
@@ -518,7 +518,6 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
                  emin = emax
 
           except:
-             raise
              r = 0.0
              a = 0.0
              emax = 0.0

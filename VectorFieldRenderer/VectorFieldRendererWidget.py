@@ -6,8 +6,8 @@ from PyQt4.QtGui import *
 from qgis.core import *
 from qgis.gui import *
 
-from VectorFieldRenderer import VectorFieldRenderer
-from Ui_VectorFieldRendererWidget import Ui_VectorFieldRendererWidget
+from .VectorFieldRenderer import VectorFieldRenderer
+from .Ui_VectorFieldRendererWidget import Ui_VectorFieldRendererWidget
 
 
 class UnitButton( QObject ):

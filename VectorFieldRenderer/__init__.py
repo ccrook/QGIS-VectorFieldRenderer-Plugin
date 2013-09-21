@@ -20,7 +20,7 @@
 #       Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #       MA 02110-1301, USA.
 
-from VectorFieldRendererPlugin import Plugin
+from .VectorFieldRendererPlugin import Plugin
 
 def classFactory(iface):
     return Plugin(iface)

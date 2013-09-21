@@ -4,8 +4,8 @@ from PyQt4.QtGui import *
 
 from qgis.core import *
 
-from VectorFieldRenderer import VectorFieldRenderer
-from VectorScaleBoxOptionsDialog import VectorScaleBoxOptionsDialog
+from .VectorFieldRenderer import VectorFieldRenderer
+from .VectorScaleBoxOptionsDialog import VectorScaleBoxOptionsDialog
 
 class VectorScaleBox:
 

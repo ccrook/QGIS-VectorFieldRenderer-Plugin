@@ -5,10 +5,10 @@ from PyQt4.QtGui import *
 
 from qgis.core import *
 
-from VectorFieldRenderer import VectorFieldRenderer
-from VectorScaleBox import VectorScaleBox 
-from VectorScaleBoxPluginLayer import VectorScaleBoxPluginLayer
-from VectorScaleBoxOptionsDialog import VectorScaleBoxOptionsDialog
+from .VectorFieldRenderer import VectorFieldRenderer
+from .VectorScaleBox import VectorScaleBox 
+from .VectorScaleBoxPluginLayer import VectorScaleBoxPluginLayer
+from .VectorScaleBoxOptionsDialog import VectorScaleBoxOptionsDialog
 
 class VectorFieldRendererController:
 
