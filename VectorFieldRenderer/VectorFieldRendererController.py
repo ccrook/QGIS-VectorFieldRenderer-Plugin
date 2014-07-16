@@ -9,6 +9,7 @@ from .VectorFieldRenderer import VectorFieldRenderer
 from .VectorScaleBox import VectorScaleBox 
 from .VectorScaleBoxPluginLayer import VectorScaleBoxPluginLayer
 from .VectorScaleBoxOptionsDialog import VectorScaleBoxOptionsDialog
+from .VectorFieldRendererLayerDialog import VectorFieldRendererLayerDialog
 
 class VectorFieldRendererController:
 
@@ -49,23 +50,31 @@ class VectorFieldRendererController:
         action4.setStatusTip("Display the vector scale box")
         QObject.connect(action4,SIGNAL("triggered()"), self.setScaleBoxOptions )
 
-        action5 = QAction(QIcon(":plugins/VectorFieldRenderer/RendererHelpIcon.png"),
+        action5 = QAction(QIcon(":plugins/VectorFieldRenderer/VectorFieldRendererIcon.png"),
                   "Vector field renderer help", iface.mainWindow())
-        action5.setWhatsThis("Show vector field renderer help")
-        action5.setStatusTip("Show vector field renderer help")
-        QObject.connect(action5,SIGNAL("triggered()"), self.showHelp )
+        action5.setWhatsThis("Setup current layer renderer")
+        action5.setStatusTip("Setup current layer renderer")
+        QObject.connect(action5,SIGNAL("triggered()"), self.showLayerDialog )
+
+        action6 = QAction(QIcon(":plugins/VectorFieldRenderer/RendererHelpIcon.png"),
+                  "Vector field renderer help", iface.mainWindow())
+        action6.setWhatsThis("Show vector field renderer help")
+        action6.setStatusTip("Show vector field renderer help")
+        QObject.connect(action6,SIGNAL("triggered()"), self.showHelp )
 
         toolbar.addAction(action1)
         toolbar.addAction(action2)
         toolbar.addAction(action3)
         toolbar.addAction(action4)
         toolbar.addAction(action5)
+        toolbar.addAction(action6)
 
         self._rescaleAction = action1
         self._enlargeAction = action2
         self._shrinkAction = action3
         self._scaleOptionsAction = action4
-        self._helpAction = action5
+        self._layerDialog=action5
+        self._helpAction = action6
 
         # Only enable when active layer has a Vector Field renderer, so
         # disable and check whenever the canvas has redrawn (eg after
@@ -214,6 +223,12 @@ class VectorFieldRendererController:
         if VectorScaleBoxOptionsDialog.getOptions(self._scaleBox,self._iface.mainWindow()):
             self.setupScaleBox()
             self.repaintScaleBox()
+
+    def showLayerDialog( self ):
+        layer, renderer = self.findRenderer()
+        dialog=VectorFieldRendererLayerDialog( layer, renderer )
+        if dialog.exec_() == QDialog.Accepted:
+            self.refreshLayer(layer)
            
     def showHelp(self):
         VectorFieldRenderer.showHelp()

@@ -58,7 +58,7 @@ class VectorFieldRendererWidget(QgsRendererV2Widget,Ui_VectorFieldRendererWidget
             self.r = renderer
 
         self.validLayer = True
-        if layer.geometryType() != QGis.Point:
+        if layer is None or layer.type() != QgsMapLayer.VectorLayer or layer.geometryType() != QGis.Point:
            self.setupBlankUi(layer)
            self.validLayer = False
            return
@@ -70,7 +70,7 @@ class VectorFieldRendererWidget(QgsRendererV2Widget,Ui_VectorFieldRendererWidget
         self.loadFromRenderer()
 
     def setupBlankUi(self,layer):
-        name = layer.name()
+        name = layer.name() if layer else "Selected layer"
         self.uLayout = QVBoxLayout()
         self.uLabel = QLabel(
               "The vector field renderer only applies to point type layers.\n\n"
@@ -223,6 +223,11 @@ class VectorFieldRendererWidget(QgsRendererV2Widget,Ui_VectorFieldRendererWidget
         if self.validLayer:
             self.saveToRenderer()
         return self.r
+
+    def applyRenderer( self ):
+        if self.validLayer:
+            renderer=self.renderer()
+            self.layer.setRendererV2(renderer)
   
     def loadFromRenderer( self ):
         vfr = self.r
