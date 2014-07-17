@@ -107,6 +107,10 @@ The renderer also displays a scale box on the map showing how the arrow size rel
 A vector field is displayed by changing its symbology.  Right click on the layer in the 
 layers list, and select the symbology tab.  In the renderer drop down select "Vector field".  This will display the options for configuring the symbology. (Note: to see the renderer in the drop down the "new symbology" must be selected.)
 </p>
+<p><b>Note:</b>Some versions of QGIS do not properly support python based 
+renderers, and you will see instead an error message &quot;This renderer doesn't implement a graphical interface&quot;.  In this case you can attach the renderer to a layer using the &quot;Configure renderer&quot; dialog from the
+<a href="#toolbar">vector field toolbar</a>.
+</p>
 <p>The dialog has two main sections - the top section defines how the vector field is expressed in the data, and the bottom section defines characteristics of the arrow symbology.  The dialog also has a tab for
 configuring the error ellipse.
 </p>
@@ -345,6 +349,15 @@ Reduce the scale of the arrows.
 </td>
 <td>
 Configure the scale box - see below - and create the scale box layer if it is not already defined.
+</td>
+</tr>
+<tr>
+<td>
+<img src="VectorFieldRendererIcon.png" class="button">
+</td>
+<td>
+    Configure the vector field renderer for the current layer.  The layer must be a
+    point based vector layer.
 </td>
 </tr>
 <tr>
