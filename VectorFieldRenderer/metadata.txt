@@ -2,7 +2,7 @@
 name=Vector field renderer
 description=Render a point layer with arrows representing the size and direction of a vector field, an ellipse representing the errors of the arrow, with scale box and toolbar for rescaling arrows.
 category=Vector
-version=3.2
+version=3.3
 experimental=False
 qgisMinimumVersion=2.0
 homepage=http://github.com/ccrook/QGIS-VectorFieldRenderer-Plugin

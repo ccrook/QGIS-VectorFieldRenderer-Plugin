@@ -46,7 +46,6 @@ class VectorScaleBoxPluginLayer(QgsPluginLayer):
     
     def setScaleBox(self, scalebox):
         self._scalebox = scalebox
-        self.repaintScaleBox()
 
     def repaintScaleBox( self ):
         self.setCacheImage(None)

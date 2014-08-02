@@ -203,8 +203,7 @@ class VectorFieldRendererController:
 
     def autoRescale(self):
         layer, renderer = self.findRenderer()
-        mapsize = self._iface.mapCanvas().extent();
-        if renderer and renderer.autoRescale(mapsize):
+        if renderer and renderer.autoRescale(layer,self._iface.mapCanvas()):
             self.refreshLayer(layer)
    
     def enlarge(self):

@@ -107,7 +107,7 @@ The renderer also displays a scale box on the map showing how the arrow size rel
 A vector field is displayed by changing its symbology.  Right click on the layer in the 
 layers list, and select the symbology tab.  In the renderer drop down select "Vector field".  This will display the options for configuring the symbology. (Note: to see the renderer in the drop down the "new symbology" must be selected.)
 </p>
-<p><b>Note:</b>Some versions of QGIS do not properly support python based 
+<p><b>Note:</b> Some versions of QGIS do not properly support python based 
 renderers, and you will see instead an error message &quot;This renderer doesn't implement a graphical interface&quot;.  In this case you can attach the renderer to a layer using the &quot;Configure renderer&quot; dialog from the
 <a href="#toolbar">vector field toolbar</a>.
 </p>
@@ -536,6 +536,8 @@ from python code.</p>
 
 <div style="clear:both"/>
 <h2><a name="history">Change history</a></h2>
+<p><i>Version 3.3: 3 August 2014:</i>Fixes for QGIS 2.4 API changes.</p>
+<p><i>Version 3.2: 17 July 2014:</i>Added toolbar button for applying renderer to a layer to circumvent issue with some versions of QGIS not displaying renderer settings in properties dialog.</p>
 <p><i>Version 2.4: 24 January 2013:</i>Added error ellipses. Changed scale box to be a plugin layer, so that it displays in the print composer.  Added much more customisation of drawing arrows.</p>
 <p><i>Version 0.12: 8 March 2011:</i>Bug fix causing QGis crash when fields not selected.  Added functions to simplify programming from python.  Improved documentation.</p>
 <p><i>Version 0.10: 8 April 2010:</i> Changed activated() signals to triggered() in readiness for removal of qt3 support.</p>

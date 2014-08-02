@@ -3,6 +3,7 @@
 # quantity.
 # 
 
+import sys
 import math
 import inspect
 from os import path
@@ -389,7 +390,11 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
             self._sumLength = 0
             self._sumLength2 = 0
             self._renderingStarted = False
+        self.setLayerFields( layer )
+        self._pixelScaleFactor,self._vectorscale,self._mapUnitsPerPixel,self._vectorUnitsPerPixel = self.scaleFactors(context)
+        self._symbol.startRender(context)
 
+    def setLayerFields( self, layer ):
         self._fieldno=[-1]*self.NFields
         try:
           if layer: 
@@ -401,10 +406,6 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
         except:
             self._isvalid = False 
 
-
-        self._pixelScaleFactor,self._vectorscale,self._mapUnitsPerPixel,self._vectorUnitsPerPixel = self.scaleFactors(context)
-
-        self._symbol.startRender(context)
 
     def stopRender(self,context):
         self._symbol.stopRender(context)
@@ -454,6 +455,10 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
         return emax, emin, eangle, True
 
     def symbolForFeature( self, feature ):
+        self.setSymbolSizeForFeature(feature,False)
+        return self._symbol
+
+    def setSymbolSizeForFeature( self, feature, scaling ):
         r = 0.0
         a = 0.0
         emax = 0.0
@@ -486,7 +491,6 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
                      r = -r
                      a = -a
 
-    
              if self._ellipseMode == self.NoEllipse:
                  pass
              elif self._ellipseMode == self.CovarianceEllipse:
@@ -524,37 +528,43 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
              emin = 0.0
              eangle= 0.0
 
-        vscale = self._vectorscale
-        self.arrow().setVector( r * vscale, a, self._mode != self.NoArrow )
-        self.arrow().setEllipse( emax*vscale, emin*vscale, eangle, drawEllipse )
-
-        if self._rendering:
+        if scaling:
             vlen = r + emax
             self._nFeatures += 1
             self._sumLength += vlen
             self._sumLength2 += vlen*vlen
             self._maxLength = max(self._maxLength,vlen)
+        else:
+            vscale = self._vectorscale
+            self.arrow().setVector( r * vscale, a, self._mode != self.NoArrow )
+            self.arrow().setEllipse( emax*vscale, emin*vscale, eangle, drawEllipse )
 
-        return self._symbol
 
-    def stats(self):
-        mean = 0.0
-        self.setGroupScale()
-        rms = 0.0
-        if self._nFeatures > 0:
-           mean = self._sumLength/self._nFeatures
-           rms = math.sqrt(self._sumLength2/self._nFeatures)
-        return { 
-           'count': self._nFeatures,
-           'mean': mean,
-           'rms': rms,
-           'max': self._maxLength
-            }
+    def autoRescale(self, layer, canvas ):
 
-    def renderedCount(self):
-        return self._nFeatures;
+        mapextent=canvas.extent()
+        renderer=canvas.mapRenderer()
+        context=renderer.rendererContext()
+        layerExtent=renderer.outputExtentToLayerExtent(layer,mapextent)
 
-    def autoRescale(self, mapextent):
+        attributes=self.usedAttributes()
+        self.setLayerFields( layer )
+        if not self._isvalid:
+            return False
+
+        request=QgsFeatureRequest()
+        request.setFilterRect(layerExtent)
+        # This messes up retrieving attributes - could do more work on this...
+        # request.setSubsetOfAttributes(attributes)
+
+        self._nFeatures = 0
+        self._maxLength = 0.0
+        self._sumLength = 0.0
+        self._sumLength2 = 0.0
+
+        for feature in layer.getFeatures(request):
+            self.setSymbolSizeForFeature(feature,True)
+
         if self._nFeatures == 0:
             return False
 
@@ -566,17 +576,20 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
         if arrlen <= 0.0:
             return False
 
-        # Compute the desired length on the map
+        # Compute the desired length on the map - based on the number
+        # of features, ie shorter arrows if more points on the map
 
         mapsize = math.sqrt(mapextent.width()*mapextent.height())
         maplen = mapsize / math.sqrt(16.0+self._nFeatures)
-        maplen = max(min(maplen,mapsize/10),mapsize/100)
+        maplen = max(min(maplen,mapsize/10),mapsize/100)/2
         
         # Set the scale - the scale conversion is required if not
         # using map units for rendering the arrow, as we have 
         # calculated the scale in map units
 
-        scale = (maplen*self._vectorUnitsPerPixel)/(arrlen*self._mapUnitsPerPixel)
+        psf,vs,mupp,vupp=self.scaleFactors(context)
+        scale = (maplen*vupp)/(arrlen*mupp)
+
         if self.scale() == scale:
             return False 
 
@@ -587,6 +600,7 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
     # been rendered, so scale information is available.
     #
     # Get the length of the arrow - not including head, base, etc.
+
     def arrowPixelLength(self,veclen,context):
         pixelScaleFactor,vectorscale,mupp,vupp = self.scaleFactors(context)
         pixelFactor = pixelScaleFactor/context.rasterScaleFactor()
