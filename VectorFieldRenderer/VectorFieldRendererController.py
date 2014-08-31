@@ -19,8 +19,9 @@ class VectorFieldRendererController:
         self._iface = iface
         self._factor = 2.0
         self._helpWindow = None
+        self._pluginLayerType=VectorScaleBoxPluginLayer.Type()
 
-        QgsPluginLayerRegistry.instance().addPluginLayerType(VectorScaleBoxPluginLayer.Type())
+        QgsPluginLayerRegistry.instance().addPluginLayerType(self._pluginLayerType)
         self._scaleBox = VectorScaleBox(iface)
 
         toolbar = iface.addToolBar(self.toolBarName)
@@ -51,9 +52,9 @@ class VectorFieldRendererController:
         QObject.connect(action4,SIGNAL("triggered()"), self.setScaleBoxOptions )
 
         action5 = QAction(QIcon(":plugins/VectorFieldRenderer/VectorFieldRendererIcon.png"),
-                  "Vector field renderer help", iface.mainWindow())
-        action5.setWhatsThis("Setup current layer renderer")
-        action5.setStatusTip("Setup current layer renderer")
+                  "Apply vector renderer to current layer", iface.mainWindow())
+        action5.setWhatsThis("Apply vector renderer to current layer")
+        action5.setStatusTip("Apply vector renderer to current layer")
         QObject.connect(action5,SIGNAL("triggered()"), self.showLayerDialog )
 
         action6 = QAction(QIcon(":plugins/VectorFieldRenderer/RendererHelpIcon.png"),
