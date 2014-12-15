@@ -19,6 +19,7 @@ class VectorFieldRendererController:
         self._iface = iface
         self._factor = 2.0
         self._helpWindow = None
+        self._scaleBoxLayer=None
         self._pluginLayerType=VectorScaleBoxPluginLayer.Type()
 
         QgsPluginLayerRegistry.instance().addPluginLayerType(self._pluginLayerType)
@@ -182,6 +183,7 @@ class VectorFieldRendererController:
         if haveVectors and not haveScaleBox:
             l = VectorScaleBoxPluginLayer()
             l.setScaleBox( self._scaleBox )
+            self._scaleBoxLayer=l
             QgsMapLayerRegistry.instance().addMapLayer(l)
 
     def renderStarting( self ):

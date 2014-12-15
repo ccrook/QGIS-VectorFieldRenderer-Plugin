@@ -216,9 +216,10 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
 
     def scaleGroup(self):
         return self._scaleGroup
-    def setScaleGroup(self,scaleGroup):
+    def setScaleGroup(self,scaleGroup,cloning=False):
         self._scaleGroup = scaleGroup
-        self.setGroupScale()
+        if not cloning:
+            self.setGroupScale()
 
     def scaleGroupFactor(self):
         return self._scaleGroupFactor
@@ -274,8 +275,9 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
         clone.setCxxFieldName(self.cxxFieldName())
         clone.setCxyFieldName(self.cxyFieldName())
         clone.setCyyFieldName(self.cyyFieldName())
-        clone.setScaleGroup(self.scaleGroup())
         clone.setScaleGroupFactor(self.scaleGroupFactor())
+        # Don't want scale group set before anything which runs setGroupScale
+        clone.setScaleGroup(self.scaleGroup(),True)
         clone.setLegendText(self.legendText())
         clone.setScaleBoxText(self.scaleBoxText())
         clone.setShowInScaleBox(self.showInScaleBox())
@@ -360,8 +362,9 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
            self.arrow().readFromXmlElement(element)
 
            # Placed at end as not present in old project files
-           self.setScaleGroup(element.attribute("scalegroup"))
            self.setScaleGroupFactor(float(element.attribute("scalegroupfactor")))
+           # Don't want scale group set before anything which runs setGroupScale
+           self.setScaleGroup(element.attribute("scalegroup"))
            self.setLegendText(element.attribute("legendtext"))
            self.setScaleBoxText(element.attribute("scaleboxtext"))
            self.setShowInScaleBox( element.attribute("showonscalebox") == "True" )
