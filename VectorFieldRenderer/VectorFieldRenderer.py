@@ -15,7 +15,6 @@ from PyQt4.QtGui import *
 from .VectorArrowMarker import VectorArrowMarker
 
 class VectorFieldRenderer(QgsFeatureRendererV2):
-
     scaleGroups={}
 
     rendererName = "VectorFieldRenderer"
@@ -94,9 +93,6 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
         self._vectorUnitsPerPixel = 1.0
         self._mapUnitsPerPixel = 1.0
 
-        self._renderingStarted = False;
-        self._rendering = False;
-        
         # Preferred code, but currently existing symbol layers not 
         # defined in SIP..  However I do get a simple marker by
         # default in the QgsMarkSymbolV2 default constructor.. though
@@ -375,24 +371,10 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
     # startRender - looks up the field numbers in the layer for the
     # fields used to generate the arrow
 
-    def setMapRenderingStarting(self):
-        self._renderingStarted = True
-        self._rendering = True
-
-    def setMapRenderingFinished(self):
-        self._renderingStarted = False
-        self._rendering = False
-
     def startRender(self, context, layer):
         self.getGroupScale()
         self._isvalid = True
 
-        if self._renderingStarted:
-            self._nFeatures = 0
-            self._maxLength = 0
-            self._sumLength = 0
-            self._sumLength2 = 0
-            self._renderingStarted = False
         self.setLayerFields( layer )
         self._pixelScaleFactor,self._vectorscale,self._mapUnitsPerPixel,self._vectorUnitsPerPixel = self.scaleFactors(context)
         self._symbol.startRender(context)

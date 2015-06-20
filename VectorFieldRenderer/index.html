@@ -442,13 +442,11 @@ or once the scale box layer has been created, by opening the layer properties.  
 from python code.</p>
 
 <pre>
-    <span class="comment"># Obtain a vector field renderer metadata object vm</span>
-
-    vm=QgsRendererV2Registry.instance().rendererMetadata("VectorFieldRenderer")
 
     <span class="comment"># Create a renderer</span>
 
-    r = vm.createRenderer(None)
+    from VectorFieldRenderer.VectorFieldRenderer import VectorFieldRenderer
+    r = VectorFieldRenderer()
 
     <span class="comment"># Set the mode for the renderer - possible values are</span>
     <span class="comment"># Cartesian (0), Polar (1), Height (2), or NoArrow (3).</span>
@@ -522,16 +520,14 @@ from python code.</p>
     <span class="comment"># done by QGis on setting the renderer</span>
 
     layer.setRendererV2(r)
-    layer.setCacheImage(None)
     self._iface.legendInterface().refreshLayerSymbology(layer)
 
     <span class="comment"># If the scale is to be automatically set based on the visible</span>
     <span class="comment"># vectors, then the following rather obscure code will do it.</span>
 
-    self._iface.mapCanvas().refresh()
-    mapsize = self._iface.mapCanvas().extent()
-    layer.rendererV2().autoRescale(mapsize)
-    layer.setCacheImage(None)
+    canvas=self._iface.mapCanvas()
+    layer.rendererV2().autoRescale(layer,canvas)
+    layer.triggerRepaint()
 </pre>
 
 <div style="clear:both"/>

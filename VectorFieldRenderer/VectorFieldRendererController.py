@@ -137,8 +137,6 @@ class VectorFieldRendererController:
         self.resetEnabled()
 
     def renderComplete( self, painter ):
-        for l,r in self.vectorRendererLayers():
-            r.setMapRenderingFinished()
         # window=painter.window()
         # extents=QgsRectangle(window.left(),window.bottom(),window.right(),window.top())
         # self._scaleBox.render( painter, extents )
@@ -188,9 +186,8 @@ class VectorFieldRendererController:
 
     def renderStarting( self ):
         for l,r in self.vectorRendererLayers():
-            r.setMapRenderingStarting()
             if r.getGroupScale():
-                l.setCacheImage(None)
+                l.triggerRepaint()
         
         for l in self.vectorScaleBoxLayers():
             l.setScaleBox( self._scaleBox )

@@ -8,6 +8,7 @@ from .VectorFieldRendererWidget import VectorFieldRendererWidget
 from . import VectorFieldRendererResources
 
 class VectorFieldRendererMetadata(QgsRendererV2AbstractMetadata):
+
     def __init__(self):
         QgsRendererV2AbstractMetadata.__init__(
            self, 
