@@ -4,8 +4,8 @@ from PyQt4.QtGui import *
 
 from qgis.core import *
 
-from VectorFieldRenderer import VectorFieldRenderer
-from VectorScaleBoxOptionsDialog import VectorScaleBoxOptionsDialog
+from .VectorFieldRenderer import VectorFieldRenderer
+from .VectorScaleBoxOptionsDialog import VectorScaleBoxOptionsDialog
 
 class VectorScaleBox:
 
@@ -308,8 +308,7 @@ class VectorScaleBox:
             v = l.rendererV2()
             if (not v 
                 or v.type() != VectorFieldRenderer.rendererName 
-                or not v.showInScaleBox()
-                or not v.renderedCount()): 
+                or not v.showInScaleBox()):
                 continue
             layers.append(self.Layer(v))
         return layers

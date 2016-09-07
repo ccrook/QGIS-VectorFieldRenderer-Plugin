@@ -6,27 +6,9 @@ from PyQt4.QtGui import *
 from qgis.core import *
 from qgis.gui import *
 
-from VectorFieldRenderer import VectorFieldRenderer
-from Ui_VectorFieldRendererWidget import Ui_VectorFieldRendererWidget
+from .VectorFieldRenderer import VectorFieldRenderer
+from .Ui_VectorFieldRendererWidget import Ui_VectorFieldRendererWidget
 
-# Color button class - connects up QgsColorButton with a color dialog
-
-class ColorButton( QObject ):
-
-   def __init__(self,button):
-      QObject.__init__(self)
-      self._button = button
-      button.clicked.connect( self.clicked )
-
-   def color(self):
-      return self._button.color()
-
-   def setColor(self,color):
-      if color.isValid():
-         self._button.setColor(color)
-
-   def clicked(self):
-      self.setColor(QColorDialog.getColor(self.color()))
 
 class UnitButton( QObject ):
 
@@ -76,7 +58,7 @@ class VectorFieldRendererWidget(QgsRendererV2Widget,Ui_VectorFieldRendererWidget
             self.r = renderer
 
         self.validLayer = True
-        if layer.geometryType() != QGis.Point:
+        if layer is None or layer.type() != QgsMapLayer.VectorLayer or layer.geometryType() != QGis.Point:
            self.setupBlankUi(layer)
            self.validLayer = False
            return
@@ -88,7 +70,7 @@ class VectorFieldRendererWidget(QgsRendererV2Widget,Ui_VectorFieldRendererWidget
         self.loadFromRenderer()
 
     def setupBlankUi(self,layer):
-        name = layer.name()
+        name = layer.name() if layer else "Selected layer"
         self.uLayout = QVBoxLayout()
         self.uLabel = QLabel(
               "The vector field renderer only applies to point type layers.\n\n"
@@ -99,12 +81,12 @@ class VectorFieldRendererWidget(QgsRendererV2Widget,Ui_VectorFieldRendererWidget
 
     def buildWidget(self):
         self.setupUi(self)
-        self.arrowColor = ColorButton(self.uArrowColor)
-        self.arrowHeadColor = ColorButton(self.uArrowHeadColor)
-        self.baseColor = ColorButton(self.uBaseColor)
-        self.baseBorderColor = ColorButton(self.uBaseBorderColor)
-        self.ellipseBorderColor = ColorButton(self.uEllipseBorderColor)
-        self.ellipseFillColor = ColorButton(self.uEllipseFillColor)
+        self.uArrowColor.setColorDialogTitle('Arrow colour')
+        self.uArrowHeadColor.setColorDialogTitle('Arrow head fill colour')
+        self.uBaseColor.setColorDialogTitle('Base symbol line colour')
+        self.uBaseBorderColor.setColorDialogTitle('Base symbol fill colour')
+        self.uEllipseBorderColor.setColorDialogTitle('Ellipse line colour')
+        self.uEllipseFillColor.setColorDialogTitle('Ellipse fill colour')
 
         self.scaleUnits = UnitButton(self.uScaleUnits,"Symbol unit")
         self.outputUnits = UnitButton(self.uOutputUnits)
@@ -229,21 +211,23 @@ class VectorFieldRendererWidget(QgsRendererV2Widget,Ui_VectorFieldRendererWidget
  
     def getLayerFields( self, layer ):
          provider = layer.dataProvider()
-         feat = QgsFeature()
-         attrs = provider.attributeIndexes()
-         provider.select(attrs)
          fields = provider.fields()
-         fieldlist = []
-         for i in fields:
+         fieldlist=[]
+         for f in fields:
              # type = str(fields[i].typeName()).lower()
              # if (type=="integer") or (type=="double") or (type=="real"):
-                 fieldlist.append(fields[i].name())
+                 fieldlist.append(f.name())
          return fieldlist 
  
     def renderer(self):
         if self.validLayer:
             self.saveToRenderer()
         return self.r
+
+    def applyRenderer( self ):
+        if self.validLayer:
+            renderer=self.renderer()
+            self.layer.setRendererV2(renderer)
   
     def loadFromRenderer( self ):
         vfr = self.r
@@ -278,9 +262,9 @@ class VectorFieldRendererWidget(QgsRendererV2Widget,Ui_VectorFieldRendererWidget
         self.uFillHead.setChecked( arrow.fillHead())
         self.uArrowWidth.setValue( arrow.shaftWidth())
         self.uArrowBaseSize.setValue( arrow.baseSize())
-        self.arrowColor.setColor( arrow.color())
-        self.arrowHeadColor.setColor(arrow.headFillColor())
-        self.baseColor.setColor( arrow.baseFillColor())
+        self.uArrowColor.setColor( arrow.color())
+        self.uArrowHeadColor.setColor(arrow.headFillColor())
+        self.uBaseColor.setColor( arrow.baseFillColor())
         shape = arrow.headShape()
         self.uArrowHeadShapeFront.setValue( shape[0] )
         self.uArrowHeadShapeBack.setValue( shape[1] )
@@ -288,12 +272,12 @@ class VectorFieldRendererWidget(QgsRendererV2Widget,Ui_VectorFieldRendererWidget
         self.uFillBase.setChecked( arrow.fillBase())
         self.uDrawEllipse.setChecked( arrow.drawEllipse())
         self.uDrawEllipseAxes.setChecked( arrow.drawEllipseAxes())
-        self.baseBorderColor.setColor( arrow.baseBorderColor())
+        self.uBaseBorderColor.setColor( arrow.baseBorderColor())
         self.uEllipseBorderWidth.setValue( arrow.ellipseBorderWidth())
         self.uEllipseTickSize.setValue( arrow.ellipseTickSize())
-        self.ellipseBorderColor.setColor( arrow.ellipseBorderColor())
+        self.uEllipseBorderColor.setColor( arrow.ellipseBorderColor())
         self.uFillEllipse.setChecked( arrow.fillEllipse())
-        self.ellipseFillColor.setColor( arrow.ellipseFillColor())
+        self.uEllipseFillColor.setColor( arrow.ellipseFillColor())
         self.uLegendText.setText( vfr.legendText())
         self.uScaleBoxText.setText( vfr.scaleBoxText())
         self.uShowInScaleBox.setChecked( vfr.showInScaleBox())
@@ -344,19 +328,19 @@ class VectorFieldRendererWidget(QgsRendererV2Widget,Ui_VectorFieldRendererWidget
         centre = float(self.uArrowHeadShapeCentre.value())
         arrow.setHeadShape( front, back, centre )
         arrow.setBaseSize( self.uArrowBaseSize.value())
-        arrow.setColor( self.arrowColor.color())
-        arrow.setHeadFillColor( self.arrowHeadColor.color())
+        arrow.setColor( self.uArrowColor.color())
+        arrow.setHeadFillColor( self.uArrowHeadColor.color())
         arrow.setFillBase( self.uFillBase.isChecked())
         arrow.setFillHead( self.uFillHead.isChecked())
         arrow.setDrawEllipse( self.uDrawEllipse.isChecked())
         arrow.setDrawEllipseAxes( self.uDrawEllipseAxes.isChecked())
-        arrow.setBaseFillColor( self.baseColor.color())
-        arrow.setBaseBorderColor( self.baseBorderColor.color())
+        arrow.setBaseFillColor( self.uBaseColor.color())
+        arrow.setBaseBorderColor( self.uBaseBorderColor.color())
         arrow.setEllipseBorderWidth( self.uEllipseBorderWidth.value())
         arrow.setEllipseTickSize( self.uEllipseTickSize.value())
-        arrow.setEllipseBorderColor( self.ellipseBorderColor.color())
+        arrow.setEllipseBorderColor( self.uEllipseBorderColor.color())
         arrow.setFillEllipse( self.uFillEllipse.isChecked())
-        arrow.setEllipseFillColor( self.ellipseFillColor.color())
+        arrow.setEllipseFillColor( self.uEllipseFillColor.color())
         vfr.setLegendText( self.uLegendText.text())
         vfr.setScaleBoxText( self.uScaleBoxText.text())
         vfr.setShowInScaleBox( self.uShowInScaleBox.isChecked())

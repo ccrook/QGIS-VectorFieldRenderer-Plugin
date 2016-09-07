@@ -3,11 +3,12 @@
 from qgis.core import QgsRendererV2AbstractMetadata
 from PyQt4.QtGui import *
 
-from VectorFieldRenderer import VectorFieldRenderer
-from VectorFieldRendererWidget import VectorFieldRendererWidget
-import VectorFieldRendererResources
+from .VectorFieldRenderer import VectorFieldRenderer
+from .VectorFieldRendererWidget import VectorFieldRendererWidget
+from . import VectorFieldRendererResources
 
 class VectorFieldRendererMetadata(QgsRendererV2AbstractMetadata):
+
     def __init__(self):
         QgsRendererV2AbstractMetadata.__init__(
            self, 

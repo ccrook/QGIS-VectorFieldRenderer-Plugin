@@ -5,10 +5,11 @@ from PyQt4.QtGui import *
 
 from qgis.core import *
 
-from VectorFieldRenderer import VectorFieldRenderer
-from VectorScaleBox import VectorScaleBox 
-from VectorScaleBoxPluginLayer import VectorScaleBoxPluginLayer
-from VectorScaleBoxOptionsDialog import VectorScaleBoxOptionsDialog
+from .VectorFieldRenderer import VectorFieldRenderer
+from .VectorScaleBox import VectorScaleBox 
+from .VectorScaleBoxPluginLayer import VectorScaleBoxPluginLayer
+from .VectorScaleBoxOptionsDialog import VectorScaleBoxOptionsDialog
+from .VectorFieldRendererLayerDialog import VectorFieldRendererLayerDialog
 
 class VectorFieldRendererController:
 
@@ -18,8 +19,10 @@ class VectorFieldRendererController:
         self._iface = iface
         self._factor = 2.0
         self._helpWindow = None
+        self._scaleBoxLayer=None
+        self._pluginLayerType=VectorScaleBoxPluginLayer.Type()
 
-        QgsPluginLayerRegistry.instance().addPluginLayerType(VectorScaleBoxPluginLayer.Type())
+        QgsPluginLayerRegistry.instance().addPluginLayerType(self._pluginLayerType)
         self._scaleBox = VectorScaleBox(iface)
 
         toolbar = iface.addToolBar(self.toolBarName)
@@ -49,23 +52,31 @@ class VectorFieldRendererController:
         action4.setStatusTip("Display the vector scale box")
         QObject.connect(action4,SIGNAL("triggered()"), self.setScaleBoxOptions )
 
-        action5 = QAction(QIcon(":plugins/VectorFieldRenderer/RendererHelpIcon.png"),
+        action5 = QAction(QIcon(":plugins/VectorFieldRenderer/VectorFieldRendererIcon.png"),
+                  "Apply vector renderer to current layer", iface.mainWindow())
+        action5.setWhatsThis("Apply vector renderer to current layer")
+        action5.setStatusTip("Apply vector renderer to current layer")
+        QObject.connect(action5,SIGNAL("triggered()"), self.showLayerDialog )
+
+        action6 = QAction(QIcon(":plugins/VectorFieldRenderer/RendererHelpIcon.png"),
                   "Vector field renderer help", iface.mainWindow())
-        action5.setWhatsThis("Show vector field renderer help")
-        action5.setStatusTip("Show vector field renderer help")
-        QObject.connect(action5,SIGNAL("triggered()"), self.showHelp )
+        action6.setWhatsThis("Show vector field renderer help")
+        action6.setStatusTip("Show vector field renderer help")
+        QObject.connect(action6,SIGNAL("triggered()"), self.showHelp )
 
         toolbar.addAction(action1)
         toolbar.addAction(action2)
         toolbar.addAction(action3)
         toolbar.addAction(action4)
         toolbar.addAction(action5)
+        toolbar.addAction(action6)
 
         self._rescaleAction = action1
         self._enlargeAction = action2
         self._shrinkAction = action3
         self._scaleOptionsAction = action4
-        self._helpAction = action5
+        self._layerDialog=action5
+        self._helpAction = action6
 
         # Only enable when active layer has a Vector Field renderer, so
         # disable and check whenever the canvas has redrawn (eg after
@@ -126,8 +137,6 @@ class VectorFieldRendererController:
         self.resetEnabled()
 
     def renderComplete( self, painter ):
-        for l,r in self.vectorRendererLayers():
-            r.setMapRenderingFinished()
         # window=painter.window()
         # extents=QgsRectangle(window.left(),window.bottom(),window.right(),window.top())
         # self._scaleBox.render( painter, extents )
@@ -172,13 +181,13 @@ class VectorFieldRendererController:
         if haveVectors and not haveScaleBox:
             l = VectorScaleBoxPluginLayer()
             l.setScaleBox( self._scaleBox )
+            self._scaleBoxLayer=l
             QgsMapLayerRegistry.instance().addMapLayer(l)
 
     def renderStarting( self ):
         for l,r in self.vectorRendererLayers():
-            r.setMapRenderingStarting()
             if r.getGroupScale():
-                l.setCacheImage(None)
+                l.triggerRepaint()
         
         for l in self.vectorScaleBoxLayers():
             l.setScaleBox( self._scaleBox )
@@ -194,8 +203,7 @@ class VectorFieldRendererController:
 
     def autoRescale(self):
         layer, renderer = self.findRenderer()
-        mapsize = self._iface.mapCanvas().extent();
-        if renderer and renderer.autoRescale(mapsize):
+        if renderer and renderer.autoRescale(layer,self._iface.mapCanvas()):
             self.refreshLayer(layer)
    
     def enlarge(self):
@@ -214,6 +222,12 @@ class VectorFieldRendererController:
         if VectorScaleBoxOptionsDialog.getOptions(self._scaleBox,self._iface.mainWindow()):
             self.setupScaleBox()
             self.repaintScaleBox()
+
+    def showLayerDialog( self ):
+        layer, renderer = self.findRenderer()
+        dialog=VectorFieldRendererLayerDialog( layer, renderer )
+        if dialog.exec_() == QDialog.Accepted:
+            self.refreshLayer(layer)
            
     def showHelp(self):
         VectorFieldRenderer.showHelp()

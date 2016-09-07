@@ -20,30 +20,9 @@
 #       Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #       MA 02110-1301, USA.
 
-from VectorFieldRendererPlugin import Plugin
-
-def name():
-    return "Vector field renderer"
-
-def description():
-    return "Render a point layer with arrows representing the size and direction of a vector field, an ellipse representing the errors of the arrow, with scale box and toolbar for rescaling arrows."
-
-def version():
-    return "2.5"
-
-def qgisMinimumVersion():
-    return "1.6"
-
-def email():
-    return "ccrook@linz.govt.nz <Chris Crook>"
-
-def author():
-    return "Chris Crook"
-
-def icon():
-    return "./VectorFieldRenderer.png"
+from .VectorFieldRendererPlugin import Plugin
 
 def classFactory(iface):
-    return Plugin(iface,name(),version(),email())
+    return Plugin(iface)
 
 

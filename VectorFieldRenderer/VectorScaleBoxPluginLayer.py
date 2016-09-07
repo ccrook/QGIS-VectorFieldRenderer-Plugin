@@ -4,7 +4,7 @@ from PyQt4.QtGui import *
 
 from qgis.core import *
 
-from VectorFieldRenderer import VectorFieldRenderer
+from .VectorFieldRenderer import VectorFieldRenderer
  
 class VectorScaleBoxPluginLayer(QgsPluginLayer):
 
@@ -46,7 +46,6 @@ class VectorScaleBoxPluginLayer(QgsPluginLayer):
     
     def setScaleBox(self, scalebox):
         self._scalebox = scalebox
-        self.repaintScaleBox()
 
     def repaintScaleBox( self ):
         self.setCacheImage(None)
