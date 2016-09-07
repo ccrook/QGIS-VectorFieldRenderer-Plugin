@@ -9,6 +9,8 @@ from .VectorScaleBoxOptionsDialog import VectorScaleBoxOptionsDialog
 
 class VectorScaleBox:
 
+    controller=None
+
     class Layer:
         def __init__(self,renderer):
             self._r = renderer
@@ -305,7 +307,10 @@ class VectorScaleBox:
                 and (mc.scale() < l.minimumScale() 
                 or mc.scale() > l.maximumScale())):
                 continue
-            v = l.rendererV2()
+            if VectorScaleBox.controller is not None:
+                v=VectorScaleBox.controller.findLayerRenderer(l)
+            else:
+                v = l.rendererV2()
             if (not v 
                 or v.type() != VectorFieldRenderer.rendererName 
                 or not v.showInScaleBox()):

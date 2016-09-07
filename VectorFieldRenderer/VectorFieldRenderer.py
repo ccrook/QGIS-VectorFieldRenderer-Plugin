@@ -17,6 +17,7 @@ from .VectorArrowMarker import VectorArrowMarker
 class VectorFieldRenderer(QgsFeatureRendererV2):
     scaleGroups={}
 
+    controller=None
     rendererName = "VectorFieldRenderer"
     iface = None
     plugin = None
@@ -75,6 +76,7 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
         self._ellipseAngleFromNorth = True
         self._ellipseDegrees = True
         self._ellipseScale = 1.0
+        self._legendIcon = None
 
         # Field used in processing ..
 
@@ -618,6 +620,8 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
         arrow.renderArrow(point,context.painter(),pixelFactor)
 
     def legendSymbologyItems( self, size ):
+        # legendSymbologyItems seems to not be used now
+        print("legendSymbologyItems called")
         iconType = VectorArrowMarker.IconArrow
         if self._mode == self.NoArrow:
             if self._ellipseMode == self.CircularEllipse:
@@ -626,8 +630,17 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
                 iconType = VectorArrowMarker.IconTickVertical
             else:
                 iconType = VectorArrowMarker.IconEllipse
-        icon = self.arrow().legendIcon(size,iconType)
-        return [[self._legendText,icon]]
+        self._legendIcon = self.arrow().legendIcon(size,iconType)
+        return [[self._legendText,self._legendIcon]]
+
+    def legendSymbolItemsV2( self ):
+        print("legendSymbolItems called")
+        return [QgsLegendSymbolItemV2(self._symbol,self._legendText,'',False)]
+
+    def applyToLayer( self, layer ):
+        layer.setRendererV2(self)
+        if self.controller is not None:
+            self.controller.saveLayerRenderer( layer, self )
 
     # Display the help information for this renderer
     @staticmethod

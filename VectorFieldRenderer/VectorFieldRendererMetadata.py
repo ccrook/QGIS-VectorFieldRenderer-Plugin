@@ -9,7 +9,8 @@ from . import VectorFieldRendererResources
 
 class VectorFieldRendererMetadata(QgsRendererV2AbstractMetadata):
 
-    def __init__(self):
+    def __init__(self,controller):
+        self._controller=controller
         QgsRendererV2AbstractMetadata.__init__(
            self, 
            VectorFieldRenderer.rendererName, 
@@ -22,5 +23,5 @@ class VectorFieldRendererMetadata(QgsRendererV2AbstractMetadata):
         return vfr
 
     def createRendererWidget(self, layer, style, renderer):
-        return VectorFieldRendererWidget(layer,style,renderer)
+        return VectorFieldRendererWidget(layer,style,renderer,self._controller)
  

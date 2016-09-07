@@ -107,9 +107,10 @@ The renderer also displays a scale box on the map showing how the arrow size rel
 A vector field is displayed by changing its symbology.  Right click on the layer in the 
 layers list, and select the symbology tab.  In the renderer drop down select "Vector field".  This will display the options for configuring the symbology. (Note: to see the renderer in the drop down the "new symbology" must be selected.)
 </p>
-<p><b>Note:</b> Some versions of QGIS do not properly support python based 
-renderers, and you will see instead an error message &quot;This renderer doesn't implement a graphical interface&quot;.  In this case you can attach the renderer to a layer using the &quot;Configure renderer&quot; dialog from the
-<a href="#toolbar">vector field toolbar</a>.
+<p><b>Warning:</b> Due to a problem in mapping between python and the core QGIS code, once you have applied the vector field 
+renderer to a layer you cannot choose a different renderer type from the properties dialog.  If you do QGIS will crash
+horribly!  The easiest way to revert a layer to use a different type of renderer is to copy and paste a style from a different 
+layer using the context menus in the Layers Panel.
 </p>
 <p>The dialog has two main sections - the top section defines how the vector field is expressed in the data, and the bottom section defines characteristics of the arrow symbology.  The dialog also has a tab for
 configuring the error ellipse.
@@ -510,16 +511,14 @@ from python code.</p>
     r.setScaleGroup('def')
     r.setScaleGroupFactor(1.0)
 
-    r.setScaleGroup('deformation')
     r.setLegendText(' horizontal')
     r.setScaleBoxText(' hor (95% conf lim)')
     r.setShowInScaleBox(True)
 
     <span class="comment"># Assign the renderer to the layer and refresh the symbology</span>
-    <span class="comment"># Not sure whether clearing the image cache is necessary, should be </span>
-    <span class="comment"># done by QGis on setting the renderer</span>
+    <span class="comment"># Use applyToLayer to overcome issues with C++ pointer losing python SIP object</span>
 
-    layer.setRendererV2(r)
+    r.applyToLayer(layer)
     self._iface.legendInterface().refreshLayerSymbology(layer)
 
     <span class="comment"># If the scale is to be automatically set based on the visible</span>
@@ -532,6 +531,7 @@ from python code.</p>
 
 <div style="clear:both"/>
 <h2><a name="history">Change history</a></h2>
+<p><i>Version 3.5.2: 7 September 2016:</i>Fixes to circumvent crashes interfacing python plugin with core QGIS</p>
 <p><i>Version 3.4: 31 August 2014:</i>Fix for renderer GUI not showing in properties dialog</p>
 <p><i>Version 3.3: 3 August 2014:</i>Fixes for QGIS 2.4 API changes.</p>
 <p><i>Version 3.2: 17 July 2014:</i>Added toolbar button for applying renderer to a layer to circumvent issue with some versions of QGIS not displaying renderer settings in properties dialog.</p>

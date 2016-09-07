@@ -13,13 +13,14 @@ from .VectorFieldRendererWidget import VectorFieldRendererWidget
 
 class VectorFieldRendererLayerDialog(QDialog):
 
-    def __init__(self,layer,renderer,parent=None):
+    def __init__(self,layer,renderer,controller,parent=None):
         QDialog.__init__(self,parent)
         self.setWindowTitle("Vector Field Renderer")
 
         self.stylev2=QgsStyleV2()
         self.layer=layer
-        self.widget=VectorFieldRendererWidget(layer,self.stylev2,renderer)
+        self.widget=VectorFieldRendererWidget(layer,self.stylev2,renderer,controller)
+        self.widget.uCrashWarning.hide()
         buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         layout=QVBoxLayout()
         layout.addWidget(self.widget)

@@ -1,5 +1,4 @@
 
-
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
@@ -17,6 +16,11 @@ class VectorFieldRendererController:
 
     def __init__( self, iface ):
         self._iface = iface
+        # jferencik workaround for 'QgsFeatureRendererV2' object has no attribute error
+        # _vlayers...
+        self._vlayers={}
+        VectorFieldRenderer.controller=self
+        VectorScaleBox.controller=self
         self._factor = 2.0
         self._helpWindow = None
         self._scaleBoxLayer=None
@@ -153,7 +157,22 @@ class VectorFieldRendererController:
         renderer = layer.rendererV2()
         if not renderer or renderer.type() != VectorFieldRenderer.rendererName:
             return None
+        if not isinstance(renderer,VectorFieldRenderer):
+            renderer=self._vlayers.get(layer.id())
+            # Is it worth resetting the layer renderer here?
         return renderer
+
+    # saveLayerRenderer is a workaround for the bug/issue that the passing a renderer
+    # through C++ pointers and SIP sometimes seems to lose its python instance
+    #
+    # This may not be sufficient as when renderer is cloned the cloned python object 
+    # is not saved.  A WIP resolution
+
+    def saveLayerRenderer(self,layer,renderer):
+        layerrenderer=layer.rendererV2()
+        if isinstance(layerrenderer,VectorFieldRenderer):
+            renderer=layerrenderer
+        self._vlayers[layer.id()]=renderer
 
     def vectorRendererLayers( self ):
         for l in self._iface.mapCanvas().layers():
@@ -197,9 +216,8 @@ class VectorFieldRendererController:
             l.repaintScaleBox()
 
     def refreshLayer(self,layer):
-        layer.setCacheImage(None)
+        layer.repaintRequested.emit()
         self.repaintScaleBox()
-        self._iface.mapCanvas().refresh()
 
     def autoRescale(self):
         layer, renderer = self.findRenderer()
@@ -225,7 +243,7 @@ class VectorFieldRendererController:
 
     def showLayerDialog( self ):
         layer, renderer = self.findRenderer()
-        dialog=VectorFieldRendererLayerDialog( layer, renderer )
+        dialog=VectorFieldRendererLayerDialog( layer, renderer, self )
         if dialog.exec_() == QDialog.Accepted:
             self.refreshLayer(layer)
            

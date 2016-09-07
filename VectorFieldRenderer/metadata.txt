@@ -9,7 +9,7 @@ about=Renders a point layer with arrows representing vectors.  The
   changed using buttons on the toolbar.  The plugin also can
   draw a scale box on the map.
 category=Vector
-version=3.5.1
+version=3.5.2
 experimental=False
 qgisMinimumVersion=2.0
 homepage=http://github.com/ccrook/QGIS-VectorFieldRenderer-Plugin

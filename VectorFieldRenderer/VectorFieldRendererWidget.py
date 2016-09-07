@@ -49,14 +49,24 @@ class UnitButton( QObject ):
 
 class VectorFieldRendererWidget(QgsRendererV2Widget,Ui_VectorFieldRendererWidget):
 
-    def __init__(self,layer,style,renderer):
+    def __init__(self,layer,style,renderer,controller):
         QgsRendererV2Widget.__init__(self, layer, style)
 
-        if renderer is None or renderer.type() != VectorFieldRenderer.rendererName:
-            self.r = VectorFieldRenderer()
-        else:
-            self.r = renderer
+        self._controller=controller
 
+        if renderer is not None and renderer.type() != VectorFieldRenderer.rendererName:
+            renderer=None
+
+        import sip
+        if renderer is not None and sip.isdeleted(renderer):
+            renderer=None
+
+        if renderer is not None and not isinstance(renderer,VectorFieldRenderer):
+            renderer=self._controller.findLayerRenderer(layer)
+
+        self.r = VectorFieldRenderer() if renderer is None else renderer
+
+        self._layer=layer
         self.validLayer = True
         if layer is None or layer.type() != QgsMapLayer.VectorLayer or layer.geometryType() != QGis.Point:
            self.setupBlankUi(layer)
@@ -68,6 +78,8 @@ class VectorFieldRendererWidget(QgsRendererV2Widget,Ui_VectorFieldRendererWidget
         self.buildWidget()
         self.setupLayer(layer)
         self.loadFromRenderer()
+        # Try creating a new renderer to save to ...
+        self.r=VectorFieldRenderer()
 
     def setupBlankUi(self,layer):
         name = layer.name() if layer else "Selected layer"
@@ -130,7 +142,6 @@ class VectorFieldRendererWidget(QgsRendererV2Widget,Ui_VectorFieldRendererWidget
             fields=["Height attribute"]
         elif mode == VectorFieldRenderer.Polar:
             self.uFieldTypePolar.setChecked(True)
-            fields=["Length attribute","Angle attribute"]
         elif mode == VectorFieldRenderer.NoArrow:
             self.uFieldTypeNone.setChecked(True)
             fields=[]
@@ -222,12 +233,13 @@ class VectorFieldRendererWidget(QgsRendererV2Widget,Ui_VectorFieldRendererWidget
     def renderer(self):
         if self.validLayer:
             self.saveToRenderer()
+            self._controller.saveLayerRenderer( self._layer, self.r )
         return self.r
 
     def applyRenderer( self ):
         if self.validLayer:
             renderer=self.renderer()
-            self.layer.setRendererV2(renderer)
+            renderer.applyToLayer(self._layer)
   
     def loadFromRenderer( self ):
         vfr = self.r

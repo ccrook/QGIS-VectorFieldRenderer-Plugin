@@ -19,9 +19,9 @@ class Plugin:
 
     def initGui(self):
         # QgsSymbolLayerV2Registry.instance().addSymbolLayerType( VectorArrowMarkerMetadata() )
-        self._metadata=VectorFieldRendererMetadata()
-        QgsRendererV2Registry.instance().addRenderer( self._metadata ) 
         self._controller = VectorFieldRendererController(self._iface)
+        self._metadata=VectorFieldRendererMetadata(self._controller)
+        QgsRendererV2Registry.instance().addRenderer( self._metadata ) 
 
     def unload(self):      
         self._controller.unload()

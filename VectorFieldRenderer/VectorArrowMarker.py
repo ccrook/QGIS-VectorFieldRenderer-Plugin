@@ -234,6 +234,7 @@ class VectorArrowMarker(QgsMarkerSymbolLayerV2):
         self._drawCurrentEllipse = drawEllipse
 
     def legendIcon( self, size, iconType):
+        print("legendIcon called")
         self.setupMarker()
         px = QPixmap(size)
         px.fill(Qt.transparent)
@@ -288,6 +289,8 @@ class VectorArrowMarker(QgsMarkerSymbolLayerV2):
             p.setPen(QPen(self.color(),1))
             p.drawLine(xb,y,xa,y)
         p.end()
+        self._icon=px
+        print("Icon built")
         return px
 
     def calcHeadSize( self, length, pixelFactor ):

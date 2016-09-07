@@ -48,8 +48,7 @@ class VectorScaleBoxPluginLayer(QgsPluginLayer):
         self._scalebox = scalebox
 
     def repaintScaleBox( self ):
-        self.setCacheImage(None)
-        self.emit(SIGNAL("repaintRequested()"))
+        self.repaintRequested.emit()
   
     def showDialog(self):
         if self._scalebox:
