@@ -3,6 +3,7 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
 from qgis.core import *
+from qgis.gui import *
 
 from .VectorFieldRenderer import VectorFieldRenderer
 from .VectorScaleBox import VectorScaleBox 
@@ -243,6 +244,11 @@ class VectorFieldRendererController:
 
     def showLayerDialog( self ):
         layer, renderer = self.findRenderer()
+        if layer is None or layer.type() != QgsMapLayer.VectorLayer or layer.geometryType() != QGis.Point:
+            self._iface.messageBar().pushMessage("Invalid layer",
+                "The vector field renderer only renders point layers",
+                level=QgsMessageBar.WARNING, duration=5)
+            return
         dialog=VectorFieldRendererLayerDialog( layer, renderer, self )
         if dialog.exec_() == QDialog.Accepted:
             self.refreshLayer(layer)

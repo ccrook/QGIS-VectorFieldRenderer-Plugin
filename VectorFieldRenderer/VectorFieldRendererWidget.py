@@ -142,6 +142,7 @@ class VectorFieldRendererWidget(QgsRendererV2Widget,Ui_VectorFieldRendererWidget
             fields=["Height attribute"]
         elif mode == VectorFieldRenderer.Polar:
             self.uFieldTypePolar.setChecked(True)
+            fields=["Length attribute","Angle attribute"]
         elif mode == VectorFieldRenderer.NoArrow:
             self.uFieldTypeNone.setChecked(True)
             fields=[]

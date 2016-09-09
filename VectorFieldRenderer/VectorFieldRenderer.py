@@ -465,7 +465,7 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
                   if r > 0.0:
                       a = math.atan2(y,x)
              elif self._mode == self.Polar:
-                 r = value[self.RField] 
+                 r = max(0.0,value[self.RField])
                  a = value[self.AngleField]
                  if self._degrees:
                     a = a * math.pi/180.0

@@ -20,7 +20,8 @@ class VectorFieldRendererLayerDialog(QDialog):
         self.stylev2=QgsStyleV2()
         self.layer=layer
         self.widget=VectorFieldRendererWidget(layer,self.stylev2,renderer,controller)
-        self.widget.uCrashWarning.hide()
+        if hasattr(self.widget,'uCrashWarning'):
+            self.widget.uCrashWarning.hide()
         buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         layout=QVBoxLayout()
         layout.addWidget(self.widget)
