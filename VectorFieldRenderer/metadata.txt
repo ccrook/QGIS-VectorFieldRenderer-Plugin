@@ -6,10 +6,10 @@ about=Renders a point layer with arrows representing vectors.  The
   would be used to represent movement, fluid flow or ground deformation
   for example.  The plugin can also draw an ellipse representing the
   error covariance of the vector.  The scale of the arrows can be easily
-  changed using buttons on the toolbar.  The plugin also can
-  draw a scale box on the map.
+  changed using buttons on the toolbar.  The plugin can also
+  draw a scale box on the map showing the magnitude of vectors.
 category=Vector
-version=3.5.3
+version=3.6.1
 experimental=False
 qgisMinimumVersion=2.0
 homepage=http://github.com/ccrook/QGIS-VectorFieldRenderer-Plugin

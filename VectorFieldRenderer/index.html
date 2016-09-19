@@ -66,6 +66,7 @@ pre span.comment {
 <li><a href="#toolbar">Modifying the vector field - the vector field toolbar</a></li>
 <li><a href="#scalebox">Configuring the scale box<a></li>
 <li><a href="#python">Configuring the renderer from python<a></li>
+<li><a href="#issues">Issues</a></li>
 <li><a href="#history">Change history</a></li>
 </ul>
 <h2><a name="introduction">Introduction</a></h2>
@@ -218,6 +219,31 @@ configuring the error ellipse.
 </td>
 <td>Defines a scale group label for the layer.  Layers rendered with the same scale group will be forced to use the same scale.  This must be a simple name, for example "displacement".  The name can optionally followed by "*" and a mupltiple, which scale the arrow at the specified multiple of the group scale (for example "displacement*2").
 </td>
+</tr>
+
+<tr>
+    <td>Align vector...</td>
+    <td>
+        If &quot;Align vector with map north&quot; is selected vector symbols are oriented relative to map north.  
+        This accounts for the possible difference between the map and vector coordinate systems as well as the rotation of 
+        the map canvas.
+        If it is not selected then the vector is aligned in terms of the map frame 
+        (that is, a northward pointing vector will always be plotted pointing directly towards the top of
+        the map frame).  
+
+        Note that this only applies for Cartesian and Polar type vectors, and Covariance and Axes type error ellipses.
+        Height vectors and Height errors are always plotted pointing to the top (or bottom) of the map frame.
+    </td>
+</tr>
+
+<tr>
+    <td>Vector is ...</td>
+    <td>
+    Select &quot;Vector defined relative to true north&quot; if the layer is defined in terms of a projection coordinate system, but
+    the vector field is defined in terms of true (geographic) north.  This only has effect if &quot;Align vector with map north&quot;
+    is selected, in which case it is used to determine the relationship between the north direction of the vector coordinate
+    system and that of the map.  
+    </td>
 </tr>
 
 <tr>
@@ -507,6 +533,8 @@ from python code.</p>
 
     r.setScale(100)
     r.setUseMapUnit(False)
+    r.setUseMapNorth(True)
+    r.setVectorIsTrueNorth(False)
 
     r.setScaleGroup('def')
     r.setScaleGroupFactor(1.0)
@@ -530,7 +558,14 @@ from python code.</p>
 </pre>
 
 <div style="clear:both"/>
+<h2><a name="issues">Issues</a></h2>
+<p>The correction from vector north to map north (applying projection convergence etc) may not work if the point locations
+are not sensible for both coordinate systems.  If the plugin is unable to apply a correction it currently sets it to
+zero.  The map canvas rotation will still be applied.</p>
+
+<div style="clear:both"/>
 <h2><a name="history">Change history</a></h2>
+<p><i>Version 3.6.1: 19 September 2016:</i>Fixes display on map layer legend. Adds handling of map canvas rotation and correction of azimuth from vector coordinate system to map coordinate system.  Adds using expressions for fields.</p>
 <p><i>Version 3.5.2: 7 September 2016:</i>Fixes to circumvent crashes interfacing python plugin with core QGIS</p>
 <p><i>Version 3.4: 31 August 2014:</i>Fix for renderer GUI not showing in properties dialog</p>
 <p><i>Version 3.3: 3 August 2014:</i>Fixes for QGIS 2.4 API changes.</p>

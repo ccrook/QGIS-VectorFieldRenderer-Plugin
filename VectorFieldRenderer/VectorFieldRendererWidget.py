@@ -156,10 +156,12 @@ class VectorFieldRendererWidget(QgsRendererV2Widget,Ui_VectorFieldRendererWidget
         self.uYField.setEnabled( nfields > 1 )
         self.uXFieldLabel.setText( fields[0] if nfields > 0 else '' )
         self.uYFieldLabel.setText( fields[1] if nfields > 1 else '' )
+        self.uXField.setExpressionDialogTitle( fields[0] if nfields > 0 else '' )
+        self.uYField.setExpressionDialogTitle( fields[1] if nfields > 1 else '' )
         if nfields < 1:
-            self.uXField.setCurrentIndex(-1)
+            self.uXField.setField("")
         if nfields < 2:
-            self.uYField.setCurrentIndex(-1)
+            self.uYField.setField("")
         isPolar = mode == VectorFieldRenderer.Polar
         self.uAngleUnitsGroupBox.setEnabled( isPolar )
         self.uOrientationGroupBox.setEnabled( isPolar )
@@ -194,12 +196,15 @@ class VectorFieldRendererWidget(QgsRendererV2Widget,Ui_VectorFieldRendererWidget
         self.uCxxFieldLabel.setText(fields[0] if nfields > 0 else '')
         self.uCxyFieldLabel.setText(fields[1] if nfields > 1 else '')
         self.uCyyFieldLabel.setText(fields[2] if nfields > 2 else '')
+        self.uCxxField.setExpressionDialogTitle(fields[0] if nfields > 0 else '')
+        self.uCxyField.setExpressionDialogTitle(fields[1] if nfields > 1 else '')
+        self.uCyyField.setExpressionDialogTitle(fields[2] if nfields > 2 else '')
         if nfields < 1:
-            self.uCxxField.setCurrentIndex(-1)
+            self.uCxxField.setField("")
         if nfields < 2:
-            self.uCxyField.setCurrentIndex(-1)
+            self.uCxyField.setField("")
         if nfields < 3:
-            self.uCyyField.setCurrentIndex(-1)
+            self.uCyyField.setField("")
 
         isPolar = mode == VectorFieldRenderer.AxesEllipse
         self.uAxisAngleUnitsGroupBox.setEnabled( isPolar )
@@ -208,18 +213,11 @@ class VectorFieldRendererWidget(QgsRendererV2Widget,Ui_VectorFieldRendererWidget
  
     def setupLayer( self, layer ):
         self.layer = layer
-        self.uXField.clear()
-        self.uYField.clear()
-        self.uCxxField.clear()
-        self.uCxyField.clear()
-        self.uCyyField.clear()
-        if layer:
-           for f in self.getLayerFields(layer):
-             self.uXField.addItem(f)
-             self.uYField.addItem(f)
-             self.uCxxField.addItem(f)
-             self.uCxyField.addItem(f)
-             self.uCyyField.addItem(f)
+        self.uXField.setLayer(layer)
+        self.uYField.setLayer(layer)
+        self.uCxxField.setLayer(layer)
+        self.uCxyField.setLayer(layer)
+        self.uCyyField.setLayer(layer)
  
     def getLayerFields( self, layer ):
          provider = layer.dataProvider()
@@ -235,6 +233,7 @@ class VectorFieldRendererWidget(QgsRendererV2Widget,Ui_VectorFieldRendererWidget
         if self.validLayer:
             self.saveToRenderer()
             self._controller.saveLayerRenderer( self._layer, self.r )
+            self._controller.repaintScaleBox()
         return self.r
 
     def applyRenderer( self ):
@@ -246,11 +245,11 @@ class VectorFieldRendererWidget(QgsRendererV2Widget,Ui_VectorFieldRendererWidget
         vfr = self.r
         self.setMode( vfr.mode())
         self.setEllipseMode( vfr.ellipseMode())
-        self.uXField.setCurrentIndex( self.uXField.findText(vfr.xFieldName()))
-        self.uYField.setCurrentIndex( self.uYField.findText(vfr.yFieldName()))
-        self.uCxxField.setCurrentIndex( self.uCxxField.findText(vfr.cxxFieldName()))
-        self.uCxyField.setCurrentIndex( self.uCxyField.findText(vfr.cxyFieldName()))
-        self.uCyyField.setCurrentIndex( self.uCyyField.findText(vfr.cyyFieldName()))
+        self.uXField.setField( vfr.xFieldName())
+        self.uYField.setField( vfr.yFieldName())
+        self.uCxxField.setField( vfr.cxxFieldName())
+        self.uCxyField.setField( vfr.cxyFieldName())
+        self.uCyyField.setField( vfr.cyyFieldName())
         self.uAngleUnitsDegrees.setChecked( vfr.degrees())
         self.uAngleUnitsRadians.setChecked( not vfr.degrees())
         self.uAngleOrientationNorth.setChecked( vfr.angleFromNorth())
@@ -260,6 +259,8 @@ class VectorFieldRendererWidget(QgsRendererV2Widget,Ui_VectorFieldRendererWidget
         self.uEllipseOrientationNorth.setChecked( vfr.ellipseAngleFromNorth())
         self.uEllipseOrientationEast.setChecked( not vfr.ellipseAngleFromNorth())
         self.scaleUnits.setIsMapUnit(vfr.useMapUnit())
+        self.uVectorIsTrueNorth.setChecked(vfr.vectorIsTrueNorth())
+        self.uAlignToMapNorth.setChecked(vfr.useMapNorth())
         self.uArrowScale.setText( str(vfr.scale()))
         self.uEllipseScale.setText( str(vfr.ellipseScale()))
         group = vfr.scaleGroup()
@@ -320,6 +321,8 @@ class VectorFieldRendererWidget(QgsRendererV2Widget,Ui_VectorFieldRendererWidget
         except:
            pass
         vfr.setUseMapUnit( self.scaleUnits.isMapUnit())
+        vfr.setVectorIsTrueNorth(self.uVectorIsTrueNorth.isChecked())
+        vfr.setUseMapNorth(self.uAlignToMapNorth.isChecked())
         group = self.uScaleGroup.text()
         factor = 1.0
         if "*" in group:

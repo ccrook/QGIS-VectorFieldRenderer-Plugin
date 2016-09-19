@@ -2,6 +2,7 @@
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
+import math
 from qgis.core import *
 
 from .VectorFieldRenderer import VectorFieldRenderer
@@ -222,14 +223,11 @@ class VectorScaleBox:
             painter.drawText(QPointF(0.0,0.0),text)
             painter.restore()
 
-        extent=context.extent()
+        extent=QgsRectangle(context.extent())
         transform=context.mapToPixel().transform
-        window=QgsRectangle(
-            transform(extent.xMinimum(),extent.yMaximum()),
-            transform(extent.xMaximum(),extent.yMinimum())
-            )
-        height = window.height()
-        width = window.width()
+        origin=transform(extent.xMinimum(),extent.yMinimum())
+        width=math.sqrt(origin.sqrDist(transform(extent.xMaximum(),extent.yMinimum())))
+        height=math.sqrt(origin.sqrDist(transform(extent.xMinimum(),extent.yMaximum())))
 
         arrowlen = width*(self._arrowSizePercent/100.0)
         for l in layers:

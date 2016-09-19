@@ -54,6 +54,7 @@ class VectorArrowMarker(QgsMarkerSymbolLayerV2):
 
         self.setVector( 10.0, 0.0, True )
         self.setEllipse( 0.0, 0.0, 0.0, False )
+        self._iconType=self.IconArrow
 
     def width( self ):
         return self._width
@@ -178,6 +179,11 @@ class VectorArrowMarker(QgsMarkerSymbolLayerV2):
     def setBaseBorderColor(self,color):
         self._baseBorderColor = color
 
+    def iconType( self ):
+        return self._iconType
+    def setIconType( self, iconType ):
+        self._iconType=iconType
+
     def setupMarker(self):
         front, back, centre = self._headshape
         small = 0.001
@@ -233,30 +239,25 @@ class VectorArrowMarker(QgsMarkerSymbolLayerV2):
         self._ellipseAngle = eangle
         self._drawCurrentEllipse = drawEllipse
 
-    def legendIcon( self, size, iconType):
-        print("legendIcon called")
+    def drawPreviewIcon( self, context, size ):
         self.setupMarker()
-        px = QPixmap(size)
-        px.fill(Qt.transparent)
         y = size.height()/2
         msize = size.width()/5
-        if iconType == self.IconArrow:
+        if self._iconType == self.IconArrow:
             xb = msize
         else:
             xb = size.width()/2
 
         xa = size.width()-xb
-        p = QPainter()
-        p.begin(px)
-        p.setRenderHint(QPainter.Antialiasing)
+        p = context.renderContext().painter()
 
-        if iconType != self.IconArrow:
+        if self._iconType != self.IconArrow:
             p.setPen(QPen( self.ellipseBorderColor()))
-            if iconType == self.IconTickVertical:
+            if self._iconType == self.IconTickVertical:
                 p.drawLine(xb-msize,0,xb+msize,0)
                 p.drawLine(xb-msize,size.height(),xb+msize,size.height())
                 p.drawLine(xb,0,xb,size.height())
-            elif iconType == self.IconTickHorizontal:
+            elif self._iconType == self.IconTickHorizontal:
                 p.drawLine(0,y-msize,0,y+msize,0)
                 p.drawLine(size.width(),y-msize,size.width(),y+msize)
                 p.drawLine(0,y,size.width(),y)
@@ -266,7 +267,7 @@ class VectorArrowMarker(QgsMarkerSymbolLayerV2):
                 else:
                     p.setBrush(Qt.NoBrush)
                 height = size.width()/2.0
-                if iconType == self.IconEllipse:
+                if self._iconType == self.IconEllipse:
                     height *= 0.6
                 p.drawEllipse(QPointF(y,xb),size.width()/2.0,height)
 
@@ -278,7 +279,7 @@ class VectorArrowMarker(QgsMarkerSymbolLayerV2):
                 p.setBrush(Qt.NoBrush)
             p.drawEllipse(QPointF(xb,y),msize,msize)
 
-        if iconType == self.IconArrow:
+        if self._iconType == self.IconArrow:
             p.setPen(QPen(self.color()))
             p.setBrush(QBrush(self.color()))
             if self.relativeHeadSize() > 0 or self.maxHeadSize() > 0:
@@ -289,9 +290,6 @@ class VectorArrowMarker(QgsMarkerSymbolLayerV2):
             p.setPen(QPen(self.color(),1))
             p.drawLine(xb,y,xa,y)
         p.end()
-        self._icon=px
-        print("Icon built")
-        return px
 
     def calcHeadSize( self, length, pixelFactor ):
         headsize = 0.0

@@ -65,8 +65,6 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
         self._scale = 1.0
         self._fieldname=[""]*self.NFields
         self._useMapUnit = False
-        self._xfieldno = -1
-        self._yfieldno = -1
         self._legendText = ''
         self._showInScaleBox = True
         self._scaleBoxText = ''
@@ -76,17 +74,20 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
         self._ellipseAngleFromNorth = True
         self._ellipseDegrees = True
         self._ellipseScale = 1.0
-        self._legendIcon = None
+        self._vectorIsTrueNorth = True
+        self._useMapNorth = True
+        self._layerId = None
 
         # Field used in processing ..
 
-        self._fieldno=[-1]*self.NFields
+        self._fieldexp=[None]*self.NFields
         self._usedfield = [False]*self.NFields
         self._isvalid = True
 
         # Fields used to generate statistics for autoscaling
 
         self._nFeatures = 0
+        self._nErrors = 0
         self._maxLength = 0.0
         self._sumLength = 0.0
         self._sumLength2 = 0.0
@@ -94,6 +95,10 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
         self._pixelScaleFactor = 1.0
         self._vectorUnitsPerPixel = 1.0
         self._mapUnitsPerPixel = 1.0
+        self._mapRotation = 0.0
+        self._coordToVectorCRS=None
+        self._vectorToMapCRS=None
+        self._northVectorLength=0.01
 
         # Preferred code, but currently existing symbol layers not 
         # defined in SIP..  However I do get a simple marker by
@@ -119,11 +124,13 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
         return self._mode
     def setMode(self,mode):
         self._mode = mode
+        self.setUsedFields()
 
     def ellipseMode(self):
         return self._ellipseMode
     def setEllipseMode(self,mode):
         self._ellipseMode = mode
+        self.setUsedFields()
 
     def degrees(self):
         return self._degrees
@@ -162,6 +169,16 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
     def setUseMapUnit(self,usemapunit):
         self._useMapUnit = usemapunit
         self.setGroupScale()
+
+    def vectorIsTrueNorth(self):
+        return self._vectorIsTrueNorth
+    def setVectorIsTrueNorth(self,vectoristruenorth):
+        self._vectorIsTrueNorth = vectoristruenorth
+
+    def useMapNorth(self):
+        return self._useMapNorth
+    def setUseMapNorth(self,usemapnorth):
+        self._useMapNorth = usemapnorth
 
     def xFieldName(self):
         return self._fieldname[self.XField]
@@ -257,6 +274,9 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
                newScale = True
         return newScale
 
+    def setLayer( self, layer ):
+        self._layerId=layer.id()
+
     def clone(self):
         clone = VectorFieldRenderer()
         clone.setDegrees(self.degrees())
@@ -268,6 +288,8 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
         clone.setEllipseAngleFromNorth(self.ellipseAngleFromNorth())
         clone.setEllipseScale(self.ellipseScale())
         clone.setUseMapUnit(self.useMapUnit())
+        clone.setUseMapNorth(self.useMapNorth())
+        clone.setVectorIsTrueNorth(self.vectorIsTrueNorth())
         clone.setXFieldName(self.xFieldName())
         clone.setYFieldName(self.yFieldName())
         clone.setCxxFieldName(self.cxxFieldName())
@@ -280,6 +302,7 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
         clone.setScaleBoxText(self.scaleBoxText())
         clone.setShowInScaleBox(self.showInScaleBox())
         clone._symbol = self._symbol.clone()
+        clone._layerId = self._layerId
         return clone
 
     def setUsedFields( self ):
@@ -291,7 +314,12 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
 
     def usedAttributes(self):
         self.setUsedFields()
-        return [self._fieldname[i] for i in range(self.NFields) if self._usedfield[i]]
+        fields=set()
+        for fieldexp in [self._fieldname[i] for i in range(self.NFields) if self._usedfield[i]]:
+            exp=QgsExpression(fieldexp)
+            if not exp.hasParserError():
+                fields.update(exp.referencedColumns())
+        return list(fields)
 
     def symbols(self):
         return [self._symbol]
@@ -308,6 +336,8 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
         re.setAttribute("ellipseScale",str(self._ellipseScale))
         re.setAttribute("ellipseMode",str(self._ellipseMode))
         re.setAttribute("usemapunit",str(self._useMapUnit))
+        re.setAttribute("vectoristruenorth",str(self._vectorIsTrueNorth))
+        re.setAttribute("usemapnorth",str(self._useMapNorth))
         re.setAttribute("xfieldname",self._fieldname[self.XField])
         re.setAttribute("yfieldname",self._fieldname[self.YField])
         re.setAttribute("cxxfieldname",self._fieldname[self.CxxField])
@@ -321,6 +351,7 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
         re.setAttribute("outputunit", "MapUnit" 
             if self._symbol.outputUnit() == QgsSymbolV2.MapUnit 
             else "MM" )
+        re.setAttribute("layerid",self._layerId)
 
         self.arrow().saveToXmlElement(re)
 
@@ -347,8 +378,8 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
            self.setEllipseMode( int(element.attribute("ellipseMode","0")) )
            self.setEllipseScale( float( element.attribute("ellipseScale","1.0")))
            self.setUseMapUnit( element.attribute("usemapunit") == "True" )
-           self.setXFieldName( element.attribute("xfieldname"))
-           self.setYFieldName( element.attribute("yfieldname"))
+           self.setXFieldName( element.attribute("xfieldname",""))
+           self.setYFieldName( element.attribute("yfieldname",""))
            self.setCxxFieldName( element.attribute("cxxfieldname",""))
            self.setCxyFieldName( element.attribute("cxyfieldname",""))
            self.setCyyFieldName( element.attribute("cyyfieldname",""))
@@ -366,36 +397,93 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
            self.setLegendText(element.attribute("legendtext"))
            self.setScaleBoxText(element.attribute("scaleboxtext"))
            self.setShowInScaleBox( element.attribute("showonscalebox") == "True" )
+           self.setVectorIsTrueNorth( element.attribute("vectoristruenorth") == "True" )
+           self.setUseMapNorth( element.attribute("usemapnorth") == "True" )
+           self._layerId=element.attribute("layerid","")
         except:
-           raise
            pass
 
     # startRender - looks up the field numbers in the layer for the
     # fields used to generate the arrow
+    #
+    # How will we determine the layer, which we need to get the layer CRS?
 
-    def startRender(self, context, layer):
+    def startRender(self, context, fields):
         self.getGroupScale()
         self._isvalid = True
 
-        self.setLayerFields( layer )
+        self.setUsedFields()
+        self.setLayerFields( fields )
         self._pixelScaleFactor,self._vectorscale,self._mapUnitsPerPixel,self._vectorUnitsPerPixel = self.scaleFactors(context)
+        self._mapRotation=0.0
+        self._coordToVectorCRS=None
+        self._vectorToMapCRS=None
+        self._northVectorLength=0.01
+        self._nErrors=0
+
+        # Test if we are converting vectors to map north
+        if (self._useMapNorth and 
+            (self._mode in [self.Cartesian,self.Polar] or 
+            self._ellipseMode in [self.CovarianceEllipse,self.AxesEllipse])):
+            try:
+                layercrs=None
+                vectorcrs=None
+                mapcrs=None
+                if context.coordinateTransform() is None:
+                    if self._layerId is not None:
+                        try:
+                            layer=QgsMapLayerRegistry.instance().mapLayer(self._layerId)
+                            layercrs=layer.crs()
+                            mapcrs=layercrs
+                        except:
+                            pass  # Give up - can't find crs!
+                else:
+                    layercrs=context.coordinateTransform().sourceCrs()
+                    mapcrs=context.coordinateTransform().destCRS()
+
+                vectorcrs=layercrs
+
+                if layercrs is not None and self._vectorIsTrueNorth and not layercrs.geographicFlag():
+                    vectorcrs=QgsCoordinateReferenceSystem(layercrs.geographicCRSAuthId())
+
+                if layercrs is not None and vectorcrs != mapcrs:
+                    if vectorcrs != layercrs:
+                        self._coordToVectorCRS=QgsCoordinateTransform(layercrs,vectorcrs)
+                    self._vectorToMapCRS=QgsCoordinateTransform(vectorcrs,mapcrs)
+                    # Use approx 1km vector to estimate local convergence..
+                    self._northVectorLength=0.01 if vectorcrs.geographicFlag() else 1000.0
+            except Exception as ex:
+                self._lastError=ex.message
+                self._nErrors += 1
+                self._coordToVectorCRS=None
+                self._vectorToMapCRS=None
+
+            if self._useMapNorth and hasattr(context.mapToPixel(),'mapRotation'):
+                self._mapRotation=-math.radians(context.mapToPixel().mapRotation())
+                pass
+
         self._symbol.startRender(context)
 
-    def setLayerFields( self, layer ):
-        self._fieldno=[-1]*self.NFields
+    def setLayerFields( self, fields ):
+        self._fieldexp=[None]*self.NFields
         try:
-          if layer: 
+          if fields: 
               for i in range(self.NFields):
-                  if self._usedfield[i]:
-                      self._fieldno[i]=layer.fieldNameIndex(self._fieldname[i])
-                      if self._fieldno[i] == -1:
-                          self._isvalid=False
-        except:
+                   if self._usedfield[i]:
+                       exp=QgsExpression(self._fieldname[i])
+                       exp.prepare(fields)
+                       if not  exp.hasParserError():
+                           self._fieldexp[i]=exp
+                       else:
+                           self._isvalid=False
+        except Exception as ex:
             self._isvalid = False 
 
 
     def stopRender(self,context):
         self._symbol.stopRender(context)
+        self._coordToVectorCRS=None
+        self._vectorToMapCRS=None
 
     # Calculate symbol output scale factor, as needed for plotting 
     # scale bar.  Copied from code in qgssymbollayerv2utils.cpp. 
@@ -453,11 +541,15 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
         eangle= 0.0
         value=[0.0]*self.NFields
         drawEllipse = self._ellipseMode != self.NoEllipse
+        applyConvergence = not scaling and self._vectorToMapCRS is not None
         if self._isvalid:
           try:
              for i in range(self.NFields):
                  if self._usedfield[i]:
-                    value[i] = float(feature[self._fieldno[i]])
+                     exp=self._fieldexp[i]
+                     value[i]=exp.evaluate(feature)
+                     if exp.hasEvalError():
+                         raise RuntimeError(exp.evalErrorString())
              if self._mode == self.Cartesian:
                   x=value[self.XField]
                   y=value[self.YField]
@@ -508,12 +600,41 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
                  emax = abs(value[self.ERadiusField]*self._ellipseScale)
                  emin = emax
 
-          except:
+          except Exception as ex:
+             self._nErrors += 1
+             self._lastError = ex.message
              r = 0.0
              a = 0.0
              emax = 0.0
              emin = 0.0
              eangle= 0.0
+             applyConvergence=False # To avoid calculating rotation
+
+        rotation=self._mapRotation
+
+        error=False
+        if applyConvergence:
+            try:
+                fpoint=feature.geometry().asPoint()
+                if self._coordToVectorCRS is not None:
+                    fpoint=self._coordToVectorCRS.transform(fpoint)
+                    
+                fpoint2=QgsPoint(fpoint.x(),fpoint.y()+self._northVectorLength)
+                fpoint=self._vectorToMapCRS.transform(fpoint)
+                fpoint2=self._vectorToMapCRS.transform(fpoint2)
+                azimuth=math.radians(fpoint.azimuth(fpoint2))
+                rotation -= azimuth
+            except Exception as ex:
+                error=True
+                self._lastError = ex.message
+                self._nErrors += 1
+
+
+        if self._mode != self.Height:
+            a += rotation
+
+        if self._ellipseMode != self.HeightEllipse:
+            eangle += rotation
 
         if scaling:
             vlen = r + emax
@@ -535,7 +656,7 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
         layerExtent=renderer.outputExtentToLayerExtent(layer,mapextent)
 
         attributes=self.usedAttributes()
-        self.setLayerFields( layer )
+        self.setLayerFields( layer.pendingFields() )
         if not self._isvalid:
             return False
 
@@ -545,6 +666,7 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
         # request.setSubsetOfAttributes(attributes)
 
         self._nFeatures = 0
+        self._nErrors = 0
         self._maxLength = 0.0
         self._sumLength = 0.0
         self._sumLength2 = 0.0
@@ -619,9 +741,7 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
         pixelFactor = pixelScaleFactor/context.rasterScaleFactor()
         arrow.renderArrow(point,context.painter(),pixelFactor)
 
-    def legendSymbologyItems( self, size ):
-        # legendSymbologyItems seems to not be used now
-        print("legendSymbologyItems called")
+    def legendSymbolItemsV2( self ):
         iconType = VectorArrowMarker.IconArrow
         if self._mode == self.NoArrow:
             if self._ellipseMode == self.CircularEllipse:
@@ -630,14 +750,11 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
                 iconType = VectorArrowMarker.IconTickVertical
             else:
                 iconType = VectorArrowMarker.IconEllipse
-        self._legendIcon = self.arrow().legendIcon(size,iconType)
-        return [[self._legendText,self._legendIcon]]
-
-    def legendSymbolItemsV2( self ):
-        print("legendSymbolItems called")
+        self.arrow().setIconType(iconType)
         return [QgsLegendSymbolItemV2(self._symbol,self._legendText,'',False)]
 
     def applyToLayer( self, layer ):
+        self._layerId=layer.id()
         layer.setRendererV2(self)
         if self.controller is not None:
             self.controller.saveLayerRenderer( layer, self )

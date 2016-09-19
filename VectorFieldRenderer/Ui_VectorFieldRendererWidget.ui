@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>778</width>
-    <height>510</height>
+    <height>570</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,7 +19,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0,0,0,0">
+  <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0,0,0,0,0">
    <item>
     <widget class="QLabel" name="uCrashWarning">
      <property name="palette">
@@ -66,7 +66,7 @@
       </font>
      </property>
      <property name="text">
-      <string>Warning: Do not select another type of renderer above: QGIS will crash!</string>
+      <string>Warning: Do not replace Vector Field Renderer with another type above: QGIS will crash!</string>
      </property>
     </widget>
    </item>
@@ -130,14 +130,11 @@
         </widget>
        </item>
        <item>
-        <layout class="QGridLayout" name="uVectorFieldGrid" columnstretch="0,1">
+        <layout class="QGridLayout" name="uVectorFieldGrid" columnstretch="0,0">
          <item row="0" column="0">
           <widget class="QLabel" name="uXFieldLabel">
            <property name="text">
             <string>X attribute</string>
-           </property>
-           <property name="buddy">
-            <cstring>uXField</cstring>
            </property>
           </widget>
          </item>
@@ -146,22 +143,19 @@
            <property name="text">
             <string>Y attribute</string>
            </property>
-           <property name="buddy">
-            <cstring>uYField</cstring>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QgsFieldExpressionWidget" name="uXField">
+           <property name="filters">
+            <set>QgsFieldProxyModel::Numeric</set>
            </property>
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="QComboBox" name="uYField">
-           <property name="toolTip">
-            <string>Select the y/angle field</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QComboBox" name="uXField">
-           <property name="toolTip">
-            <string>Select the X/length field</string>
+          <widget class="QgsFieldExpressionWidget" name="uYField">
+           <property name="filters">
+            <set>QgsFieldProxyModel::Numeric</set>
            </property>
           </widget>
          </item>
@@ -333,6 +327,9 @@
               <property name="text">
                <string>Head border width</string>
               </property>
+              <property name="buddy">
+               <cstring>uHeadWidth</cstring>
+              </property>
              </widget>
             </item>
             <item>
@@ -410,6 +407,9 @@
               <property name="text">
                <string>Head fill?</string>
               </property>
+              <property name="buddy">
+               <cstring>uFillHead</cstring>
+              </property>
              </widget>
             </item>
             <item>
@@ -451,6 +451,9 @@
               <property name="text">
                <string>Arrow shape (relative x coords): front</string>
               </property>
+              <property name="buddy">
+               <cstring>uArrowHeadShapeFront</cstring>
+              </property>
              </widget>
             </item>
             <item>
@@ -474,6 +477,9 @@
               <property name="text">
                <string>back outside</string>
               </property>
+              <property name="buddy">
+               <cstring>uArrowHeadShapeBack</cstring>
+              </property>
              </widget>
             </item>
             <item>
@@ -496,6 +502,9 @@
              <widget class="QLabel" name="uArrowHeadShapeCentreLabel">
               <property name="text">
                <string>back centre</string>
+              </property>
+              <property name="buddy">
+               <cstring>uArrowHeadShapeCentre</cstring>
               </property>
              </widget>
             </item>
@@ -606,25 +615,12 @@
            <property name="text">
             <string>Cxx attribute</string>
            </property>
-           <property name="buddy">
-            <cstring>uCxxField</cstring>
-           </property>
           </widget>
          </item>
          <item row="1" column="0">
           <widget class="QLabel" name="uCxyFieldLabel">
            <property name="text">
             <string>Cxy attribute</string>
-           </property>
-           <property name="buddy">
-            <cstring>uCxyField</cstring>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="2">
-          <widget class="QComboBox" name="uCxyField">
-           <property name="toolTip">
-            <string>Select the y/angle field</string>
            </property>
           </widget>
          </item>
@@ -658,27 +654,31 @@
            </item>
           </layout>
          </item>
-         <item row="0" column="2">
-          <widget class="QComboBox" name="uCxxField">
-           <property name="toolTip">
-            <string>Select the X/length field</string>
-           </property>
-          </widget>
-         </item>
          <item row="2" column="0">
           <widget class="QLabel" name="uCyyFieldLabel">
            <property name="text">
             <string>Cyy attribute</string>
            </property>
-           <property name="buddy">
-            <cstring>uCyyField</cstring>
+          </widget>
+         </item>
+         <item row="0" column="2">
+          <widget class="QgsFieldExpressionWidget" name="uCxxField">
+           <property name="filters">
+            <set>QgsFieldProxyModel::Numeric</set>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2">
+          <widget class="QgsFieldExpressionWidget" name="uCxyField">
+           <property name="filters">
+            <set>QgsFieldProxyModel::Numeric</set>
            </property>
           </widget>
          </item>
          <item row="2" column="2">
-          <widget class="QComboBox" name="uCyyField">
-           <property name="toolTip">
-            <string>Select the y/angle field</string>
+          <widget class="QgsFieldExpressionWidget" name="uCyyField">
+           <property name="filters">
+            <set>QgsFieldProxyModel::Numeric</set>
            </property>
           </widget>
          </item>
@@ -1018,7 +1018,7 @@
         <string>Fill?</string>
        </property>
        <property name="buddy">
-        <cstring>uBaseColor</cstring>
+        <cstring>uFillBase</cstring>
        </property>
       </widget>
      </item>
@@ -1055,9 +1055,84 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_4">
+    <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="0,0,0,0,0">
      <property name="topMargin">
       <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>Align vector with map north</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+       <property name="buddy">
+        <cstring>uAlignToMapNorth</cstring>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="uAlignToMapNorth">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If selected the vector is drawn in terms of true north on the map, otherwise a north vector is drawn upwards on the map regardless of the map projection or map canvas rotation.  &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_2">
+       <property name="toolTip">
+        <string/>
+       </property>
+       <property name="text">
+        <string>Vector defined relative to true north</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+       <property name="buddy">
+        <cstring>uVectorIsTrueNorth</cstring>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="uVectorIsTrueNorth">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If selected the vector is defined in terms of geographic north (true north) even if the layer coordinate reference system is a projection. Otherwise the vector is defined in terms of projection north for layer coordinate systems. Has no effect for geographic layer coordinate systems or for height only vectors.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_3">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <property name="topMargin">
+      <number>9</number>
+     </property>
+     <property name="rightMargin">
+      <number>9</number>
      </property>
      <item>
       <widget class="QLabel" name="uArrowScaleLabel">
@@ -1165,15 +1240,63 @@
    <extends>QPushButton</extends>
    <header>qgscolorbutton.h</header>
   </customwidget>
+  <customwidget>
+   <class>QgsFieldExpressionWidget</class>
+   <extends>QWidget</extends>
+   <header>qgsfieldexpressionwidget.h</header>
+  </customwidget>
  </customwidgets>
  <tabstops>
+  <tabstop>uTabManager</tabstop>
   <tabstop>uFieldTypeCartesian</tabstop>
   <tabstop>uFieldTypePolar</tabstop>
+  <tabstop>uFieldTypeHeight</tabstop>
+  <tabstop>uFieldTypeNone</tabstop>
   <tabstop>uAngleOrientationEast</tabstop>
   <tabstop>uAngleOrientationNorth</tabstop>
   <tabstop>uAngleUnitsDegrees</tabstop>
   <tabstop>uAngleUnitsRadians</tabstop>
+  <tabstop>uArrowHeadSize</tabstop>
   <tabstop>uArrowHeadMaxSize</tabstop>
+  <tabstop>uHeadWidth</tabstop>
+  <tabstop>uArrowWidth</tabstop>
+  <tabstop>uArrowColor</tabstop>
+  <tabstop>uFillHead</tabstop>
+  <tabstop>uArrowHeadColor</tabstop>
+  <tabstop>uArrowHeadShapeFront</tabstop>
+  <tabstop>uArrowHeadShapeBack</tabstop>
+  <tabstop>uArrowHeadShapeCentre</tabstop>
+  <tabstop>uEllipseTypeCovariance</tabstop>
+  <tabstop>uEllipseTypeAxes</tabstop>
+  <tabstop>uEllipseTypeCircular</tabstop>
+  <tabstop>uEllipseTypeHeight</tabstop>
+  <tabstop>uEllipseTypeNone</tabstop>
+  <tabstop>uEllipseScale</tabstop>
+  <tabstop>uEllipseOrientationEast</tabstop>
+  <tabstop>uEllipseOrientationNorth</tabstop>
+  <tabstop>uEllipseAngleUnitsDegrees</tabstop>
+  <tabstop>uEllipseAngleUnitsRadians</tabstop>
+  <tabstop>uEllipseBorderWidth</tabstop>
+  <tabstop>uEllipseTickSize</tabstop>
+  <tabstop>uDrawEllipse</tabstop>
+  <tabstop>uDrawEllipseAxes</tabstop>
+  <tabstop>uEllipseBorderColor</tabstop>
+  <tabstop>uFillEllipse</tabstop>
+  <tabstop>uEllipseFillColor</tabstop>
+  <tabstop>uOutputUnits</tabstop>
+  <tabstop>uArrowBaseSize</tabstop>
+  <tabstop>uBaseBorderColor</tabstop>
+  <tabstop>uFillBase</tabstop>
+  <tabstop>uBaseColor</tabstop>
+  <tabstop>uAlignToMapNorth</tabstop>
+  <tabstop>uVectorIsTrueNorth</tabstop>
+  <tabstop>uArrowScale</tabstop>
+  <tabstop>uScaleUnits</tabstop>
+  <tabstop>uScaleGroup</tabstop>
+  <tabstop>uLegendText</tabstop>
+  <tabstop>uScaleBoxText</tabstop>
+  <tabstop>uShowInScaleBox</tabstop>
+  <tabstop>uHelpButton</tabstop>
  </tabstops>
  <resources/>
  <connections/>
