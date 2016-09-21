@@ -547,7 +547,10 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
              for i in range(self.NFields):
                  if self._usedfield[i]:
                      exp=self._fieldexp[i]
-                     value[i]=exp.evaluate(feature)
+                     v=exp.evaluate(feature)
+                     if v is None:
+                         v=0.0
+                     value[i]=float(v)
                      if exp.hasEvalError():
                          raise RuntimeError(exp.evalErrorString())
              if self._mode == self.Cartesian:
