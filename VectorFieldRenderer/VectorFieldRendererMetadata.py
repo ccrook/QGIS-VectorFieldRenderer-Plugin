@@ -1,7 +1,7 @@
 # Set up the metadata required to implement a vector field renderer
 
 from qgis.core import QgsRendererV2AbstractMetadata
-from PyQt4.QtGui import *
+from PyQt5.QtGui import *
 
 from .VectorFieldRenderer import VectorFieldRenderer
 from .VectorFieldRendererWidget import VectorFieldRendererWidget

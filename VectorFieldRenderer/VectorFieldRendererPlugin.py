@@ -1,6 +1,6 @@
 
 
-from PyQt4.QtGui import *
+from PyQt5.QtGui import *
 from qgis.core import QgsRendererV2Registry, QgsSymbolLayerV2Registry
 
 from .VectorFieldRendererMetadata import VectorFieldRendererMetadata

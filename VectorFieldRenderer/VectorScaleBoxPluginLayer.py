@@ -1,6 +1,6 @@
 
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
 
 from qgis.core import *
 
@@ -52,7 +52,7 @@ class VectorScaleBoxPluginLayer(QgsPluginLayer):
   
     def showDialog(self):
         if self._scalebox:
-            from VectorScaleBoxOptionsDialog import VectorScaleBoxOptionsDialog
+            from .VectorScaleBoxOptionsDialog import VectorScaleBoxOptionsDialog
             if VectorScaleBoxOptionsDialog.getOptions( self._scalebox ):
                 self.repaintScaleBox()
     

@@ -1,7 +1,8 @@
 import sys
+from PyQt5.QtWidgets import *
 
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
 
 from qgis.core import *
 from qgis.gui import *
@@ -14,7 +15,7 @@ from .VectorFieldRenderer import VectorFieldRenderer
 class ColorButton:
    def __init__(self,button):
       self._button = button
-      QObject.connect(button,SIGNAL("clicked()"),self.clicked)
+      button.clicked.connect(self.clicked)
 
    def color(self):
       return self._button.color()
@@ -30,7 +31,7 @@ class FontButton:
    def __init__(self,button):
       self._button = button
       self._font = QFont("Arial",12)
-      QObject.connect(button,SIGNAL("clicked()"),self.clicked)
+      button.clicked.connect(self.clicked)
 
    def font(self):
       return self._font

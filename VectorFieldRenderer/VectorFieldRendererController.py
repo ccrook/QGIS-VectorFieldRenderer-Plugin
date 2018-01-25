@@ -1,12 +1,13 @@
 
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
 
 from qgis.core import *
 from qgis.gui import *
 
 from .VectorFieldRenderer import VectorFieldRenderer
-from .VectorScaleBox import VectorScaleBox 
+from .VectorScaleBox import VectorScaleBox
 from .VectorScaleBoxPluginLayer import VectorScaleBoxPluginLayer
 from .VectorScaleBoxOptionsDialog import VectorScaleBoxOptionsDialog
 from .VectorFieldRendererLayerDialog import VectorFieldRendererLayerDialog
@@ -37,37 +38,37 @@ class VectorFieldRendererController:
                   "Autosize arrows", iface.mainWindow())
         action1.setWhatsThis("Resize the arrows to a suggested scale for the current view")
         action1.setStatusTip("Resize the arrows to a suggested scale for the current view")
-        QObject.connect(action1,SIGNAL("triggered()"), self.autoRescale )
+        action1.triggered.connect(self.autoRescale)
 
         action2 = QAction(QIcon(":/plugins/VectorFieldRenderer/EnlargeRendererIcon.png"),
                   "Enlarge arrows", iface.mainWindow())
         action2.setWhatsThis("Increase the arrow size")
         action2.setStatusTip("Increase the arrow size")
-        QObject.connect(action2,SIGNAL("triggered()"), self.enlarge )
+        action2.triggered.connect(self.enlarge)
 
         action3 = QAction(QIcon(":/plugins/VectorFieldRenderer/ShrinkRendererIcon.png"),
                   "Shrink arrows", iface.mainWindow())
         action3.setWhatsThis("Decrease the arrow size")
         action3.setStatusTip("Decrease the arrow size")
-        QObject.connect(action3,SIGNAL("triggered()"), self.shrink )
+        action3.triggered.connect(self.shrink)
 
         action4 = QAction(QIcon(":/plugins/VectorFieldRenderer/VectorScaleBoxOptionsIcon.png"),
                   "Display the vector scale box", iface.mainWindow())
         action4.setWhatsThis("Display the vector scale box")
         action4.setStatusTip("Display the vector scale box")
-        QObject.connect(action4,SIGNAL("triggered()"), self.setScaleBoxOptions )
+        action4.triggered.connect(self.setScaleBoxOptions)
 
         action5 = QAction(QIcon(":plugins/VectorFieldRenderer/VectorFieldRendererIcon.png"),
                   "Apply vector renderer to current layer", iface.mainWindow())
         action5.setWhatsThis("Apply vector renderer to current layer")
         action5.setStatusTip("Apply vector renderer to current layer")
-        QObject.connect(action5,SIGNAL("triggered()"), self.showLayerDialog )
+        action5.triggered.connect(self.showLayerDialog)
 
         action6 = QAction(QIcon(":plugins/VectorFieldRenderer/RendererHelpIcon.png"),
                   "Vector field renderer help", iface.mainWindow())
         action6.setWhatsThis("Show vector field renderer help")
         action6.setStatusTip("Show vector field renderer help")
-        QObject.connect(action6,SIGNAL("triggered()"), self.showHelp )
+        action6.triggered.connect(self.showHelp)
 
         toolbar.addAction(action1)
         toolbar.addAction(action2)
@@ -88,20 +89,16 @@ class VectorFieldRendererController:
         # changing symobology), or the active layer has changed
 
         self.enableActions(False)
-        QObject.connect(iface,SIGNAL("currentLayerChanged(QgsMapLayer*)"),
-            self.activeLayerChanged)
-        QObject.connect( iface.mainWindow(), SIGNAL( "projectRead()" ), self.loadProject)
-        QObject.connect(iface.mapCanvas(),SIGNAL("renderComplete(QPainter*)"),
-            self.renderComplete)
-        QObject.connect( iface.mapCanvas(),SIGNAL("renderStarting()"),self.renderStarting )
+        iface.currentLayerChanged[QgsMapLayer].connect(self.activeLayerChanged)
+        iface.mainWindow().projectRead.connect(self.loadProject)
+        iface.mapCanvas().renderComplete[QPainter].connect(self.renderComplete)
+        iface.mapCanvas().renderStarting.connect(self.renderStarting)
 
     def unload( self ):
-        QObject.disconnect(self._iface,SIGNAL("currentLayerChanged(QgsMapLayer*)"),
-            self.activeLayerChanged)
-        QObject.disconnect( self._iface.mainWindow(), SIGNAL( "projectRead()" ), self.loadProject)
-        QObject.disconnect(self._iface.mapCanvas(),SIGNAL("renderComplete(QPainter*)"),
-            self.renderComplete)
-        QObject.disconnect( self._iface.mapCanvas(),SIGNAL("renderStarting()"),self.renderStarting )
+        self._iface.currentLayerChanged[QgsMapLayer].disconnect(self.activeLayerChanged)
+        self._iface.mainWindow().projectRead.disconnect(self.loadProject)
+        self._iface.mapCanvas().renderComplete[QPainter].disconnect(self.renderComplete)
+        self._iface.mapCanvas().renderStarting.disconnect(self.renderStarting)
         self._iface.mainWindow().removeToolBar(self._toolbar)
         QgsPluginLayerRegistry.instance().removePluginLayerType(VectorScaleBoxPluginLayer.LayerType)
 
@@ -182,7 +179,7 @@ class VectorFieldRendererController:
                 yield l,r
 
     def vectorScaleBoxLayers( self ):
-        for l in QgsMapLayerRegistry.instance().mapLayers().values():
+        for l in list(QgsMapLayerRegistry.instance().mapLayers().values()):
             if l.type() == QgsMapLayer.PluginLayer:
                 if type(l) == VectorScaleBoxPluginLayer:
                     yield l
