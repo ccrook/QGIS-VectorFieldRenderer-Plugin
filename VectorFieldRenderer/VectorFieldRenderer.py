@@ -14,7 +14,7 @@ from PyQt5.QtGui import *
 
 from .VectorArrowMarker import VectorArrowMarker
 
-class VectorFieldRenderer(QgsFeatureRendererV2):
+class VectorFieldRenderer(QgsFeatureRenderer):
     scaleGroups={}
 
     controller=None
@@ -55,7 +55,7 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
     EHeightField=2
 
     def __init__(self):
-        QgsFeatureRendererV2.__init__(self,VectorFieldRenderer.rendererName)
+        QgsFeatureRenderer.__init__(self,VectorFieldRenderer.rendererName)
 
         # Attributes of the renderer 
 
@@ -102,19 +102,19 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
 
         # Preferred code, but currently existing symbol layers not 
         # defined in SIP..  However I do get a simple marker by
-        # default in the QgsMarkSymbolV2 default constructor.. though
+        # default in the QgsMarkSymbol default constructor.. though
         # I can't access its borderColor..
         # Could make this part of the arrow as an alternative...
 
         # black = QColor(0,0,0)
-        # base = QgsSimpleMarkerSymbolLayerV2( "circle", black, black, 5.0, 0.0 )
-        #        QgsSimpleMarkerSymbolLayerV2
+        # base = QgsSimpleMarkerSymbolLayer( "circle", black, black, 5.0, 0.0 )
+        #        QgsSimpleMarkerSymbolLayer
         # arrow = VectorArrowMarker()
-        # symbol = QgsMarkerSymbolV2( base, arrow )
+        # symbol = QgsMarkerSymbol( base, arrow )
 
         arrow = VectorArrowMarker()
-        symbol = QgsMarkerSymbolV2()
-        symbol.setOutputUnit(QgsSymbolV2.MM)
+        symbol = QgsMarkerSymbol()
+        symbol.setOutputUnit(QgsSymbol.MM)
         self._symbol = symbol
         self.setupArrowMarker(None)
 
@@ -349,7 +349,7 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
         re.setAttribute("scaleboxtext",self._scaleBoxText)
         re.setAttribute("showonscalebox",str(self._showInScaleBox))
         re.setAttribute("outputunit", "MapUnit" 
-            if self._symbol.outputUnit() == QgsSymbolV2.MapUnit 
+            if self._symbol.outputUnit() == QgsSymbol.MapUnit 
             else "MM" )
         re.setAttribute("layerid",self._layerId)
 
@@ -384,9 +384,9 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
            self.setCxyFieldName( element.attribute("cxyfieldname",""))
            self.setCyyFieldName( element.attribute("cyyfieldname",""))
 
-           self._symbol.setOutputUnit( QgsSymbolV2.MapUnit
+           self._symbol.setOutputUnit( QgsSymbol.MapUnit
                 if element.attribute("outputunit") == "MapUnit" 
-                else QgsSymbolV2.MM )
+                else QgsSymbol.MM )
 
            self.arrow().readFromXmlElement(element)
 
@@ -432,7 +432,7 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
                 if context.coordinateTransform() is None:
                     if self._layerId is not None:
                         try:
-                            layer=QgsMapLayerRegistry.instance().mapLayer(self._layerId)
+                            layer=QgsProject.instance().mapLayer(self._layerId)
                             layercrs=layer.crs()
                             mapcrs=layercrs
                         except:
@@ -489,7 +489,7 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
     # scale bar.  Copied from code in qgssymbollayerv2utils.cpp. 
 
     def pixelSizeScaleFactor(self,context,outputUnit):
-        if outputUnit == QgsSymbolV2.MM:
+        if outputUnit == QgsSymbol.MM:
             return context.scaleFactor()*context.rasterScaleFactor()
         mup = context.mapToPixel().mapUnitsPerPixel()
         if mup > 0:
@@ -508,8 +508,8 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
         vectorUnitsPerPixel = 1.0/pixelScaleFactor
         mapUnitsPerPixel = context.mapToPixel().mapUnitsPerPixel()
 
-        if self.useMapUnit() and self.outputUnit() != QgsSymbolV2.MapUnit:
-            vectorUnitsPerPixel = 1.0/self.pixelSizeScaleFactor(context,QgsSymbolV2.MapUnit)
+        if self.useMapUnit() and self.outputUnit() != QgsSymbol.MapUnit:
+            vectorUnitsPerPixel = 1.0/self.pixelSizeScaleFactor(context,QgsSymbol.MapUnit)
             vectorscale = self._scale/(vectorUnitsPerPixel*pixelScaleFactor)
 
         return pixelScaleFactor,vectorscale,mapUnitsPerPixel,vectorUnitsPerPixel,
@@ -659,7 +659,7 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
         layerExtent=renderer.outputExtentToLayerExtent(layer,mapextent)
 
         attributes=self.usedAttributes()
-        self.setLayerFields( layer.pendingFields() )
+        self.setLayerFields( layer.fields() )
         if not self._isvalid:
             return False
 
@@ -744,7 +744,7 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
         pixelFactor = pixelScaleFactor/context.rasterScaleFactor()
         arrow.renderArrow(point,context.painter(),pixelFactor)
 
-    def legendSymbolItemsV2( self ):
+    def legendSymbolItems( self ):
         iconType = VectorArrowMarker.IconArrow
         if self._mode == self.NoArrow:
             if self._ellipseMode == self.CircularEllipse:
@@ -754,11 +754,11 @@ class VectorFieldRenderer(QgsFeatureRendererV2):
             else:
                 iconType = VectorArrowMarker.IconEllipse
         self.arrow().setIconType(iconType)
-        return [QgsLegendSymbolItemV2(self._symbol,self._legendText,'',False)]
+        return [QgsLegendSymbolItem(self._symbol,self._legendText,'',False)]
 
     def applyToLayer( self, layer ):
         self._layerId=layer.id()
-        layer.setRendererV2(self)
+        layer.setRenderer(self)
         if self.controller is not None:
             self.controller.saveLayerRenderer( layer, self )
 

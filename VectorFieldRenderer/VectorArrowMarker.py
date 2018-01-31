@@ -14,7 +14,7 @@ from PyQt5.QtGui import *
 # Symbol layer class to draw an arrow of a specified size and orientation
 #
 
-class VectorArrowMarker(QgsMarkerSymbolLayerV2):
+class VectorArrowMarker(QgsMarkerSymbolLayer):
 
     symbolLayerName = "VectorArrowMarker"
     minEllipseRatio = 0.001
@@ -30,7 +30,7 @@ class VectorArrowMarker(QgsMarkerSymbolLayerV2):
     DrawEllipsePart=2
 
     def __init__(self):
-        QgsMarkerSymbolLayerV2.__init__(self)
+        QgsMarkerSymbolLayer.__init__(self)
         self.setWidth(0.7)
         self.setRelativeHeadSize(0.3)
         self.setHeadWidth(0.0)

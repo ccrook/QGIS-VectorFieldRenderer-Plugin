@@ -308,7 +308,7 @@ class VectorScaleBox:
             if VectorScaleBox.controller is not None:
                 v=VectorScaleBox.controller.findLayerRenderer(l)
             else:
-                v = l.rendererV2()
+                v = l.renderer()
             if (not v 
                 or v.type() != VectorFieldRenderer.rendererName 
                 or not v.showInScaleBox()):

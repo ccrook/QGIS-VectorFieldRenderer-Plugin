@@ -1,7 +1,7 @@
 
 
 from PyQt5.QtGui import *
-from qgis.core import QgsRendererV2Registry, QgsSymbolLayerV2Registry
+from qgis.core import QgsApplication
 
 from .VectorFieldRendererMetadata import VectorFieldRendererMetadata
 from .VectorFieldRenderer import VectorFieldRenderer
@@ -18,10 +18,10 @@ class Plugin:
         VectorFieldRenderer.plugin = self
 
     def initGui(self):
-        # QgsSymbolLayerV2Registry.instance().addSymbolLayerType( VectorArrowMarkerMetadata() )
+        # QgsApplication.instance().symbolLayerRegistry().addSymbolLayerType( VectorArrowMarkerMetadata() )
         self._controller = VectorFieldRendererController(self._iface)
         self._metadata=VectorFieldRendererMetadata(self._controller)
-        QgsRendererV2Registry.instance().addRenderer( self._metadata ) 
+        QgsApplication.instance().rendererRegistry().addRenderer( self._metadata ) 
 
     def unload(self):      
         self._controller.unload()

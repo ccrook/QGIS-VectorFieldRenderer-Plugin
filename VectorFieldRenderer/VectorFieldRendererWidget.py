@@ -19,28 +19,28 @@ class UnitButton( QObject ):
       QObject.__init__(self)
       self._button = button
       self._mmLabel = mmtext
-      self.setUnits(QgsSymbolV2.MM)
+      self.setUnits(QgsSymbol.MM)
       button.clicked.connect(self.clicked)
 
    def units(self):
       return self._units
 
    def setUnits(self,units):
-      if units == QgsSymbolV2.MM:
-         self._units = QgsSymbolV2.MM
+      if units == QgsSymbol.MM:
+         self._units = QgsSymbol.MM
          self._button.setText(self._mmLabel)
       else:
-         self._units = QgsSymbolV2.MapUnit
+         self._units = QgsSymbol.MapUnit
          self._button.setText("Map units")
 
    def isMapUnit( self ):
-       return self._units == QgsSymbolV2.MapUnit
+       return self._units == QgsSymbol.MapUnit
 
    def setIsMapUnit( self, isMapUnits ):
       if isMapUnits:
-          self.setUnits(QgsSymbolV2.MapUnit)
+          self.setUnits(QgsSymbol.MapUnit)
       else:
-          self.setUnits(QgsSymbolV2.MM)
+          self.setUnits(QgsSymbol.MM)
       self.valueChanged.emit()
 
    def clicked(self):
@@ -48,10 +48,10 @@ class UnitButton( QObject ):
 
 # Vector field renderer widget
 
-class VectorFieldRendererWidget(QgsRendererV2Widget,Ui_VectorFieldRendererWidget):
+class VectorFieldRendererWidget(QgsRendererWidget,Ui_VectorFieldRendererWidget):
 
     def __init__(self,layer,style,renderer,controller):
-        QgsRendererV2Widget.__init__(self, layer, style)
+        QgsRendererWidget.__init__(self, layer, style)
 
         self._controller=controller
 
@@ -69,7 +69,7 @@ class VectorFieldRendererWidget(QgsRendererV2Widget,Ui_VectorFieldRendererWidget
 
         self._layer=layer
         self.validLayer = True
-        if layer is None or layer.type() != QgsMapLayer.VectorLayer or layer.geometryType() != QGis.Point:
+        if layer is None or layer.type() != QgsMapLayer.VectorLayer or layer.geometryType() != QgsWkbTypes.PointGeometry:
            self.setupBlankUi(layer)
            self.validLayer = False
            return
@@ -94,6 +94,11 @@ class VectorFieldRendererWidget(QgsRendererV2Widget,Ui_VectorFieldRendererWidget
 
     def buildWidget(self):
         self.setupUi(self)
+        self.uXField.setFilters(QgsFieldProxyModel.Numeric)
+        self.uYField.setFilters(QgsFieldProxyModel.Numeric)
+        self.uCxxField.setFilters(QgsFieldProxyModel.Numeric)
+        self.uCxyField.setFilters(QgsFieldProxyModel.Numeric)
+        self.uCyyField.setFilters(QgsFieldProxyModel.Numeric)
         self.uArrowColor.setColorDialogTitle('Arrow colour')
         self.uArrowHeadColor.setColorDialogTitle('Arrow head fill colour')
         self.uBaseColor.setColorDialogTitle('Base symbol line colour')

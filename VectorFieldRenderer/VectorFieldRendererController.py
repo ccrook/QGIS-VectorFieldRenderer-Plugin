@@ -18,7 +18,7 @@ class VectorFieldRendererController:
 
     def __init__( self, iface ):
         self._iface = iface
-        # jferencik workaround for 'QgsFeatureRendererV2' object has no attribute error
+        # jferencik workaround for 'QgsFeatureRenderer' object has no attribute error
         # _vlayers...
         self._vlayers={}
         VectorFieldRenderer.controller=self
@@ -28,7 +28,7 @@ class VectorFieldRendererController:
         self._scaleBoxLayer=None
         self._pluginLayerType=VectorScaleBoxPluginLayer.Type()
 
-        QgsPluginLayerRegistry.instance().addPluginLayerType(self._pluginLayerType)
+        QgsApplication.instance().pluginLayerRegistry().addPluginLayerType(self._pluginLayerType)
         self._scaleBox = VectorScaleBox(iface)
 
         toolbar = iface.addToolBar(self.toolBarName)
@@ -100,7 +100,7 @@ class VectorFieldRendererController:
         self._iface.mapCanvas().renderComplete[QPainter].disconnect(self.renderComplete)
         self._iface.mapCanvas().renderStarting.disconnect(self.renderStarting)
         self._iface.mainWindow().removeToolBar(self._toolbar)
-        QgsPluginLayerRegistry.instance().removePluginLayerType(VectorScaleBoxPluginLayer.LayerType)
+        QgsApplication.instance().pluginLayerRegistry().removePluginLayerType(VectorScaleBoxPluginLayer.LayerType)
 
     def canBeUninstalled(self):
         vrlayers = []
@@ -120,7 +120,7 @@ class VectorFieldRendererController:
                 return False
 
             for lid in vrlayerids:
-                QgsMapLayerRegistry.instance().removeMapLayer(lid)
+                QgsProject.instance().removeMapLayer(lid)
 
         return True
 
@@ -152,7 +152,7 @@ class VectorFieldRendererController:
     def findLayerRenderer(self,layer):
         if not layer or layer.type() != QgsMapLayer.VectorLayer:
             return None
-        renderer = layer.rendererV2()
+        renderer = layer.renderer()
         if not renderer or renderer.type() != VectorFieldRenderer.rendererName:
             return None
         if not isinstance(renderer,VectorFieldRenderer):
@@ -167,7 +167,7 @@ class VectorFieldRendererController:
     # is not saved.  A WIP resolution
 
     def saveLayerRenderer(self,layer,renderer):
-        layerrenderer=layer.rendererV2()
+        layerrenderer=layer.renderer()
         if isinstance(layerrenderer,VectorFieldRenderer):
             renderer=layerrenderer
         self._vlayers[layer.id()]=renderer
@@ -179,7 +179,7 @@ class VectorFieldRendererController:
                 yield l,r
 
     def vectorScaleBoxLayers( self ):
-        for l in list(QgsMapLayerRegistry.instance().mapLayers().values()):
+        for l in list(QgsProject.instance().mapLayers().values()):
             if l.type() == QgsMapLayer.PluginLayer:
                 if type(l) == VectorScaleBoxPluginLayer:
                     yield l
@@ -199,7 +199,7 @@ class VectorFieldRendererController:
             l = VectorScaleBoxPluginLayer()
             l.setScaleBox( self._scaleBox )
             self._scaleBoxLayer=l
-            QgsMapLayerRegistry.instance().addMapLayer(l)
+            QgsProject.instance().addMapLayer(l)
 
     def renderStarting( self ):
         for l,r in self.vectorRendererLayers():
@@ -241,7 +241,7 @@ class VectorFieldRendererController:
 
     def showLayerDialog( self ):
         layer, renderer = self.findRenderer()
-        if layer is None or layer.type() != QgsMapLayer.VectorLayer or layer.geometryType() != QGis.Point:
+        if layer is None or layer.type() != QgsMapLayer.VectorLayer or layer.geometryType() != QgsWkbTypes.PointGeometry:
             self._iface.messageBar().pushMessage("Invalid layer",
                 "The vector field renderer only renders point layers",
                 level=QgsMessageBar.WARNING, duration=5)

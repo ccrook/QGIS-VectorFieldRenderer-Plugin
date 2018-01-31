@@ -497,9 +497,9 @@ from python code.</p>
 
 
     <span class="comment"># Get the arrow symbol and assign its colors</span>
-    <span class="comment"># Units can be QgsSymbolV2.MapUnit or QgsSymbolV2.MM</span>
+    <span class="comment"># Units can be QgsSymbol.MapUnit or QgsSymbol.MM</span>
 
-    r.setOutputUnit(QgsSymbolV2.MapUnit)
+    r.setOutputUnit(QgsSymbol.MapUnit)
 
     arrow = r.arrow()
 
@@ -553,7 +553,7 @@ from python code.</p>
     <span class="comment"># vectors, then the following rather obscure code will do it.</span>
 
     canvas=self._iface.mapCanvas()
-    layer.rendererV2().autoRescale(layer,canvas)
+    layer.renderer().autoRescale(layer,canvas)
     layer.triggerRepaint()
 </pre>
 

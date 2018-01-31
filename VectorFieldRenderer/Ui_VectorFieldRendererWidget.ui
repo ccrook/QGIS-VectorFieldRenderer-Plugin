@@ -147,16 +147,10 @@
          </item>
          <item row="0" column="1">
           <widget class="QgsFieldExpressionWidget" name="uXField">
-           <property name="filters">
-            <set>QgsFieldProxyModel::Numeric</set>
-           </property>
           </widget>
          </item>
          <item row="1" column="1">
           <widget class="QgsFieldExpressionWidget" name="uYField">
-           <property name="filters">
-            <set>QgsFieldProxyModel::Numeric</set>
-           </property>
           </widget>
          </item>
         </layout>
@@ -663,23 +657,14 @@
          </item>
          <item row="0" column="2">
           <widget class="QgsFieldExpressionWidget" name="uCxxField">
-           <property name="filters">
-            <set>QgsFieldProxyModel::Numeric</set>
-           </property>
           </widget>
          </item>
          <item row="1" column="2">
           <widget class="QgsFieldExpressionWidget" name="uCxyField">
-           <property name="filters">
-            <set>QgsFieldProxyModel::Numeric</set>
-           </property>
           </widget>
          </item>
          <item row="2" column="2">
           <widget class="QgsFieldExpressionWidget" name="uCyyField">
-           <property name="filters">
-            <set>QgsFieldProxyModel::Numeric</set>
-           </property>
           </widget>
          </item>
         </layout>

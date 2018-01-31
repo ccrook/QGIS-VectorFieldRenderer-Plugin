@@ -18,7 +18,7 @@ class VectorFieldRendererLayerDialog(QDialog):
         QDialog.__init__(self,parent)
         self.setWindowTitle("Vector Field Renderer")
 
-        self.stylev2=QgsStyleV2()
+        self.stylev2=QgsStyle()
         self.layer=layer
         self.widget=VectorFieldRendererWidget(layer,self.stylev2,renderer,controller)
         if hasattr(self.widget,'uCrashWarning'):
