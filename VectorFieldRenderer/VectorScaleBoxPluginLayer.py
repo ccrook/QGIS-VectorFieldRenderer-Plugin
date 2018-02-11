@@ -27,10 +27,12 @@ class VectorScaleBoxPluginLayer(QgsPluginLayer):
         self.setValid(True)
         self._scalebox = None
     
-    def draw(self, rendererContext):
-        if self._scalebox != None:
-            self._scalebox.render( rendererContext )
-        return True
+    # QGIS3 - need to implement clone()
+    # QGIS3 - need to implement createMapRenderer() instead of draw
+    #def draw(self, rendererContext):
+    #    if self._scalebox != None:
+    #        self._scalebox.render( rendererContext )
+    #    return True
     
     def readXml(self, node):
         # custom properties

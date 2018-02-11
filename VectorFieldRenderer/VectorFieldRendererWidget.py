@@ -19,28 +19,28 @@ class UnitButton( QObject ):
       QObject.__init__(self)
       self._button = button
       self._mmLabel = mmtext
-      self.setUnits(QgsSymbol.MM)
+      self.setUnits(QgsUnitTypes.RenderMillimeters)
       button.clicked.connect(self.clicked)
 
    def units(self):
       return self._units
 
    def setUnits(self,units):
-      if units == QgsSymbol.MM:
-         self._units = QgsSymbol.MM
+      if units == QgsUnitTypes.RenderMillimeters:
+         self._units = QgsUnitTypes.RenderMillimeters
          self._button.setText(self._mmLabel)
       else:
-         self._units = QgsSymbol.MapUnit
+         self._units = QgsUnitTypes.RenderMapUnits
          self._button.setText("Map units")
 
    def isMapUnit( self ):
-       return self._units == QgsSymbol.MapUnit
+       return self._units == QgsUnitTypes.RenderMapUnits
 
    def setIsMapUnit( self, isMapUnits ):
       if isMapUnits:
-          self.setUnits(QgsSymbol.MapUnit)
+          self.setUnits(QgsUnitTypes.RenderMapUnits)
       else:
-          self.setUnits(QgsSymbol.MM)
+          self.setUnits(QgsUnitTypes.RenderMillimeters)
       self.valueChanged.emit()
 
    def clicked(self):

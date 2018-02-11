@@ -291,6 +291,13 @@ class VectorArrowMarker(QgsMarkerSymbolLayer):
             p.drawLine(xb,y,xa,y)
         p.end()
 
+    def bounds( self, point, context ):
+        pixelFactor = context.convertToPainterUnits(1.0,QgsUnitTypes.RenderMapUnits)
+        size=self.calcHeadSize(0.0,pixelFactor)
+        x=point.x()
+        y=point.y()
+        return QRectF(QPointF(x-size,y-size),QPointF(x+size,y+size))
+
     def calcHeadSize( self, length, pixelFactor ):
         headsize = 0.0
         if self._maxHeadSize > 0.0:
@@ -331,13 +338,9 @@ class VectorArrowMarker(QgsMarkerSymbolLayer):
 
     def renderPoint( self, point, context ):
         # Test selected to support earlier builds of 1.5 dev stream
-        selColor = None
-        if 'selected' in dir(context):
-            selected = context.selected()
-            if selected:
-                selColor = context.selectionColor()
+        selColor=None
         painter = context.renderContext().painter()
-        pixelFactor = context.outputPixelSize(1.0)/context.renderContext().rasterScaleFactor()
+        pixelFactor = context.convertToPainterUnits(1.0,QgsUnitTypes.RenderMapUnits)
         self.renderArrow( point, painter, pixelFactor, selColor )
 
     def renderArrow( self, point, painter, pixelFactor, selColor=None ):

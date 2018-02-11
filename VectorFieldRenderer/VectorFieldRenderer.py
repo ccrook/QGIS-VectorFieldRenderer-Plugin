@@ -114,7 +114,7 @@ class VectorFieldRenderer(QgsFeatureRenderer):
 
         arrow = VectorArrowMarker()
         symbol = QgsMarkerSymbol()
-        symbol.setOutputUnit(QgsSymbol.MM)
+        symbol.setOutputUnit(QgsUnitTypes.RenderMillimeters)
         self._symbol = symbol
         self.setupArrowMarker(None)
 
@@ -312,7 +312,7 @@ class VectorFieldRenderer(QgsFeatureRenderer):
         for i in range(narrow): self._usedfield[i]=True
         for i in range(nellipse): self._usedfield[i+self.EllipseField0]=True
 
-    def usedAttributes(self):
+    def usedAttributes(self,context):
         self.setUsedFields()
         fields=set()
         for fieldexp in [self._fieldname[i] for i in range(self.NFields) if self._usedfield[i]]:
@@ -321,7 +321,7 @@ class VectorFieldRenderer(QgsFeatureRenderer):
                 fields.update(exp.referencedColumns())
         return list(fields)
 
-    def symbols(self):
+    def symbols(self,context):
         return [self._symbol]
 
     def save(self, doc):
@@ -349,7 +349,7 @@ class VectorFieldRenderer(QgsFeatureRenderer):
         re.setAttribute("scaleboxtext",self._scaleBoxText)
         re.setAttribute("showonscalebox",str(self._showInScaleBox))
         re.setAttribute("outputunit", "MapUnit" 
-            if self._symbol.outputUnit() == QgsSymbol.MapUnit 
+            if self._symbol.outputUnit() == QgsUnitTypes.RenderMapUnits 
             else "MM" )
         re.setAttribute("layerid",self._layerId)
 
@@ -384,9 +384,9 @@ class VectorFieldRenderer(QgsFeatureRenderer):
            self.setCxyFieldName( element.attribute("cxyfieldname",""))
            self.setCyyFieldName( element.attribute("cyyfieldname",""))
 
-           self._symbol.setOutputUnit( QgsSymbol.MapUnit
+           self._symbol.setOutputUnit( QgsUnitTypes.RenderMapUnits
                 if element.attribute("outputunit") == "MapUnit" 
-                else QgsSymbol.MM )
+                else QgsUnitTypes.RenderMillimeters )
 
            self.arrow().readFromXmlElement(element)
 
@@ -407,8 +407,10 @@ class VectorFieldRenderer(QgsFeatureRenderer):
     # fields used to generate the arrow
     #
     # How will we determine the layer, which we need to get the layer CRS?
-
+    
+    #QGIS3 "ASSERT failure in QgsFeatureRenderer::renderFeature: \"renderFeature called in a different thread - use a cloned renderer instead\", file ../../src/core/symbology/qgsrenderer.cpp, line 121")
     def startRender(self, context, fields):
+        QgsFeatureRenderer.startRender(context,fields)
         self.getGroupScale()
         self._isvalid = True
 
@@ -471,7 +473,9 @@ class VectorFieldRenderer(QgsFeatureRenderer):
               for i in range(self.NFields):
                    if self._usedfield[i]:
                        exp=QgsExpression(self._fieldname[i])
-                       exp.prepare(fields)
+                       context=QgsExpressionContext()
+                       context.setFields(fields)
+                       exp.prepare(context)
                        if not  exp.hasParserError():
                            self._fieldexp[i]=exp
                        else:
@@ -481,6 +485,7 @@ class VectorFieldRenderer(QgsFeatureRenderer):
 
 
     def stopRender(self,context):
+        QgsFeatureRenderer.stopRender(context)
         self._symbol.stopRender(context)
         self._coordToVectorCRS=None
         self._vectorToMapCRS=None
@@ -489,12 +494,7 @@ class VectorFieldRenderer(QgsFeatureRenderer):
     # scale bar.  Copied from code in qgssymbollayerv2utils.cpp. 
 
     def pixelSizeScaleFactor(self,context,outputUnit):
-        if outputUnit == QgsSymbol.MM:
-            return context.scaleFactor()*context.rasterScaleFactor()
-        mup = context.mapToPixel().mapUnitsPerPixel()
-        if mup > 0:
-            return context.rasterScaleFactor()/mup
-        return
+        return context.convertToPainterUnits(1.0,outputUnit)
 
     def scaleFactors(self,context):
 
@@ -508,8 +508,8 @@ class VectorFieldRenderer(QgsFeatureRenderer):
         vectorUnitsPerPixel = 1.0/pixelScaleFactor
         mapUnitsPerPixel = context.mapToPixel().mapUnitsPerPixel()
 
-        if self.useMapUnit() and self.outputUnit() != QgsSymbol.MapUnit:
-            vectorUnitsPerPixel = 1.0/self.pixelSizeScaleFactor(context,QgsSymbol.MapUnit)
+        if self.useMapUnit() and self.outputUnit() != QgsUnitTypes.RenderMapUnits:
+            vectorUnitsPerPixel = 1.0/self.pixelSizeScaleFactor(context,QgsUnitTypes.RenderMapUnits)
             vectorscale = self._scale/(vectorUnitsPerPixel*pixelScaleFactor)
 
         return pixelScaleFactor,vectorscale,mapUnitsPerPixel,vectorUnitsPerPixel,
@@ -529,7 +529,8 @@ class VectorFieldRenderer(QgsFeatureRenderer):
         emin = math.sqrt(max(v1-v4,0.0))
         return emax, emin, eangle, True
 
-    def symbolForFeature( self, feature ):
+    # QgsRenderContext ...
+    def symbolForFeature( self, feature, context ):
         self.setSymbolSizeForFeature(feature,False)
         return self._symbol
 
@@ -542,12 +543,14 @@ class VectorFieldRenderer(QgsFeatureRenderer):
         value=[0.0]*self.NFields
         drawEllipse = self._ellipseMode != self.NoEllipse
         applyConvergence = not scaling and self._vectorToMapCRS is not None
+        context=QgsExpressionContext()
+        context.setFeature(feature)
         if self._isvalid:
           try:
              for i in range(self.NFields):
                  if self._usedfield[i]:
                      exp=self._fieldexp[i]
-                     v=exp.evaluate(feature)
+                     v=exp.evaluate(context)
                      if v is None:
                          v=0.0
                      value[i]=float(v)
