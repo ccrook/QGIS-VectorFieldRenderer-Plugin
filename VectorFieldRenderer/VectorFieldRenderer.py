@@ -14,7 +14,13 @@ from PyQt5.QtGui import *
 
 from .VectorArrowMarker import VectorArrowMarker
 
+
+
 class VectorFieldRenderer(QgsFeatureRenderer):
+    # !!!
+    # NOTE: For testing impact of lifetime... keep python object indefinitely
+    renderers=[]
+    
     scaleGroups={}
 
     controller=None
@@ -117,6 +123,11 @@ class VectorFieldRenderer(QgsFeatureRenderer):
         symbol.setOutputUnit(QgsUnitTypes.RenderMillimeters)
         self._symbol = symbol
         self.setupArrowMarker(None)
+
+        # !!!
+        # NOTE: test code
+        print("Created VFR: {0:x}\n".format(id(self)))
+        self.renderers.append(self)
 
     # Accessor functions - get and set members
 
@@ -409,6 +420,7 @@ class VectorFieldRenderer(QgsFeatureRenderer):
     # How will we determine the layer, which we need to get the layer CRS?
     
     #QGIS3 "ASSERT failure in QgsFeatureRenderer::renderFeature: \"renderFeature called in a different thread - use a cloned renderer instead\", file ../../src/core/symbology/qgsrenderer.cpp, line 121")
+    #QGIS3 "TypeError - first argument of unbound method must have type QgsFeatureRenderer
     def startRender(self, context, fields):
         QgsFeatureRenderer.startRender(context,fields)
         self.getGroupScale()
