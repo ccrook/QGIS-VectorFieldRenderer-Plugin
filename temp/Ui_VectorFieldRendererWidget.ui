@@ -1,0 +1,721 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>VectorFieldRendererWidget</class>
+ <widget class="QWidget" name="VectorFieldRendererWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>791</width>
+    <height>403</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0,0">
+   <item>
+    <widget class="QWidget" name="uTabManager" native="true">
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QGroupBox" name="uVectorFieldTypeGroupBox">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="title">
+         <string>Vector field type</string>
+        </property>
+        <layout class="QHBoxLayout" name="uFieldTypeLayout">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QRadioButton" name="uFieldTypeCartesian">
+           <property name="text">
+            <string>Cartesian (XY) field</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="uFieldTypePolar">
+           <property name="text">
+            <string>Polar (length,angle) field</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="uFieldTypeHeight">
+           <property name="text">
+            <string>Height only</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="uFieldTypeNone">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="text">
+            <string>None</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <layout class="QGridLayout" name="uVectorFieldGrid" columnstretch="0,1">
+        <item row="0" column="0">
+         <widget class="QLabel" name="uXFieldLabel">
+          <property name="text">
+           <string>X attribute</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="uYFieldLabel">
+          <property name="text">
+           <string>Y attribute</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QgsFieldComboBox" name="uXField"/>
+        </item>
+        <item row="1" column="1">
+         <widget class="QgsFieldComboBox" name="uYField"/>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="uAngleFormatLayout">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QGroupBox" name="uOrientationGroupBox">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="title">
+           <string>Angle orientation</string>
+          </property>
+          <layout class="QHBoxLayout" name="uOrientationLayout">
+           <property name="spacing">
+            <number>6</number>
+           </property>
+           <property name="leftMargin">
+            <number>9</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>9</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QRadioButton" name="uAngleOrientationEast">
+             <property name="toolTip">
+              <string>Select the angle orientation</string>
+             </property>
+             <property name="text">
+              <string>North from east</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="uAngleOrientationNorth">
+             <property name="toolTip">
+              <string>Select the angle orientation</string>
+             </property>
+             <property name="text">
+              <string>East from north</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="uAngleUnitsGroupBox">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="title">
+           <string>Angle units</string>
+          </property>
+          <layout class="QHBoxLayout" name="uAngleUnitsLayout">
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QRadioButton" name="uAngleUnitsDegrees">
+             <property name="toolTip">
+              <string>Select the angle units</string>
+             </property>
+             <property name="text">
+              <string>Degrees</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="uAngleUnitsRadians">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="toolTip">
+              <string>Select the angle units</string>
+             </property>
+             <property name="text">
+              <string>Radians</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="uArrowFormatGroup">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="title">
+         <string>Arrow format</string>
+        </property>
+        <layout class="QVBoxLayout" name="uArrowFormatLayout">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <layout class="QHBoxLayout" name="uArrowSizeLayout">
+           <item>
+            <widget class="QLabel" name="uArrowHeadSizeLabel">
+             <property name="text">
+              <string>Size: Head (relative)</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="uArrowHeadSize">
+             <property name="toolTip">
+              <string>Arrow head size as a multiple of the length</string>
+             </property>
+             <property name="minimum">
+              <double>-3.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>3.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.100000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="uArrowHeadMaxSizeLabel">
+             <property name="text">
+              <string>Head (max)</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="uArrowHeadMaxSize">
+             <property name="toolTip">
+              <string>Maximum arrow head size</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="uHeadWidthLabel">
+             <property name="text">
+              <string>Head border width</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="uHeadWidth">
+             <property name="toolTip">
+              <string>Width of the arrow shaft</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="uArrowWidthLabel">
+             <property name="text">
+              <string> Shaft width</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="uArrowWidth">
+             <property name="toolTip">
+              <string>Width of the arrow shaft</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="uArrowFormatSpacer1">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="uArrowFormatLayout2">
+           <item>
+            <widget class="QLabel" name="uArrowColorLabel">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Colour: Head border/shaft</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QgsColorButton" name="uArrowColor">
+             <property name="toolTip">
+              <string>Change the arrow colour</string>
+             </property>
+             <property name="text">
+              <string>change</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="uArrowHeadColorLabel">
+             <property name="text">
+              <string>Head fill?</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="uFillHead">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QgsColorButton" name="uArrowHeadColor">
+             <property name="toolTip">
+              <string>Change the arrow colour</string>
+             </property>
+             <property name="text">
+              <string>change</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="uArrowFormatSpacer2">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="uArrowFormatLayout3">
+           <item>
+            <widget class="QLabel" name="uArrowHeadShapeFrontLabel">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>Arrow shape (relative x coords): front</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="uArrowHeadShapeFront">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="toolTip">
+              <string>Arrow head size as a multiple of the length</string>
+             </property>
+             <property name="minimum">
+              <double>-3.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>3.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.100000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="uArrowHeadShapeBackLabel">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>back outside</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="uArrowHeadShapeBack">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="toolTip">
+              <string>Arrow head size as a multiple of the length</string>
+             </property>
+             <property name="minimum">
+              <double>-3.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>3.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.100000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="uArrowHeadShapeCentreLabel">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>back centre</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="uArrowHeadShapeCentre">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="toolTip">
+              <string>Arrow head size as a multiple of the length</string>
+             </property>
+             <property name="minimum">
+              <double>-3.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>3.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.100000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="uArrowFormatSpacer3">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="uOutputUnitLabel">
+       <property name="text">
+        <string>Symbol units</string>
+       </property>
+       <property name="buddy">
+        <cstring>uOutputUnits</cstring>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="uOutputUnits">
+       <property name="minimumSize">
+        <size>
+         <width>100</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Millimeter</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="uArrowBaseSizeLabel">
+       <property name="text">
+        <string>Base size</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+       <property name="buddy">
+        <cstring>uArrowBaseSize</cstring>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QDoubleSpinBox" name="uArrowBaseSize">
+       <property name="toolTip">
+        <string>Size of the arrow base symbol</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="uBaseBorderColorLabel">
+       <property name="text">
+        <string>Colours: Border</string>
+       </property>
+       <property name="buddy">
+        <cstring>uBaseBorderColor</cstring>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QgsColorButton" name="uBaseBorderColor">
+       <property name="toolTip">
+        <string>Change the base border colour</string>
+       </property>
+       <property name="text">
+        <string>change</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="uBaseColorLabel">
+       <property name="text">
+        <string>Fill?</string>
+       </property>
+       <property name="buddy">
+        <cstring>uFillBase</cstring>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="uFillBase">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QgsColorButton" name="uBaseColor">
+       <property name="toolTip">
+        <string>Change the base symbol colour</string>
+       </property>
+       <property name="text">
+        <string>change</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="uArrowUnitSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <property name="topMargin">
+      <number>9</number>
+     </property>
+     <property name="rightMargin">
+      <number>9</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="uArrowScaleLabel">
+       <property name="text">
+        <string>Scale:  </string>
+       </property>
+       <property name="buddy">
+        <cstring>uArrowScale</cstring>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="uArrowScale"/>
+     </item>
+     <item>
+      <widget class="QPushButton" name="uScaleUnits">
+       <property name="minimumSize">
+        <size>
+         <width>100</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Millimeter</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="uScaleGroupLabel">
+       <property name="text">
+        <string>    Scale group</string>
+       </property>
+       <property name="buddy">
+        <cstring>uScaleGroup</cstring>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="uScaleGroup"/>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QgsColorButton</class>
+   <extends>QToolButton</extends>
+   <header>qgscolorbutton.h</header>
+  </customwidget>
+  <customwidget>
+   <class>QgsFieldComboBox</class>
+   <extends>QComboBox</extends>
+   <header>qgsfieldcombobox.h</header>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>uFieldTypeCartesian</tabstop>
+  <tabstop>uFieldTypePolar</tabstop>
+  <tabstop>uFieldTypeHeight</tabstop>
+  <tabstop>uFieldTypeNone</tabstop>
+  <tabstop>uXField</tabstop>
+  <tabstop>uYField</tabstop>
+  <tabstop>uAngleOrientationEast</tabstop>
+  <tabstop>uAngleOrientationNorth</tabstop>
+  <tabstop>uAngleUnitsDegrees</tabstop>
+  <tabstop>uAngleUnitsRadians</tabstop>
+  <tabstop>uArrowHeadSize</tabstop>
+  <tabstop>uArrowHeadMaxSize</tabstop>
+  <tabstop>uHeadWidth</tabstop>
+  <tabstop>uArrowWidth</tabstop>
+  <tabstop>uArrowColor</tabstop>
+  <tabstop>uFillHead</tabstop>
+  <tabstop>uArrowHeadColor</tabstop>
+  <tabstop>uArrowHeadShapeFront</tabstop>
+  <tabstop>uArrowHeadShapeBack</tabstop>
+  <tabstop>uArrowHeadShapeCentre</tabstop>
+  <tabstop>uOutputUnits</tabstop>
+  <tabstop>uArrowBaseSize</tabstop>
+  <tabstop>uBaseBorderColor</tabstop>
+  <tabstop>uFillBase</tabstop>
+  <tabstop>uBaseColor</tabstop>
+  <tabstop>uArrowScale</tabstop>
+  <tabstop>uScaleUnits</tabstop>
+  <tabstop>uScaleGroup</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>
