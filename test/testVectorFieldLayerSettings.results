@@ -1,0 +1,4 @@
+======================================================================
+>>>> 001__dump_default_settings {"angleOrientation": 0, "angleUnits": 0, "arrowBorderColor": "#ff000000", "arrowBorderWidth": 0.0, "arrowFillColor": "#ff000000", "arrowHeadShape": [0, -1.0, -0.7], "arrowMaxHeadSize": 3.0, "arrowRelativeHeadSize": 0.3, "arrowShaftSize": 1.5, "baseBorderColor": "#ff000000", "baseBorderWidth": 0.0, "baseFillColor": "#ffff0000", "baseSize": 2.0, "degrees": true, "drawEllipse": true, "drawEllipseAxes": false, "dxField": "", "dyField": "", "ellipseAngleFromNorth": true, "ellipseBorderColor": "#ff000000", "ellipseBorderWidth": 0.7, "ellipseDegrees": true, "ellipseFillColor": "#ff000000", "ellipseScale": 1.0, "ellipseTickSize": 2.0, "emaxAzimuthField": "", "emaxField": "", "eminField": "", "fillArrow": true, "fillBase": true, "fillEllipse": false, "mode": 0, "scale": 1.0, "scaleGroup": "", "scaleGroupFactor": 1.0, "unitType": 0}
+>>>> 001__reload_settings None
+>>>>

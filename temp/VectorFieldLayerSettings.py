@@ -176,7 +176,7 @@ class VectorFieldLayerSettings:
         settings = {}
         for setting in self.__dict__:
             if re.match(r"_[a-z]", setting):
-                value = self.__dict__(setting)
+                value = self.__dict__[setting]
                 key = setting[1:]
                 if callable(value):
                     continue
