@@ -1,27 +1,32 @@
 #!/usr/bin/python3
-from qgis.core import (
-    QgsUnitTypes,
-    QgsVectorFieldSymbolLayer,
-    QgsMarkerSymbol,
-    QgsMarkerLineSymbolLayer,
-    QgsArrowSymbolLayer,
-    QgsSimpleFillSymbolLayer,
-    QgsFillSymbol,
-    QgsMapLayerType,
-    QgsWkbTypes,
-)
-
-from PyQt5.QtGui import QColor
-
 import json
 import re
-
 from re import T
+
+from PyQt5.QtGui import QColor
+from qgis.core import (
+    QgsArrowSymbolLayer,
+    QgsFillSymbol,
+    QgsMapLayerType,
+    QgsMarkerLineSymbolLayer,
+    QgsMarkerSymbol,
+    QgsSimpleFillSymbolLayer,
+    QgsUnitTypes,
+    QgsVectorFieldSymbolLayer,
+    QgsWkbTypes,
+)
 
 VECTOR_SETTINGS_PROP = "vfr_settings"
 
 
 class VectorFieldLayerSettings:
+
+    NoEllipse = 0
+    CovarianceEllipse = 1
+    AxesEllipse = 2
+    CircularEllipse = 3
+    HeightEllipse = 4
+
     def __init__(self):
         self._degrees = True
         self._mode = QgsVectorFieldSymbolLayer.Cartesian
@@ -30,13 +35,15 @@ class VectorFieldLayerSettings:
         self._scale = 1.0
         self._dxField = ""
         self._dyField = ""
-        self._unitType = QgsUnitTypes.RenderMillimeters
+        self._scaleUnitType = QgsUnitTypes.RenderMillimeters
         self._scaleGroup = ""
         self._scaleGroupFactor = 1.0
-        # self._ellipseMode = VectorFieldRenderer.AxesEllipse
+        self._symbolUnitType = QgsUnitTypes.RenderMillimeters
+        self._ellipseMode = VectorFieldLayerSettings.AxesEllipse
         self._ellipseAngleFromNorth = True
         self._ellipseDegrees = True
         self._ellipseScale = 1.0
+        self._symbolUnitType = QgsUnitTypes.RenderMillimeters
         self._arrowShaftSize = 1.5
         self._arrowRelativeHeadSize = 0.3
         self._arrowMaxHeadSize = 3.0
@@ -44,7 +51,9 @@ class VectorFieldLayerSettings:
         self._arrowFillColor = QColor(0, 0, 0)
         self._fillArrow = True
         self._arrowBorderColor = QColor(0, 0, 0)
-        self._arrowHeadShape = (0, -1.0, -0.7)
+        self._arrowHeadShapeFront=0.0
+        self._arrowHeadShapeBackOuter=-1.0
+        self._arrowHeadShapeBackInner=-0.7
         self._baseSize = 2.0
         self._fillBase = True
         self._baseFillColor = QColor(255, 0, 0)
@@ -68,6 +77,254 @@ class VectorFieldLayerSettings:
         # self._legendText = ""
         # self._showInScaleBox = True
         # self._scaleBoxText = ""
+
+    def degrees(self):
+        return self._degrees
+
+    def setDegrees(self,value):
+        self._degrees = value
+
+    def mode(self):
+        return self._mode
+
+    def setMode(self,value):
+        self._mode = value
+
+    def angleOrientation(self):
+        return self._angleOrientation
+
+    def setAngleOrientation(self,value):
+        self._angleOrientation = value
+
+    def angleUnits(self):
+        return self._angleUnits
+
+    def setAngleUnits(self,value):
+        self._angleUnits = value
+
+    def scale(self):
+        return self._scale
+
+    def setScale(self,value):
+        self._scale = value
+
+    def dxField(self):
+        return self._dxField
+
+    def setDxField(self,value):
+        self._dxField = value
+
+    def dyField(self):
+        return self._dyField
+
+    def setDyField(self,value):
+        self._dyField = value
+
+    def scaleUnitType(self):
+        return self._scaleUnitType
+
+    def setScaleUnitType(self,value):
+        self._scaleUnitType = value
+
+    def symbolUnitType(self):
+        return self._symbolUnitType
+
+    def setSymbolUnitType(self,value):
+        self._symbolUnitType = value
+
+    def scaleGroup(self):
+        return self._scaleGroup
+
+    def setScaleGroup(self,value):
+        self._scaleGroup = value
+
+    def scaleGroupFactor(self):
+        return self._scaleGroupFactor
+
+    def setScaleGroupFactor(self,value):
+        self._scaleGroupFactor = value
+
+    def ellipseMode(self):
+        return self._ellipseMode
+
+    def setEllipseMode(self,value):
+        self._ellipseMode = value
+
+    def ellipseAngleFromNorth(self):
+        return self._ellipseAngleFromNorth
+
+    def setEllipseAngleFromNorth(self,value):
+        self._ellipseAngleFromNorth = value
+
+    def ellipseDegrees(self):
+        return self._ellipseDegrees
+
+    def setEllipseDegrees(self,value):
+        self._ellipseDegrees = value
+
+    def ellipseScale(self):
+        return self._ellipseScale
+
+    def setEllipseScale(self,value):
+        self._ellipseScale = value
+
+    def arrowShaftSize(self):
+        return self._arrowShaftSize
+
+    def setArrowShaftSize(self,value):
+        self._arrowShaftSize = value
+
+    def arrowRelativeHeadSize(self):
+        return self._arrowRelativeHeadSize
+
+    def setArrowRelativeHeadSize(self,value):
+        self._arrowRelativeHeadSize = value
+
+    def arrowMaxHeadSize(self):
+        return self._arrowMaxHeadSize
+
+    def setArrowMaxHeadSize(self,value):
+        self._arrowMaxHeadSize = value
+
+    def arrowBorderWidth(self):
+        return self._arrowBorderWidth
+
+    def setArrowBorderWidth(self,value):
+        self._arrowBorderWidth = value
+
+    def arrowFillColor(self):
+        return self._arrowFillColor
+
+    def setArrowFillColor(self,value):
+        self._arrowFillColor = value
+
+    def fillArrow(self):
+        return self._fillArrow
+
+    def setFillArrow(self,value):
+        self._fillArrow = value
+
+    def arrowBorderColor(self):
+        return self._arrowBorderColor
+
+    def setArrowBorderColor(self,value):
+        self._arrowBorderColor = value
+
+    def arrowHeadShapeFront(self):
+        return self._arrowHeadShapeFront
+
+    def setArrowHeadShapeFront(self,value):
+        self._arrowHeadShapeFront = value
+
+    def arrowHeadShapeBackOuter(self):
+        return self._arrowHeadShapeBackOuter
+
+    def setArrowHeadShapeBackOuter(self,value):
+        self._arrowHeadShapeBackOuter = value
+ 
+    def arrowHeadShapeBackInner(self):
+        return self._arrowHeadShapeBackInner
+
+    def setArrowHeadShapeBackInner(self,value):
+        self._arrowHeadShapeBackInner = value
+
+    def baseSize(self):
+        return self._baseSize
+
+    def arrowHeadShape(self):
+        return self._arrowHeadShape
+
+    def setArrowHeadShape(self,value):
+        self._arrowHeadShape = value
+
+    def setBaseSize(self,value):
+        self._baseSize = value
+
+    def fillBase(self):
+        return self._fillBase
+
+    def setFillBase(self,value):
+        self._fillBase = value
+
+    def baseFillColor(self):
+        return self._baseFillColor
+
+    def setBaseFillColor(self,value):
+        self._baseFillColor = value
+
+    def baseBorderWidth(self):
+        return self._baseBorderWidth
+
+    def setBaseBorderWidth(self,value):
+        self._baseBorderWidth = value
+
+    def baseBorderColor(self):
+        return self._baseBorderColor
+
+    def setBaseBorderColor(self,value):
+        self._baseBorderColor = value
+
+    def ellipseBorderWidth(self):
+        return self._ellipseBorderWidth
+
+    def setEllipseBorderWidth(self,value):
+        self._ellipseBorderWidth = value
+
+    def emaxField(self):
+        return self._emaxField
+
+    def setEmaxField(self,value):
+        self._emaxField = value
+
+    def eminField(self):
+        return self._eminField
+
+    def setEminField(self,value):
+        self._eminField = value
+
+    def emaxAzimuthField(self):
+        return self._emaxAzimuthField
+
+    def setEmaxAzimuthField(self,value):
+        self._emaxAzimuthField = value
+
+    def ellipseBorderColor(self):
+        return self._ellipseBorderColor
+
+    def setEllipseBorderColor(self,value):
+        self._ellipseBorderColor = value
+
+    def ellipseFillColor(self):
+        return self._ellipseFillColor
+
+    def setEllipseFillColor(self,value):
+        self._ellipseFillColor = value
+
+    def fillEllipse(self):
+        return self._fillEllipse
+
+    def setFillEllipse(self,value):
+        self._fillEllipse = value
+
+    def drawEllipse(self):
+        return self._drawEllipse
+
+    def setDrawEllipse(self,value):
+        self._drawEllipse = value
+
+    def drawEllipseAxes(self):
+        return self._drawEllipseAxes
+
+    def setDrawEllipseAxes(self,value):
+        self._drawEllipseAxes = value
+
+    def ellipseTickSize(self):
+        return self._ellipseTickSize
+
+    def setEllipseTickSize(self,value):
+        self._ellipseTickSize = value
+
+    # Functions to construct symbology
 
     def basepointSymbolLayer(self):
         """
@@ -99,7 +356,7 @@ class VectorFieldLayerSettings:
                 "arrow_type": "0",
                 "arrow_width": str(self._arrowShaftSize),
                 "arrow_start_width": str(self._arrowShaftSize),
-                "arrow_head_length": str(self._arrowMaxHeadSize * (_arrowHeadShape[0] - self._arrowHeadShape[1])),
+                "arrow_head_length": str(self._arrowMaxHeadSize * (_arrowHeadShapeFront - self._arrowHeadShapeBackOuter)),
                 "arrow_head_width": str(self._arrowMaxHeadSize),
                 "arrow_start_width_unit": symbolUnit,
                 "arrow_width_unit": symbolUnit,
@@ -126,7 +383,7 @@ class VectorFieldLayerSettings:
         # ellipseLine=QgsMarkerLineSymbolLayer()
         # ellipseLine.setPlacement(QgsMarkerLineSymbolLayer.LastVertex)
         # ellipse=QgsEllipseSymbolLayer()
-        return ellipseLine()
+        return ellipseLine
 
     def createVectorFieldSymbol(self):
         vfl = QgsVectorFieldSymbolLayer()
@@ -183,7 +440,7 @@ class VectorFieldLayerSettings:
                 if type(value) == QColor:
                     value = value.name(QColor.HexArgb)
                 settings[key] = value
-        settingstr = json.dumps(settings,sort_keys=True)
+        settingstr = json.dumps(settings, sort_keys=True)
         return settingstr
 
     def saveToLayer(self, layer):
@@ -197,13 +454,13 @@ class VectorFieldLayerSettings:
         """
         Read the layer settings from a JSON formatted string
         """
+        result=False
         try:
-            settingstr = layer.customPropert(VECTOR_SETTINGS_PROP)
             settings = json.loads(settingstr)
             newvalues = {}
             for setting in self.__dict__:
                 if re.match(r"_[a-z]", setting):
-                    value = self.__dict__(setting)
+                    value = self.__dict__[setting]
                     valueType = type(value)
                     if callable(value):
                         continue
@@ -219,14 +476,19 @@ class VectorFieldLayerSettings:
                     except:
                         pass
             self.__dict__.update(newvalues)
+            result=True
         except:
             pass
+        return result
 
     def readFromLayer(self, layer):
         """
         Write the layer settings to a QgsMapLayer custom property 
         """
 
+        result=False
         settingstr = layer.customProperty(VECTOR_SETTINGS_PROP, "")
         if settingstr != "":
-            self.readFromString(settingstr)
+            result=self.readFromString(settingstr)
+        return result
+            
