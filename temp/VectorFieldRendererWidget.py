@@ -242,11 +242,9 @@ class VectorFieldRendererWidget(QWidget, Ui_VectorFieldRendererWidget):
     def settings(self):
         if self.validLayer:
             self.saveToSettings()
-            self._controller.saveLayerRenderer( self._layer, self._settings )
-            # self._controller.repaintScaleBox()
         return self._settings
 
-    def applyRenderer( self ):
+    def applyToLayer( self ):
         if self.validLayer:
             settings=self.settings()
             settings.applyToLayer(self._layer)

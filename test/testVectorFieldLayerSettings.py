@@ -2,12 +2,12 @@ import sys
 import os.path
 from PyQt5.QtGui import QColor
 
-modpath = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "temp")
+modpath = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, modpath)
 print(modpath)
 
 import fileunittest
-from VectorFieldLayerSettings import VectorFieldLayerSettings
+from temp.VectorFieldLayerSettings import VectorFieldLayerSettings
 
 class VectorFieldLayerSettingsTestCase(fileunittest.TestCase):
     def test001_Params(self):
