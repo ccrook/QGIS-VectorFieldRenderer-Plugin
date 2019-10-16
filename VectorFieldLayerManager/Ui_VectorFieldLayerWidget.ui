@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>VectorFieldRendererWidget</class>
- <widget class="QWidget" name="VectorFieldRendererWidget">
+ <class>VectorFieldLayerWidget</class>
+ <widget class="QWidget" name="VectorFieldLayerWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>791</width>
-    <height>532</height>
+    <height>512</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,7 +19,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0,0,0,0">
+  <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0,0,0">
    <item>
     <widget class="QTabWidget" name="uTabManager">
      <property name="currentIndex">
@@ -292,51 +292,22 @@
            <number>0</number>
           </property>
           <item>
-           <layout class="QHBoxLayout" name="uArrowSizeLayout">
+           <layout class="QHBoxLayout" name="uArrowFormatSizeLayout">
             <item>
-             <widget class="QLabel" name="uArrowHeadSizeLabel">
+             <widget class="QLabel" name="uArrowHeadWidthLabel">
               <property name="text">
-               <string>Size: Head (relative)</string>
+               <string>Size: Head</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
               <property name="buddy">
-               <cstring>uArrowHeadSize</cstring>
+               <cstring>uArrowHeadWidth</cstring>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QDoubleSpinBox" name="uArrowHeadSize">
-              <property name="toolTip">
-               <string>Arrow head size as a multiple of the length</string>
-              </property>
-              <property name="minimum">
-               <double>-3.000000000000000</double>
-              </property>
-              <property name="maximum">
-               <double>3.000000000000000</double>
-              </property>
-              <property name="singleStep">
-               <double>0.100000000000000</double>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLabel" name="uArrowHeadMaxSizeLabel">
-              <property name="text">
-               <string>Head (max)</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-              <property name="buddy">
-               <cstring>uArrowHeadMaxSize</cstring>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QDoubleSpinBox" name="uArrowHeadMaxSize">
+             <widget class="QDoubleSpinBox" name="uArrowHeadWidth">
               <property name="toolTip">
                <string>Maximum arrow head size</string>
               </property>
@@ -345,7 +316,7 @@
             <item>
              <widget class="QLabel" name="uArrowShaftWidthLabel">
               <property name="text">
-               <string> Shaft width</string>
+               <string> Shaft</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -363,19 +334,54 @@
              </widget>
             </item>
             <item>
-             <widget class="QLabel" name="uArrowBorderWidthLabel">
+             <widget class="QLabel" name="uArrowHeadRelativeLengthLabel">
               <property name="text">
-               <string>Border width</string>
-              </property>
-              <property name="buddy">
-               <cstring>uArrowBorderWidth</cstring>
+               <string>Relative head length</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QDoubleSpinBox" name="uArrowBorderWidth">
+             <widget class="QDoubleSpinBox" name="uArrowHeadRelativeLength">
               <property name="toolTip">
-               <string>Width of the arrow shaft</string>
+               <string>Arrow head size as a multiple of the length</string>
+              </property>
+              <property name="minimum">
+               <double>0.000000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>10.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.500000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="uArrowMaxRelativeHeadSizeLabel">
+              <property name="text">
+               <string>Max relative head size</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+              <property name="buddy">
+               <cstring>uArrowMaxRelativeHeadSize</cstring>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QDoubleSpinBox" name="uArrowMaxRelativeHeadSize">
+              <property name="toolTip">
+               <string>Arrow head size as a multiple of the length</string>
+              </property>
+              <property name="minimum">
+               <double>0.000000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>2.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.100000000000000</double>
               </property>
              </widget>
             </item>
@@ -395,20 +401,21 @@
            </layout>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="uArrowFormatLayout2">
+           <layout class="QHBoxLayout" name="uArrowFormatColourLayout">
             <item>
-             <widget class="QLabel" name="uArrowBorderColorLabel">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
+             <widget class="QLabel" name="uArrowBorderWidthLabel">
               <property name="text">
-               <string>Colour: Head border/shaft</string>
+               <string>Style: Border width</string>
               </property>
               <property name="buddy">
-               <cstring>uArrowBorderColor</cstring>
+               <cstring>uArrowBorderWidth</cstring>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QDoubleSpinBox" name="uArrowBorderWidth">
+              <property name="toolTip">
+               <string>Width of the arrow shaft</string>
               </property>
              </widget>
             </item>
@@ -464,100 +471,73 @@
             </item>
            </layout>
           </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QFrame" name="uVectorFieldAlignmentFrame">
+         <layout class="QHBoxLayout" name="uVectorAlignmentLayout" stretch="0,0,0,0,0">
+          <property name="topMargin">
+           <number>1</number>
+          </property>
+          <property name="rightMargin">
+           <number>1</number>
+          </property>
           <item>
-           <layout class="QHBoxLayout" name="uArrowFormatLayout_3">
-            <item>
-             <widget class="QLabel" name="uArrowHeadShapeFrontLabel">
-              <property name="text">
-               <string>Arrow shape (relative x coords): front</string>
-              </property>
-              <property name="buddy">
-               <cstring>uArrowHeadShapeFront</cstring>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QDoubleSpinBox" name="uArrowHeadShapeFront">
-              <property name="toolTip">
-               <string>Arrow head size as a multiple of the length</string>
-              </property>
-              <property name="minimum">
-               <double>-3.000000000000000</double>
-              </property>
-              <property name="maximum">
-               <double>3.000000000000000</double>
-              </property>
-              <property name="singleStep">
-               <double>0.100000000000000</double>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLabel" name="uArrowHeadShapeBackLabel">
-              <property name="text">
-               <string>back outside</string>
-              </property>
-              <property name="buddy">
-               <cstring>uArrowHeadShapeBack</cstring>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QDoubleSpinBox" name="uArrowHeadShapeBack">
-              <property name="toolTip">
-               <string>Arrow head size as a multiple of the length</string>
-              </property>
-              <property name="minimum">
-               <double>-3.000000000000000</double>
-              </property>
-              <property name="maximum">
-               <double>3.000000000000000</double>
-              </property>
-              <property name="singleStep">
-               <double>0.100000000000000</double>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLabel" name="uArrowHeadShapeCentreLabel">
-              <property name="text">
-               <string>back centre</string>
-              </property>
-              <property name="buddy">
-               <cstring>uArrowHeadShapeCentre</cstring>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QDoubleSpinBox" name="uArrowHeadShapeCentre">
-              <property name="toolTip">
-               <string>Arrow head size as a multiple of the length</string>
-              </property>
-              <property name="minimum">
-               <double>-3.000000000000000</double>
-              </property>
-              <property name="maximum">
-               <double>3.000000000000000</double>
-              </property>
-              <property name="singleStep">
-               <double>0.100000000000000</double>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="uArrowFormatSpacer3">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-           </layout>
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>Align vector with map north</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="uAlignToMapNorth">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If selected the vector is drawn in terms of true north on the map, otherwise a north vector is drawn upwards on the map regardless of the map projection or map canvas rotation.  &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_2">
+            <property name="toolTip">
+             <string/>
+            </property>
+            <property name="text">
+             <string>Vector defined relative to true north</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="uVectorIsTrueNorth">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If selected the vector is defined in terms of geographic north (true north) even if the layer coordinate reference system is a projection. Otherwise the vector is defined in terms of projection north for layer coordinate systems. Has no effect for geographic layer coordinate systems or for height only vectors.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_3">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
           </item>
          </layout>
         </widget>
@@ -747,7 +727,7 @@
              <number>0</number>
             </property>
             <item>
-             <widget class="QRadioButton" name="uEllipseOrientationEast">
+             <widget class="QRadioButton" name="uEllipseOrientationNorth">
               <property name="toolTip">
                <string>Select the angle orientation</string>
               </property>
@@ -760,7 +740,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QRadioButton" name="uEllipseOrientationNorth">
+             <widget class="QRadioButton" name="uEllipseOrientationEast">
               <property name="toolTip">
                <string>Select the angle orientation</string>
               </property>
@@ -1147,78 +1127,6 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="uVectorAlignmentLayout" stretch="0,0,0,0,0">
-     <property name="topMargin">
-      <number>0</number>
-     </property>
-     <property name="rightMargin">
-      <number>0</number>
-     </property>
-     <item>
-      <widget class="QLabel" name="label_3">
-       <property name="text">
-        <string>Align vector with map north</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-       <property name="buddy">
-        <cstring>uAlignToMapNorth</cstring>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QCheckBox" name="uAlignToMapNorth">
-       <property name="toolTip">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If selected the vector is drawn in terms of true north on the map, otherwise a north vector is drawn upwards on the map regardless of the map projection or map canvas rotation.  &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="label_2">
-       <property name="toolTip">
-        <string/>
-       </property>
-       <property name="text">
-        <string>Vector defined relative to true north</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-       <property name="buddy">
-        <cstring>uVectorIsTrueNorth</cstring>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QCheckBox" name="uVectorIsTrueNorth">
-       <property name="toolTip">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If selected the vector is defined in terms of geographic north (true north) even if the layer coordinate reference system is a projection. Otherwise the vector is defined in terms of projection north for layer coordinate systems. Has no effect for geographic layer coordinate systems or for height only vectors.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer_3">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-    </layout>
-   </item>
-   <item>
     <layout class="QHBoxLayout" name="horizontalLayout_4">
      <property name="topMargin">
       <number>9</number>
@@ -1268,61 +1176,54 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="uVectorLegendFieldsLayout">
-     <property name="topMargin">
-      <number>0</number>
-     </property>
-     <item>
-      <widget class="QLabel" name="uLegendTextLabel">
-       <property name="text">
-        <string>Legend text</string>
-       </property>
-       <property name="buddy">
-        <cstring>uLegendText</cstring>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLineEdit" name="uLegendText"/>
-     </item>
-     <item>
-      <widget class="QLabel" name="uScaleBoxTextLabel">
-       <property name="text">
-        <string>Scale box text</string>
-       </property>
-       <property name="buddy">
-        <cstring>uScaleBoxText</cstring>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLineEdit" name="uScaleBoxText"/>
-     </item>
-     <item>
-      <widget class="QLabel" name="uShowScaleBoxLabel">
-       <property name="text">
-        <string>Show?</string>
-       </property>
-       <property name="buddy">
-        <cstring>uShowInScaleBox</cstring>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QCheckBox" name="uShowInScaleBox">
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="uHelpButton">
-       <property name="text">
-        <string>Help</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
+    <widget class="QFrame" name="uVectorLegendFieldsFrame">
+     <layout class="QHBoxLayout" name="uVectorLegendFieldsLayout">
+      <property name="topMargin">
+       <number>1</number>
+      </property>
+      <item>
+       <widget class="QLabel" name="uLegendTextLabel">
+        <property name="text">
+         <string>Legend text</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="uLegendText"/>
+      </item>
+      <item>
+       <widget class="QLabel" name="uScaleBoxTextLabel">
+        <property name="text">
+         <string>Scale box text</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="uScaleBoxText"/>
+      </item>
+      <item>
+       <widget class="QLabel" name="uShowScaleBoxLabel">
+        <property name="text">
+         <string>Show?</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="uShowInScaleBox">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="uHelpButton">
+        <property name="text">
+         <string>Help</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
    </item>
   </layout>
  </widget>
@@ -1344,27 +1245,33 @@
   <tabstop>uFieldTypePolar</tabstop>
   <tabstop>uFieldTypeHeight</tabstop>
   <tabstop>uFieldTypeNone</tabstop>
-  <tabstop>uAngleOrientationEast</tabstop>
+  <tabstop>uXField</tabstop>
+  <tabstop>uYField</tabstop>
   <tabstop>uAngleOrientationNorth</tabstop>
+  <tabstop>uAngleOrientationEast</tabstop>
   <tabstop>uAngleUnitsDegrees</tabstop>
   <tabstop>uAngleUnitsRadians</tabstop>
-  <tabstop>uArrowHeadSize</tabstop>
-  <tabstop>uArrowHeadMaxSize</tabstop>
+  <tabstop>uArrowHeadWidth</tabstop>
   <tabstop>uArrowShaftWidth</tabstop>
+  <tabstop>uArrowHeadRelativeLength</tabstop>
+  <tabstop>uArrowMaxRelativeHeadSize</tabstop>
+  <tabstop>uArrowBorderWidth</tabstop>
   <tabstop>uArrowBorderColor</tabstop>
   <tabstop>uFillArrow</tabstop>
   <tabstop>uArrowFillColor</tabstop>
-  <tabstop>uArrowHeadShapeFront</tabstop>
-  <tabstop>uArrowHeadShapeBack</tabstop>
-  <tabstop>uArrowHeadShapeCentre</tabstop>
+  <tabstop>uAlignToMapNorth</tabstop>
+  <tabstop>uVectorIsTrueNorth</tabstop>
   <tabstop>uEllipseTypeCovariance</tabstop>
   <tabstop>uEllipseTypeAxes</tabstop>
   <tabstop>uEllipseTypeCircular</tabstop>
   <tabstop>uEllipseTypeHeight</tabstop>
   <tabstop>uEllipseTypeNone</tabstop>
+  <tabstop>uEmaxField</tabstop>
+  <tabstop>uEminField</tabstop>
+  <tabstop>uEmaxAzimuthField</tabstop>
   <tabstop>uEllipseScale</tabstop>
-  <tabstop>uEllipseOrientationEast</tabstop>
   <tabstop>uEllipseOrientationNorth</tabstop>
+  <tabstop>uEllipseOrientationEast</tabstop>
   <tabstop>uEllipseAngleUnitsDegrees</tabstop>
   <tabstop>uEllipseAngleUnitsRadians</tabstop>
   <tabstop>uEllipseBorderWidth</tabstop>
@@ -1379,8 +1286,6 @@
   <tabstop>uBaseBorderColor</tabstop>
   <tabstop>uFillBase</tabstop>
   <tabstop>uBaseColor</tabstop>
-  <tabstop>uAlignToMapNorth</tabstop>
-  <tabstop>uVectorIsTrueNorth</tabstop>
   <tabstop>uArrowScale</tabstop>
   <tabstop>uScaleUnits</tabstop>
   <tabstop>uScaleGroup</tabstop>

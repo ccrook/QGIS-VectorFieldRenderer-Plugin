@@ -6,18 +6,17 @@ from PyQt5.QtGui import QColor
 from qgis.core import (
     QgsArrowSymbolLayer,
     QgsFillSymbol,
+    QgsLineSymbol,
     QgsMapLayerType,
     QgsMarkerLineSymbolLayer,
     QgsMarkerSymbol,
+    QgsSingleSymbolRenderer,
     QgsUnitTypes,
     QgsVectorFieldSymbolLayer,
     QgsWkbTypes,
 )
 
-from .VectorFieldUtils import VectorFieldUtils
-
 VECTOR_SETTINGS_PROP = "vfr_settings"
-
 
 class VectorFieldLayerSettings:
 
@@ -27,8 +26,15 @@ class VectorFieldLayerSettings:
     CircularEllipse = 3
     HeightEllipse = 4
 
+    @staticmethod
+    def isValidLayerType(layer):
+        if layer.type() != QgsMapLayerType.VectorLayer:
+            return False
+        if layer.geometryType() != QgsWkbTypes.PointGeometry:
+            return False
+        return True
+        
     def __init__(self):
-        self._degrees = True
         self._mode = QgsVectorFieldSymbolLayer.Cartesian
         self._angleOrientation = QgsVectorFieldSymbolLayer.ClockwiseFromNorth
         self._angleUnits = QgsVectorFieldSymbolLayer.Degrees
@@ -44,16 +50,14 @@ class VectorFieldLayerSettings:
         self._ellipseDegrees = True
         self._ellipseScale = 1.0
         self._symbolUnitType = QgsUnitTypes.RenderMillimeters
-        self._arrowShaftSize = 1.5
-        self._arrowRelativeHeadSize = 0.3
-        self._arrowMaxHeadSize = 3.0
+        self._arrowShaftWidth = 1.5
+        self._arrowHeadWidth = 3.0
+        self._arrowHeadRelativeLength = 2.0
         self._arrowBorderWidth = 0.0
+        self._arrowMaxRelativeHeadSize = 0.3
         self._arrowFillColor = QColor(0, 0, 0)
         self._fillArrow = True
         self._arrowBorderColor = QColor(0, 0, 0)
-        self._arrowHeadShapeFront = 0.0
-        self._arrowHeadShapeBackOuter = -1.0
-        self._arrowHeadShapeBackInner = -0.7
         self._baseSize = 2.0
         self._fillBase = True
         self._baseFillColor = QColor(255, 0, 0)
@@ -77,12 +81,6 @@ class VectorFieldLayerSettings:
         # self._legendText = ""
         # self._showInScaleBox = True
         # self._scaleBoxText = ""
-
-    def degrees(self):
-        return self._degrees
-
-    def setDegrees(self, value):
-        self._degrees = value
 
     def mode(self):
         return self._mode
@@ -168,23 +166,29 @@ class VectorFieldLayerSettings:
     def setEllipseScale(self, value):
         self._ellipseScale = value
 
-    def arrowShaftSize(self):
-        return self._arrowShaftSize
+    def arrowShaftWidth(self):
+        return self._arrowShaftWidth
 
-    def setArrowShaftSize(self, value):
-        self._arrowShaftSize = value
+    def setArrowShaftWidth(self, value):
+        self._arrowShaftWidth = value
 
-    def arrowRelativeHeadSize(self):
-        return self._arrowRelativeHeadSize
+    def arrowMaxRelativeHeadSize(self):
+        return self._arrowMaxRelativeHeadSize
 
-    def setArrowRelativeHeadSize(self, value):
-        self._arrowRelativeHeadSize = value
+    def setArrowMaxRelativeHeadSize(self, value):
+        self._arrowMaxRelativeHeadSize = value
 
-    def arrowMaxHeadSize(self):
-        return self._arrowMaxHeadSize
+    def arrowHeadWidth(self):
+        return self._arrowHeadWidth
 
-    def setArrowMaxHeadSize(self, value):
-        self._arrowMaxHeadSize = value
+    def setArrowHeadWidth(self, value):
+        self._arrowHeadWidth = value
+
+    def arrowHeadRelativeLength(self):
+        return self._arrowHeadRelativeLength
+
+    def setArrowHeadRelativeLength(self, value):
+        self._arrowHeadRelativeLength = value
 
     def arrowBorderWidth(self):
         return self._arrowBorderWidth
@@ -210,32 +214,8 @@ class VectorFieldLayerSettings:
     def setArrowBorderColor(self, value):
         self._arrowBorderColor = value
 
-    def arrowHeadShapeFront(self):
-        return self._arrowHeadShapeFront
-
-    def setArrowHeadShapeFront(self, value):
-        self._arrowHeadShapeFront = value
-
-    def arrowHeadShapeBackOuter(self):
-        return self._arrowHeadShapeBackOuter
-
-    def setArrowHeadShapeBackOuter(self, value):
-        self._arrowHeadShapeBackOuter = value
-
-    def arrowHeadShapeBackInner(self):
-        return self._arrowHeadShapeBackInner
-
-    def setArrowHeadShapeBackInner(self, value):
-        self._arrowHeadShapeBackInner = value
-
     def baseSize(self):
         return self._baseSize
-
-    def arrowHeadShape(self):
-        return self._arrowHeadShape
-
-    def setArrowHeadShape(self, value):
-        self._arrowHeadShape = value
 
     def setBaseSize(self, value):
         self._baseSize = value
@@ -331,7 +311,7 @@ class VectorFieldLayerSettings:
         Creates a line symbol layer for the base point of the arrow.  This is a marker line
         with a marker at the first vertex.
         """
-        symbolUnit = QgsUnitTypes.toAbbreviatedString()
+        symbolUnit = QgsUnitTypes.toAbbreviatedString(self._symbolUnitType)
         basepointSymbol = QgsMarkerSymbol.createSimple(
             {
                 "name": "circle",
@@ -343,23 +323,24 @@ class VectorFieldLayerSettings:
                 "outline_width_unit": symbolUnit,
             }
         )
-        basepointLine = QgsMarkerLineSymbolLayer()
+        basepointLine = QgsMarkerLineSymbolLayer(self._symbolUnitType)
         basepointLine.setPlacement(QgsMarkerLineSymbolLayer.FirstVertex)
         basepointLine.setSubSymbol(basepointSymbol)
         return basepointLine
 
     def arrowSymbolLayer(self):
-        symbolUnit = QgsUnitTypes.toAbbreviatedString()
+        symbolUnit = QgsUnitTypes.toAbbreviatedString(self._symbolUnitType)
         arrow = QgsArrowSymbolLayer.create(
             {
                 "head_type": "0",
                 "arrow_type": "0",
-                "arrow_width": str(self._arrowShaftSize),
-                "arrow_start_width": str(self._arrowShaftSize),
-                "arrow_head_length": str(self._arrowMaxHeadSize * (self._arrowHeadShapeFront - self._arrowHeadShapeBackOuter)),
-                "arrow_head_width": str(self._arrowMaxHeadSize),
+                "arrow_width": str(self._arrowShaftWidth),
+                "arrow_start_width": str(self._arrowShaftWidth),
+                "head_thickness": str(self._arrowHeadWidth),
+                "head_length": str(self._arrowHeadWidth * self._arrowHeadRelativeLength),
                 "arrow_start_width_unit": symbolUnit,
                 "arrow_width_unit": symbolUnit,
+                "arrow_head_thickness_unit": symbolUnit,
                 "arrow_head_length_unit": symbolUnit,
             }
         )
@@ -371,6 +352,7 @@ class VectorFieldLayerSettings:
                 "outline_width": str(self._arrowBorderWidth),
                 "outline_width_unit": symbolUnit,
                 "outline_color": self._arrowBorderColor.name(QColor.HexArgb),
+                "joinstyle": "miter",
             }
         )
         arrow.setSubSymbol(arrowFillSymbol)
@@ -397,7 +379,7 @@ class VectorFieldLayerSettings:
 
         # Create the symbology for the vector layer
         symbol = QgsLineSymbol()
-        symbol.removeSymbolLayer(0)
+        symbol.deleteSymbolLayer(0)
         basepoint = self.basepointSymbolLayer()
         if basepoint is not None:
             symbol.appendSymbolLayer(basepoint)
@@ -416,15 +398,15 @@ class VectorFieldLayerSettings:
         return vflsymbol
 
     def applyToLayer(self, layer):
-        if layer.type() != QgsMapLayerType.VectorLayer:
-            return None
-        if layer.geometryType() != QgsWkbTypes.PointGeometry:
-            return None
+        if not self.isValidLayerType(layer):
+            return False
         vflsymbol = self.createVectorFieldSymbol()
         renderer = QgsSingleSymbolRenderer(vflsymbol)
         layer.setRenderer(renderer)
-        VectorFieldUtils.setVectorFieldLayerScale(self._scale, self._scaleGroup, self._scaleGroupFactor)
+        self.saveToLayer(layer)
+
         layer.triggerRepaint()
+        return True
 
     def saveToString(self):
         """
@@ -483,7 +465,7 @@ class VectorFieldLayerSettings:
 
     def readFromLayer(self, layer):
         """
-        Write the layer settings to a QgsMapLayer custom property 
+        Read back the layer settings from a QgsMapLayer custom property 
         """
 
         result = False
@@ -491,4 +473,15 @@ class VectorFieldLayerSettings:
         if settingstr != "":
             result = self.readFromString(settingstr)
         return result
+
+    @staticmethod
+    def layerSettings( layer ):
+        """
+        Return the settings from a layer if they are defined, otherwise return
+        None.
+        """
+        settings=VectorFieldLayerSettings()
+        if not settings.readFromLayer(layer):
+            settings=None
+        return settings
 
