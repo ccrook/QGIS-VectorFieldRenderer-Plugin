@@ -19,11 +19,6 @@ from qgis.core import (
     QgsWkbTypes,
 )
 
-VECTOR_SETTINGS_PROP = "vfr_settings"
-SCALE_PROP = "vfr_scale"
-SCALE_GROUP_PROP = "vfr_scale_group"
-SCALE_GROUP_FACTOR_PROP = "vfr_scale_group_factor"
-
 
 class VectorFieldLayerSettings:
 
@@ -32,16 +27,6 @@ class VectorFieldLayerSettings:
     AxesEllipse = 2
     CircularEllipse = 3
     HeightEllipse = 4
-
-    @staticmethod
-    def isValidLayerType(layer):
-        if layer is None:
-            return False
-        if layer.type() != QgsMapLayerType.VectorLayer:
-            return False
-        if layer.geometryType() != QgsWkbTypes.PointGeometry:
-            return False
-        return True
 
     def __init__(self):
         self._mode = QgsVectorFieldSymbolLayer.Cartesian
@@ -82,6 +67,7 @@ class VectorFieldLayerSettings:
         self._drawEllipse = True
         self._drawEllipseAxes = False
         self._ellipseTickSize = 2.0
+        self._scaleVariableName = ""
 
         # Not used in current version of renderer
         # self._vectorIsTrueNorth = True
@@ -319,12 +305,14 @@ class VectorFieldLayerSettings:
     def setEllipseTickSize(self, value):
         self._ellipseTickSize = value
 
+    def setScaleVariableName(self, name):
+        self._scaleVariableName = name
+
     # Functions to construct symbology
 
     def basepointSymbol(self):
         """
-        Creates a line symbol layer for the base point of the arrow.  This is a marker line
-        with a marker at the first vertex.
+        Creates a markser symbol for the base point
         """
         symbolUnit = QgsUnitTypes.toAbbreviatedString(self._symbolUnitType)
         basepointSymbol = QgsMarkerSymbol.createSimple(
@@ -341,6 +329,10 @@ class VectorFieldLayerSettings:
         return basepointSymbol
 
     def basepointLineSymbolLayer(self):
+        """
+        Creates a line symbol layer for the base point of the arrow.  This is a marker line
+        with a marker at the first vertex.
+        """
         basepointSymbol = self.basepointSymbol()
         basepointLine = QgsMarkerLineSymbolLayer()
         basepointLine.setPlacement(QgsMarkerLineSymbolLayer.FirstVertex)
@@ -348,6 +340,10 @@ class VectorFieldLayerSettings:
         return basepointLine
 
     def arrowSymbolLayer(self):
+        """
+        Creates a line symbol layer for the arrow.  
+        """
+
         if not self._drawArrow:
             return None
         symbolUnit = QgsUnitTypes.toAbbreviatedString(self._symbolUnitType)
@@ -411,7 +407,12 @@ class VectorFieldLayerSettings:
                 "fill_color": fillColor,
             }
         )
-        ellipseScale = str(self._scale * self._ellipseScale)
+        scale = self._ellipseScale
+        useproperty = self._scaleVariableName != ""
+        if useproperty:
+            ellipseScale = "(@" + self._scaleVariableName + " * " + str(scale) + ")"
+        else:
+            ellipseScale = str(scale * self._scale)
         widthExpression = self._fieldExpression(self._emaxField) + "*" + ellipseScale
 
         if self._ellipseMode == self.AxesEllipse:
@@ -476,9 +477,7 @@ class VectorFieldLayerSettings:
 
         return vflsymbol
 
-    def applyToLayer(self, layer):
-        if not self.isValidLayerType(layer):
-            return False
+    def symbol(self):
         if self._drawArrow:
             symbol = self.vectorFieldSymbol()
         else:
@@ -486,11 +485,7 @@ class VectorFieldLayerSettings:
             ellipse = self.ellipseSymbolLayer()
             if ellipse is not None:
                 symbol.insertSymbolLayer(0, ellipse)
-        renderer = QgsSingleSymbolRenderer(symbol)
-        layer.setRenderer(renderer)
-        self.saveToLayer(layer)
-        layer.triggerRepaint()
-        return True
+        return symbol
 
     def saveToString(self):
         """
@@ -503,20 +498,13 @@ class VectorFieldLayerSettings:
                 key = setting[1:]
                 if callable(value):
                     continue
+                if setting == "_scaleVariableName":
+                    continue
                 if type(value) == QColor:
                     value = value.name(QColor.HexArgb)
                 settings[key] = value
         settingstr = json.dumps(settings, sort_keys=True)
         return settingstr
-
-    def saveToLayer(self, layer):
-        """
-        Write the layer settings to a QgsMapLayer custom property 
-        """
-        settingstr = self.saveToString()
-        layer.setCustomProperty(VECTOR_SETTINGS_PROP, settingstr)
-        layer.setCustomProperty(SCALE_GROUP_PROP, self._scaleGroup)
-        layer.setCustomProperty(SCALE_GROUP_FACTOR_PROP, self._scaleGroupFactor)
 
     def readFromString(self, settingstr):
         """
@@ -548,35 +536,3 @@ class VectorFieldLayerSettings:
         except:
             pass
         return result
-
-    def readFromLayer(self, layer):
-        """
-        Read back the layer settings from a QgsMapLayer custom property 
-        """
-
-        result = False
-        settingstr = layer.customProperty(VECTOR_SETTINGS_PROP, "")
-        if settingstr != "":
-            result = self.readFromString(settingstr)
-        return result
-
-    @staticmethod
-    def layerSettings(layer):
-        """
-        Return the settings from a layer if they are defined, otherwise return
-        None.
-        """
-        settings = VectorFieldLayerSettings()
-        if not settings.readFromLayer(layer):
-            settings = None
-        return settings
-
-    @staticmethod
-    def layerScaleGroupScale(layer):
-        """
-        Returns the scale group and scale group scale for a layer
-        """
-        group = layer.customProperty(SCALE_GROUP_PROP, "")
-        if group == "":
-            return None, None
-

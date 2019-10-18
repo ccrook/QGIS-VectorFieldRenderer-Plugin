@@ -208,7 +208,7 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
         return self._layer
 
     def setLayer(self, layer):
-        if not VectorFieldLayerSettings.isValidLayerType(layer):
+        if not self._controller.isValidLayerType(layer):
             if self.uLayerName is None:
                 self.uLayerName.setText("No layer selected")
             else:
@@ -236,22 +236,15 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
         return self._validLayer and self._originalSettings != self.settings().saveToString()
 
     def readFromLayer(self):
-        self._settings.readFromLayer(self._layer)
+        self._settings = self._controller.readSettingsFromLayer(self._layer)
         self.loadFromSettings()
         self._originalSettings = self.settings().saveToString()
 
     def applyToLayer(self):
         if self._validLayer:
             settings = self.settings()
-            settings.applyToLayer(self._layer)
+            self._controller.applySettingsToLayer(self._layer, settings)
             self._originalSettings = settings.saveToString()
-            if self._controller:
-                scale = settings.scale()
-                scaleGroup = settings.scaleGroup() or ""
-                scaleGroupFactor = settings.scaleGroupFactor()
-                self._controller.setVectorFieldLayerScale(
-                    self._layer, scale=scale, scaleGroup=scaleGroup, scaleGroupFactor=scaleGroupFactor
-                )
 
     def loadFromSettings(self):
         settings = self._settings
@@ -372,6 +365,4 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
         # settings.setLegendText( self.uLegendText.text())
         # settings.setScaleBoxText( self.uScaleBoxText.text())
         # settings.setShowInScaleBox( self.uShowInScaleBox.isChecked())
-        # TODO: remove test code
-        print(settings.saveToString())
 

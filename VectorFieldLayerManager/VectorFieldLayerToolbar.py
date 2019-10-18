@@ -140,7 +140,7 @@ class VectorFieldLayerToolbar:
         self._rescaleAction.setEnabled(isvectorlayer)
         self._enlargeAction.setEnabled(isvectorlayer)
         self._shrinkAction.setEnabled(isvectorlayer)
-        isvalidlayer = VectorFieldLayerSettings.isValidLayerType(layer)
+        isvalidlayer = self._controller.isValidLayerType(layer)
         self._layerDialog.setEnabled(isvalidlayer)
 
     def currentLayerChanged(self, layer):

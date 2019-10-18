@@ -7,7 +7,8 @@ sys.path.insert(0, modpath)
 print(modpath)
 
 import fileunittest
-from temp.VectorFieldLayerSettings import VectorFieldLayerSettings
+from VectorFieldLayerManager.VectorFieldLayerSettings import VectorFieldLayerSettings
+
 
 class VectorFieldLayerSettingsTestCase(fileunittest.TestCase):
     def test001_Params(self):
@@ -24,7 +25,6 @@ class VectorFieldLayerSettingsTestCase(fileunittest.TestCase):
         Test vector field layer settings
         """
         vs = VectorFieldLayerSettings()
-        vs.setDegrees(False)
         vs.setMode(2)
         vs.setAngleOrientation(1)
         vs.setAngleUnits(1)
@@ -39,16 +39,14 @@ class VectorFieldLayerSettingsTestCase(fileunittest.TestCase):
         vs.setEllipseDegrees(False)
         vs.setEllipseScale(0.7)
         vs.setSymbolUnitType(1)
-        vs.setArrowShaftWidth(0.2)
-        vs.setArrowRelativeHeadSize(0.7)
-        vs.setArrowMaxHeadSize(1.3)
+        vs.setArrowBorderColor(QColor("#ffbbffcc"))
+        vs.setArrowHeadWidth(2.5)
+        vs.setArrowHeadRelativeLength(2.3)
+        vs.setArrowShaftWidth(0.5)
         vs.setArrowBorderWidth(0.15)
         vs.setArrowFillColor(QColor("#ffffbbcc"))
         vs.setFillArrow(False)
-        vs.setArrowBorderColor(QColor("#ffbbffcc"))
-        vs.setArrowHeadShapeFront(0.5)
-        vs.setArrowHeadShapeBackOuter(1.2)
-        vs.setArrowHeadShapeBackInner(0.3)
+        vs.setArrowMaxRelativeHeadSize(0.2)
         vs.setBaseSize(0.27)
         vs.setFillBase(False)
         vs.setBaseFillColor(QColor("#aabbccdd"))
@@ -66,10 +64,11 @@ class VectorFieldLayerSettingsTestCase(fileunittest.TestCase):
         vs.setEllipseTickSize(0.003)
         settings = vs.saveToString()
         self.check("002: Setter functions", settings)
-        vs2=VectorFieldLayerSettings()
+        vs2 = VectorFieldLayerSettings()
         self.checkRun("002: Reload modified settings", lambda: vs2.readFromString(settings))
         settings2 = vs2.saveToString()
-        self.check("002: Modified settings reloaded correctly",settings == settings2)
+        self.check("002: Modified settings reloaded correctly", settings == settings2)
+
 
 if __name__ == "__main__":
     fileunittest.main()
