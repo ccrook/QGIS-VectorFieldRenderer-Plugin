@@ -1,4 +1,18 @@
 #!/usr/bin/python3
+
+# TODO: get ellipse rendering working
+# TODO: look at vector scale options (map metres)
+# TODO: restore feature - no alignment to true north
+# TODO: scale down arrow when vector small
+# TODO: Move all property names into a common module
+# TODO: Handling of drawing no arrow
+# TODO: Handle map units for size of vector/ellipse
+# TODO: Check alternative map units (map metres?)
+# TODO: Save/reuse symbology
+# TODO: Live update
+# FIXME: fix handling of scale groups
+# FIXME: reinstall autoscale feature
+
 from qgis.core import (
     QgsMapLayerType,
     QgsSingleSymbolRenderer,
@@ -11,10 +25,10 @@ SCALE_PROP = "vfr_scale"
 SCALE_GROUP_PROP = "vfr_scale_group"
 SCALE_GROUP_FACTOR_PROP = "vfr_scale_group_factor"
 
+
 class VectorFieldLayerManager:
 
     VectorFieldLayerTypeName = "VectorField"
-
 
     def __init__(self, iface=None):
         self._iface = iface
@@ -120,9 +134,11 @@ class VectorFieldLayerManager:
         group = layer.customProperty(SCALE_GROUP_PROP, None)
         if group == "":
             group = None
-        factor = layer.customProperty(SCALE_GROUP_FACTOR_PROP, 1.0)
-        if factor <= 0:
-            factor = 1.0
+        factor = 1.0
+        if group is not None:
+            factor = layer.customProperty(SCALE_GROUP_FACTOR_PROP, 1.0)
+            if factor <= 0:
+                factor = 1.0
         return group, factor
 
     def propogateVectorFieldScale(self, layer):

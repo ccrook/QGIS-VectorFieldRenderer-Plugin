@@ -45,55 +45,38 @@ class UnitButton(QObject):
     def clicked(self):
         self.setIsMapUnit(not self.isMapUnit())
 
+
 # Vector field settings widget
+
 
 class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
     def __init__(self, controller, layer):
         QWidget.__init__(self)
         self._controller = controller
-        self._layer = layer
-        self.validLayer = True
-        if not VectorFieldLayerSettings.isValidLayerType(layer):
-            self.setupBlankUi(layer)
-            self.validLayer = False
-            return
-
         self._settings = VectorFieldLayerSettings()
-        self._settings.readFromLayer(layer)
 
         self._mode = QgsVectorFieldSymbolLayer.Cartesian
-        self._ellipsemode = VectorFieldLayerSettings.NoEllipse
+        self._ellipseMode = VectorFieldLayerSettings.NoEllipse
+        self._validLayer = False
         self.buildWidget()
 
         # Hide fields not used in current implementation
         self.uVectorLegendFieldsFrame.hide()
         self.uEllipseTypeCovariance.hide()
-        self.uTickSizeLabel.hide()
-        self.uDrawEllipse.hide()
-        self.uDrawEllipseAxes.hide()
+        self.uEllipseTickSizeLabel.hide()
+        self.uEllipseTickSize.hide()
         self.uVectorFieldAlignmentFrame.hide()
 
         # Install information from layer
-        self.setupLayer(layer)
-        self.loadFromSettings()
-        scale=self._controller.vectorFieldLayerScale(layer)
+
+        self.setLayer(layer)
+        scale = self._controller.vectorFieldLayerScale(layer)
         if scale is None:
-            scale=1.0
+            scale = 1.0
         self.uArrowScale.setText(str(scale))
 
         # Try creating a new settings to save to ...
         self._settings = VectorFieldLayerSettings()
-
-    def setupBlankUi(self, layer):
-        name = layer.name() if layer else "Selected layer"
-        self.uLayout = QVBoxLayout()
-        self.uLabel = QLabel(
-            "The vector field settings only applies to point type layers.\n\n"
-            + name
-            + " is not a point layer, and cannot be displayed by the vector field settings.\n\n"
-        )
-        self.uLayout.addWidget(self.uLabel)
-        self.setLayout(self.uLayout)
 
     def buildWidget(self):
         self.setupUi(self)
@@ -221,23 +204,47 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
         self.uAxisOrientationGroupBox.setEnabled(isPolar)
         self.uEllipseFormatGroup.setEnabled(mode != VectorFieldLayerSettings.NoEllipse)
 
-    def setupLayer(self, layer):
-        self.layer = layer
+    def layer(self):
+        return self._layer
+
+    def setLayer(self, layer):
+        if not VectorFieldLayerSettings.isValidLayerType(layer):
+            if self.uLayerName is None:
+                self.uLayerName.setText("No layer selected")
+            else:
+                self.uLayerName.setText(layer.name() + " is not a point layer")
+            self.setEnabled(False)
+            self._validLayer = False
+            return
+        self.setEnabled(True)
+        self.uLayerName.setText("Layer: " + layer.name())
+        self._validLayer = True
+        self._layer = layer
         self.uXField.setLayer(layer)
         self.uYField.setLayer(layer)
         self.uEmaxField.setLayer(layer)
         self.uEminField.setLayer(layer)
         self.uEmaxAzimuthField.setLayer(layer)
+        self.readFromLayer()
 
     def settings(self):
-        if self.validLayer:
+        if self._validLayer:
             self.saveToSettings()
         return self._settings
 
+    def isModified(self):
+        return self._validLayer and self._originalSettings != self.settings().saveToString()
+
+    def readFromLayer(self):
+        self._settings.readFromLayer(self._layer)
+        self.loadFromSettings()
+        self._originalSettings = self.settings().saveToString()
+
     def applyToLayer(self):
-        if self.validLayer:
+        if self._validLayer:
             settings = self.settings()
             settings.applyToLayer(self._layer)
+            self._originalSettings = settings.saveToString()
             if self._controller:
                 scale = settings.scale()
                 scaleGroup = settings.scaleGroup() or ""
@@ -309,7 +316,9 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
         settings.setEmaxField(self.uEmaxField.currentText())
         settings.setEminField(self.uEminField.currentText())
         settings.setEmaxAzimuthField(self.uEmaxAzimuthField.currentText())
-        angleUnits=QgsVectorFieldSymbolLayer.Degrees if self.uAngleUnitsDegrees.isChecked() else QgsVectorFieldSymbolLayer.Radians
+        angleUnits = (
+            QgsVectorFieldSymbolLayer.Degrees if self.uAngleUnitsDegrees.isChecked() else QgsVectorFieldSymbolLayer.Radians
+        )
         settings.setAngleUnits(angleUnits)
         settings.setAngleOrientation(
             QgsVectorFieldSymbolLayer.ClockwiseFromNorth
@@ -363,6 +372,6 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
         # settings.setLegendText( self.uLegendText.text())
         # settings.setScaleBoxText( self.uScaleBoxText.text())
         # settings.setShowInScaleBox( self.uShowInScaleBox.isChecked())
-
-    # TODO: Sort out error handling for scale field..
+        # TODO: remove test code
+        print(settings.saveToString())
 

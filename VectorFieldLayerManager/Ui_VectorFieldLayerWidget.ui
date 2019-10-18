@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>791</width>
-    <height>512</height>
+    <height>535</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,7 +19,14 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0,0,0">
+  <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0,0,0,0">
+   <item>
+    <widget class="QLabel" name="uLayerName">
+     <property name="text">
+      <string>No layer selected</string>
+     </property>
+    </widget>
+   </item>
    <item>
     <widget class="QTabWidget" name="uTabManager">
      <property name="currentIndex">
@@ -427,6 +434,9 @@
               <property name="text">
                <string>change</string>
               </property>
+              <property name="allowOpacity">
+               <bool>true</bool>
+              </property>
              </widget>
             </item>
             <item>
@@ -453,6 +463,9 @@
               </property>
               <property name="text">
                <string>change</string>
+              </property>
+              <property name="allowOpacity">
+               <bool>true</bool>
               </property>
              </widget>
             </item>
@@ -863,6 +876,26 @@
           <item>
            <layout class="QHBoxLayout" name="uEllipseFormatLayout1">
             <item>
+             <widget class="QRadioButton" name="uDrawEllipse">
+              <property name="text">
+               <string>Draw ellipse</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="uDrawEllipseAxes">
+              <property name="layoutDirection">
+               <enum>Qt::LeftToRight</enum>
+              </property>
+              <property name="text">
+               <string>Draw ellipse axes</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QLabel" name="uEllipseWidthLabel">
               <property name="text">
                <string>Border width</string>
@@ -883,7 +916,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QLabel" name="uTickSizeLabel">
+             <widget class="QLabel" name="uEllipseTickSizeLabel">
               <property name="text">
                <string>Tick size </string>
               </property>
@@ -893,37 +926,6 @@
              <widget class="QDoubleSpinBox" name="uEllipseTickSize">
               <property name="toolTip">
                <string>Width of the arrow shaft</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLabel" name="uDrawEllipseLabel">
-              <property name="text">
-               <string>Draw ellipse</string>
-              </property>
-              <property name="buddy">
-               <cstring>uFillEllipse</cstring>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="uDrawEllipse">
-              <property name="text">
-               <string/>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLabel" name="uDrawEllipseAxesLabel">
-              <property name="text">
-               <string>Draw ellipse axes</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="uDrawEllipseAxes">
-              <property name="text">
-               <string/>
               </property>
              </widget>
             </item>
@@ -965,6 +967,9 @@
               <property name="text">
                <string>change</string>
               </property>
+              <property name="allowOpacity">
+               <bool>true</bool>
+              </property>
              </widget>
             </item>
             <item>
@@ -991,6 +996,9 @@
               </property>
               <property name="text">
                <string>change</string>
+              </property>
+              <property name="allowOpacity">
+               <bool>true</bool>
               </property>
              </widget>
             </item>
@@ -1082,6 +1090,9 @@
        <property name="text">
         <string>change</string>
        </property>
+       <property name="allowOpacity">
+        <bool>true</bool>
+       </property>
       </widget>
      </item>
      <item>
@@ -1108,6 +1119,9 @@
        </property>
        <property name="text">
         <string>change</string>
+       </property>
+       <property name="allowOpacity">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -1274,10 +1288,10 @@
   <tabstop>uEllipseOrientationEast</tabstop>
   <tabstop>uEllipseAngleUnitsDegrees</tabstop>
   <tabstop>uEllipseAngleUnitsRadians</tabstop>
-  <tabstop>uEllipseBorderWidth</tabstop>
-  <tabstop>uEllipseTickSize</tabstop>
   <tabstop>uDrawEllipse</tabstop>
   <tabstop>uDrawEllipseAxes</tabstop>
+  <tabstop>uEllipseBorderWidth</tabstop>
+  <tabstop>uEllipseTickSize</tabstop>
   <tabstop>uEllipseBorderColor</tabstop>
   <tabstop>uFillEllipse</tabstop>
   <tabstop>uEllipseFillColor</tabstop>

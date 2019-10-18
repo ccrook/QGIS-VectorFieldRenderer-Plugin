@@ -1,8 +1,7 @@
-
 from PyQt5.QtGui import QIcon, QPainter
 from PyQt5.QtWidgets import QDialog, QMessageBox, QAction
 
-from qgis.core import QgsApplication, QgsMapLayer,QgsProject
+from qgis.core import QgsApplication, QgsMapLayer, QgsProject
 from qgis.gui import QgsMessageBar
 from qgis import utils
 
@@ -11,13 +10,15 @@ from .VectorFieldLayerManager import VectorFieldLayerManager
 from .VectorFieldLayerSettings import VectorFieldLayerSettings
 from . import VectorFieldManagerResources
 
+
 class VectorFieldLayerToolbar:
 
     toolBarName = "Vector field controller"
 
-    def __init__( self, iface ):
+    def __init__(self, iface):
         self._iface = iface
-        self._controller=VectorFieldLayerManager(iface)
+        self._controller = VectorFieldLayerManager(iface)
+        self._dialog = VectorFieldLayerDialog(self._controller, self.currentLayer(), iface.mainWindow())
         self._factor = 2.0
 
         # self._helpWindow = None
@@ -29,20 +30,23 @@ class VectorFieldLayerToolbar:
         toolbar = iface.addToolBar(self.toolBarName)
         self._toolbar = toolbar
 
-        action1 = QAction(QIcon(":/plugins/VectorFieldLayerManager/AutoscaleVectorFieldIcon.png"),
-                  "Autosize arrows", iface.mainWindow())
+        action1 = QAction(
+            QIcon(":/plugins/VectorFieldLayerManager/AutoscaleVectorFieldIcon.png"), "Autosize arrows", iface.mainWindow()
+        )
         action1.setWhatsThis("Resize the arrows to a suggested scale for the current view")
         action1.setStatusTip("Resize the arrows to a suggested scale for the current view")
         action1.triggered.connect(self.autoRescale)
 
-        action2 = QAction(QIcon(":/plugins/VectorFieldLayerManager/MagnifyVectorFieldIcon.png"),
-                  "Enlarge arrows", iface.mainWindow())
+        action2 = QAction(
+            QIcon(":/plugins/VectorFieldLayerManager/MagnifyVectorFieldIcon.png"), "Enlarge arrows", iface.mainWindow()
+        )
         action2.setWhatsThis("Increase the arrow size")
         action2.setStatusTip("Increase the arrow size")
         action2.triggered.connect(self.enlarge)
 
-        action3 = QAction(QIcon(":/plugins/VectorFieldLayerManager/ShrinkVectorFieldIcon.png"),
-                  "Shrink arrows", iface.mainWindow())
+        action3 = QAction(
+            QIcon(":/plugins/VectorFieldLayerManager/ShrinkVectorFieldIcon.png"), "Shrink arrows", iface.mainWindow()
+        )
         action3.setWhatsThis("Decrease the arrow size")
         action3.setStatusTip("Decrease the arrow size")
         action3.triggered.connect(self.shrink)
@@ -53,14 +57,20 @@ class VectorFieldLayerToolbar:
         # action4.setStatusTip("Display the vector scale box")
         # action4.triggered.connect(self.setScaleBoxOptions)
 
-        action5 = QAction(QIcon(":plugins/VectorFieldLayerManager/VectorFieldLayerManagerIcon.png"),
-                  "Apply vector settings to current layer", iface.mainWindow())
+        action5 = QAction(
+            QIcon(":plugins/VectorFieldLayerManager/VectorFieldLayerManagerIcon.png"),
+            "Apply vector settings to current layer",
+            iface.mainWindow(),
+        )
         action5.setWhatsThis("Apply vector settings to current layer")
         action5.setStatusTip("Apply vector settings to current layer")
         action5.triggered.connect(self.showLayerDialog)
 
-        action6 = QAction(QIcon(":plugins/VectorFieldLayerManager/VectorFieldLayerManagerHelpIcon.png"),
-                  "Vector field settings help", iface.mainWindow())
+        action6 = QAction(
+            QIcon(":plugins/VectorFieldLayerManager/VectorFieldLayerManagerHelpIcon.png"),
+            "Vector field settings help",
+            iface.mainWindow(),
+        )
         action6.setWhatsThis("Show vector field settings help")
         action6.setStatusTip("Show vector field settings help")
         action6.triggered.connect(self.showHelp)
@@ -76,7 +86,7 @@ class VectorFieldLayerToolbar:
         self._enlargeAction = action2
         self._shrinkAction = action3
         # self._scaleOptionsAction = action4
-        self._layerDialog=action5
+        self._layerDialog = action5
         self._helpAction = action6
 
         # Only enable when active layer has a Vector Field settings, also
@@ -89,7 +99,7 @@ class VectorFieldLayerToolbar:
         # iface.mapCanvas().renderComplete[QPainter].connect(self.renderComplete)
         # iface.mapCanvas().renderStarting.connect(self.renderStarting)
 
-    def unload( self ):
+    def unload(self):
         self._iface.currentLayerChanged[QgsMapLayer].disconnect(self.currentLayerChanged)
         # self._iface.mainWindow().projectRead.disconnect(self.loadProject)
         # self._iface.mapCanvas().renderComplete[QPainter].disconnect(self.renderComplete)
@@ -103,7 +113,6 @@ class VectorFieldLayerToolbar:
     #     for l, r in self.vectorSettingsLayers():
     #         vrlayers.append(str(l.name()))
     #         vrlayerids.append(l.getLayerID())
-                
 
     #     if len(vrlayers) > 0:
     #         message = ("The following layers are using the vector field settings plugin\n    "+
@@ -126,15 +135,16 @@ class VectorFieldLayerToolbar:
     #     self.enableActions(bool(self.findSettings()[1]))
 
     def enableActions(self):
-        layer=self.currentLayer()
-        isvectorlayer=self._controller.isVectorFieldLayer(layer)
+        layer = self.currentLayer()
+        isvectorlayer = self._controller.isVectorFieldLayer(layer)
         self._rescaleAction.setEnabled(isvectorlayer)
         self._enlargeAction.setEnabled(isvectorlayer)
         self._shrinkAction.setEnabled(isvectorlayer)
-        isvalidlayer=VectorFieldLayerSettings.isValidLayerType(layer)
+        isvalidlayer = VectorFieldLayerSettings.isValidLayerType(layer)
         self._layerDialog.setEnabled(isvalidlayer)
 
-    def currentLayerChanged( self, layer ):
+    def currentLayerChanged(self, layer):
+        self._dialog.setLayer(layer)
         self.enableActions()
 
     # def renderComplete( self, painter ):
@@ -168,7 +178,7 @@ class VectorFieldLayerToolbar:
     #     for l,r in self.vectorSettingsLayers():
     #         haveVectors = True
     #         break
-        
+
     #     haveScaleBox = False
     #     for l in self.vectorScaleBoxLayers():
     #         haveScaleBox = True
@@ -184,7 +194,7 @@ class VectorFieldLayerToolbar:
     #     for l,r in self.vectorSettingsLayers():
     #         if r.getGroupScale():
     #             l.triggerRepaint()
-        
+
     #     for l in self.vectorScaleBoxLayers():
     #         l.setScaleBox( self._scaleBox )
 
@@ -201,23 +211,23 @@ class VectorFieldLayerToolbar:
         # layer, settings = self.findSettings()
         # if settings and settings.autoRescale(layer,self._iface.mapCanvas()):
         #     self.refreshLayer(layer)
-   
+
     def enlarge(self):
-        layer=self.currentLayer()
-        self._controller.rescaleVectorFieldLayer(layer,self._factor)
-   
+        layer = self.currentLayer()
+        self._controller.rescaleVectorFieldLayer(layer, self._factor)
+
     def shrink(self):
-        layer=self.currentLayer()
-        self._controller.rescaleVectorFieldLayer(layer,1.0/self._factor)
-        
+        layer = self.currentLayer()
+        self._controller.rescaleVectorFieldLayer(layer, 1.0 / self._factor)
+
     # def setScaleBoxOptions(self):
     #     if VectorScaleBoxOptionsDialog.getOptions(self._scaleBox,self._iface.mainWindow()):
     #         self.setupScaleBox()
     #         self.repaintScaleBox()
 
-    def showLayerDialog( self ):
-        layer=self.currentLayer()
-        dialog=VectorFieldLayerDialog( self._controller, layer )
-           
+    def showLayerDialog(self):
+        self._dialog.show()
+        self._dialog.raise_()
+
     def showHelp(self):
         utils.showPluginHelp()

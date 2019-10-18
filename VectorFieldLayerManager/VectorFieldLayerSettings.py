@@ -13,10 +13,17 @@ from qgis.core import (
     QgsSingleSymbolRenderer,
     QgsUnitTypes,
     QgsVectorFieldSymbolLayer,
+    QgsEllipseSymbolLayer,
+    QgsSymbolLayer,
+    QgsProperty,
     QgsWkbTypes,
 )
 
 VECTOR_SETTINGS_PROP = "vfr_settings"
+SCALE_PROP = "vfr_scale"
+SCALE_GROUP_PROP = "vfr_scale_group"
+SCALE_GROUP_FACTOR_PROP = "vfr_scale_group_factor"
+
 
 class VectorFieldLayerSettings:
 
@@ -28,12 +35,14 @@ class VectorFieldLayerSettings:
 
     @staticmethod
     def isValidLayerType(layer):
+        if layer is None:
+            return False
         if layer.type() != QgsMapLayerType.VectorLayer:
             return False
         if layer.geometryType() != QgsWkbTypes.PointGeometry:
             return False
         return True
-        
+
     def __init__(self):
         self._mode = QgsVectorFieldSymbolLayer.Cartesian
         self._angleOrientation = QgsVectorFieldSymbolLayer.ClockwiseFromNorth
@@ -49,7 +58,7 @@ class VectorFieldLayerSettings:
         self._ellipseAngleFromNorth = True
         self._ellipseDegrees = True
         self._ellipseScale = 1.0
-        self._symbolUnitType = QgsUnitTypes.RenderMillimeters
+        self._drawArrow = True
         self._arrowShaftWidth = 1.5
         self._arrowHeadWidth = 3.0
         self._arrowHeadRelativeLength = 2.0
@@ -165,6 +174,12 @@ class VectorFieldLayerSettings:
 
     def setEllipseScale(self, value):
         self._ellipseScale = value
+
+    def drawArrow(self):
+        return self._drawArrow
+
+    def setDrawArrow(self, value):
+        self._drawArrow = value
 
     def arrowShaftWidth(self):
         return self._arrowShaftWidth
@@ -306,7 +321,7 @@ class VectorFieldLayerSettings:
 
     # Functions to construct symbology
 
-    def basepointSymbolLayer(self):
+    def basepointSymbol(self):
         """
         Creates a line symbol layer for the base point of the arrow.  This is a marker line
         with a marker at the first vertex.
@@ -323,12 +338,18 @@ class VectorFieldLayerSettings:
                 "outline_width_unit": symbolUnit,
             }
         )
-        basepointLine = QgsMarkerLineSymbolLayer(self._symbolUnitType)
+        return basepointSymbol
+
+    def basepointLineSymbolLayer(self):
+        basepointSymbol = self.basepointSymbol()
+        basepointLine = QgsMarkerLineSymbolLayer()
         basepointLine.setPlacement(QgsMarkerLineSymbolLayer.FirstVertex)
         basepointLine.setSubSymbol(basepointSymbol)
         return basepointLine
 
     def arrowSymbolLayer(self):
+        if not self._drawArrow:
+            return None
         symbolUnit = QgsUnitTypes.toAbbreviatedString(self._symbolUnitType)
         arrow = QgsArrowSymbolLayer.create(
             {
@@ -358,16 +379,74 @@ class VectorFieldLayerSettings:
         arrow.setSubSymbol(arrowFillSymbol)
         return arrow
 
+    # TODO: Must be an API call for this - not sure if there is a way to
+    # escape " in field
+
+    def _fieldExpression(self, field):
+        return '"' + field + '"'
+
     def ellipseSymbolLayer(self):
 
-        ellipseLine = None
-        # symbolUnit = QgsUnitTypes.toAbbreviatedString()
-        # ellipseLine=QgsMarkerLineSymbolLayer()
-        # ellipseLine.setPlacement(QgsMarkerLineSymbolLayer.LastVertex)
-        # ellipse=QgsEllipseSymbolLayer()
+        if self._ellipseMode == self.NoEllipse:
+            return None
+        # TODO: Currently don't handle ellipse defined by covariance
+        if self._ellipseMode == self.CovarianceEllipse:
+            return None
+        symbolUnit = QgsUnitTypes.toAbbreviatedString(self._symbolUnitType)
+        scaleUnit = QgsUnitTypes.toAbbreviatedString(self._scaleUnitType)
+        fillColor = self._ellipseFillColor.name(QColor.HexArgb)
+        if not self._fillEllipse:
+            fillColor = "#00000000"
+        ellipseLayer = QgsEllipseSymbolLayer.create(
+            {
+                "symbol_width": "0",
+                "symbol_width_unit": scaleUnit,
+                "symbol_height": "0",
+                "symbol_height_unit": scaleUnit,
+                "symbol_name": ("circle" if self._drawEllipse else "cross"),
+                "angle": "0",
+                "outline_width": str(self._ellipseBorderWidth),
+                "outline_width_unit": symbolUnit,
+                "outline_color": self._ellipseBorderColor.name(QColor.HexArgb),
+                "fill_color": fillColor,
+            }
+        )
+        ellipseScale = str(self._scale * self._ellipseScale)
+        widthExpression = self._fieldExpression(self._emaxField) + "*" + ellipseScale
+
+        if self._ellipseMode == self.AxesEllipse:
+            heightExpression = self._fieldExpression(self._eminField) + "*" + ellipseScale
+            ellipseLayer.setDataDefinedProperty(QgsSymbolLayer.PropertyWidth, QgsProperty.fromExpression(widthExpression))
+            ellipseLayer.setDataDefinedProperty(QgsSymbolLayer.PropertyHeight, QgsProperty.fromExpression(heightExpression))
+            angleExpression = self._fieldExpression(self._emaxAzimuthField)
+            if not self._ellipseDegrees:
+                angleExpression = "radians(" + angleExpression + ")"
+            if self._ellipseAngleFromNorth:
+                angleExpression = "(90.0-" + angleExpression + ")"
+            ellipseLayer.setDataDefinedProperty(QgsSymbolLayer.PropertyAngle, QgsProperty.fromExpression(angleExpression))
+        elif self._ellipseMode == self.CircularEllipse:
+            ellipseLayer.setDataDefinedProperty(QgsSymbolLayer.PropertyWidth, QgsProperty.fromExpression(widthExpression))
+            ellipseLayer.setDataDefinedProperty(QgsSymbolLayer.PropertyHeight, QgsProperty.fromExpression(widthExpression))
+        elif self._ellipseMode == self.HeightEllipse:
+            ellipseLayer.setDataDefinedProperty(QgsSymbolLayer.PropertyHeight, QgsProperty.fromExpression(widthExpression))
+        else:
+            return None
+        return ellipseLayer
+
+    def ellipseLineSymbolLayer(self):
+        ellipseLayer = self.ellipseSymbolLayer()
+        if ellipseLayer is None:
+            return None
+        ellipseSymbol = QgsMarkerSymbol()
+        ellipseSymbol.deleteSymbolLayer(0)
+        ellipseSymbol.appendSymbolLayer(ellipseLayer)
+        ellipseLine = QgsMarkerLineSymbolLayer()
+        ellipseLine.setPlacement(QgsMarkerLineSymbolLayer.LastVertex)
+        ellipseLine.setSubSymbol(ellipseSymbol)
         return ellipseLine
 
-    def createVectorFieldSymbol(self):
+    def vectorFieldSymbol(self):
+        scaleUnit = QgsUnitTypes.toAbbreviatedString(self._scaleUnitType)
         vfl = QgsVectorFieldSymbolLayer()
         vfl.setXAttribute(self._dxField)
         vfl.setYAttribute(self._dyField)
@@ -380,15 +459,15 @@ class VectorFieldLayerSettings:
         # Create the symbology for the vector layer
         symbol = QgsLineSymbol()
         symbol.deleteSymbolLayer(0)
-        basepoint = self.basepointSymbolLayer()
+        basepoint = self.basepointLineSymbolLayer()
         if basepoint is not None:
             symbol.appendSymbolLayer(basepoint)
         arrow = self.arrowSymbolLayer()
         if arrow is not None:
             symbol.appendSymbolLayer(arrow)
-        ellipse = self.ellipseSymbolLayer()
+        ellipse = self.ellipseLineSymbolLayer()
         if ellipse is not None:
-            symbol.appendSymbolLayer(ellipse)
+            symbol.insertSymbolLayer(0, ellipse)
         vfl.setSubSymbol(symbol)
 
         # Now create the marker symbol using the symbol layer
@@ -400,11 +479,16 @@ class VectorFieldLayerSettings:
     def applyToLayer(self, layer):
         if not self.isValidLayerType(layer):
             return False
-        vflsymbol = self.createVectorFieldSymbol()
-        renderer = QgsSingleSymbolRenderer(vflsymbol)
+        if self._drawArrow:
+            symbol = self.vectorFieldSymbol()
+        else:
+            symbol = self.basepointSymbol()
+            ellipse = self.ellipseSymbolLayer()
+            if ellipse is not None:
+                symbol.insertSymbolLayer(0, ellipse)
+        renderer = QgsSingleSymbolRenderer(symbol)
         layer.setRenderer(renderer)
         self.saveToLayer(layer)
-
         layer.triggerRepaint()
         return True
 
@@ -431,6 +515,8 @@ class VectorFieldLayerSettings:
         """
         settingstr = self.saveToString()
         layer.setCustomProperty(VECTOR_SETTINGS_PROP, settingstr)
+        layer.setCustomProperty(SCALE_GROUP_PROP, self._scaleGroup)
+        layer.setCustomProperty(SCALE_GROUP_FACTOR_PROP, self._scaleGroupFactor)
 
     def readFromString(self, settingstr):
         """
@@ -475,13 +561,22 @@ class VectorFieldLayerSettings:
         return result
 
     @staticmethod
-    def layerSettings( layer ):
+    def layerSettings(layer):
         """
         Return the settings from a layer if they are defined, otherwise return
         None.
         """
-        settings=VectorFieldLayerSettings()
+        settings = VectorFieldLayerSettings()
         if not settings.readFromLayer(layer):
-            settings=None
+            settings = None
         return settings
+
+    @staticmethod
+    def layerScaleGroupScale(layer):
+        """
+        Returns the scale group and scale group scale for a layer
+        """
+        group = layer.customProperty(SCALE_GROUP_PROP, "")
+        if group == "":
+            return None, None
 

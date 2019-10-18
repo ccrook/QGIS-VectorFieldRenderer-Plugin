@@ -24,5 +24,3 @@
 
 # def classFactory(iface):
 #     return Plugin(iface)
-
-

@@ -39,7 +39,7 @@ class VectorFieldLayerSettingsTestCase(fileunittest.TestCase):
         vs.setEllipseDegrees(False)
         vs.setEllipseScale(0.7)
         vs.setSymbolUnitType(1)
-        vs.setArrowShaftSize(0.2)
+        vs.setArrowShaftWidth(0.2)
         vs.setArrowRelativeHeadSize(0.7)
         vs.setArrowMaxHeadSize(1.3)
         vs.setArrowBorderWidth(0.15)
