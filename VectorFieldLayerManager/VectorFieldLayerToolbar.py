@@ -95,6 +95,7 @@ class VectorFieldLayerToolbar:
 
         self.enableActions()
         iface.currentLayerChanged[QgsMapLayer].connect(self.currentLayerChanged)
+        QgsProject.instance().layerRemoved.connect(self.layerRemoved)
         # iface.mainWindow().projectRead.connect(self.loadProject)
         # iface.mapCanvas().renderComplete[QPainter].connect(self.renderComplete)
         # iface.mapCanvas().renderStarting.connect(self.renderStarting)
@@ -146,6 +147,9 @@ class VectorFieldLayerToolbar:
     def currentLayerChanged(self, layer):
         self._dialog.setLayer(layer)
         self.enableActions()
+
+    def layerRemoved(self, layerid):
+        self._dialog.layerRemoved(layerid)
 
     # def renderComplete( self, painter ):
     #     # window=painter.window()

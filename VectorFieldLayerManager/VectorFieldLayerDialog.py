@@ -31,6 +31,9 @@ class VectorFieldLayerDialog(QDialog):
     def apply(self):
         self._widget.applyToLayer()
 
+    def layerRemoved(self, layerid):
+        self._widget.layerRemoved(layerid)
+
     def setLayer(self, layer):
         if self._widget.isModified():
             message = (

@@ -60,6 +60,8 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
 
         self._mode = QgsVectorFieldSymbolLayer.Cartesian
         self._ellipseMode = VectorFieldLayerSettings.NoEllipse
+        self._layer = None
+        self._layerId = ""
         self._validLayer = False
         self.buildWidget()
 
@@ -210,19 +212,26 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
     def layer(self):
         return self._layer
 
+    def layerRemoved(self, layerid):
+        if layerid == self._layerId:
+            self.setLayer(None)
+
     def setLayer(self, layer):
         if not self._controller.isValidLayerType(layer):
-            if self.uLayerName is None:
+            if layer is None:
                 self.uLayerName.setText("No layer selected")
             else:
                 self.uLayerName.setText(layer.name() + " is not a point layer")
             self.setEnabled(False)
+            self._layer = None
+            self._layerId = ""
             self._validLayer = False
             return
         self.setEnabled(True)
         self.uLayerName.setText("Layer: " + layer.name())
         self._validLayer = True
         self._layer = layer
+        self._layerId = layer.id()
         self.uXField.setLayer(layer)
         self.uYField.setLayer(layer)
         self.uEmaxField.setLayer(layer)
@@ -251,7 +260,7 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
 
     def loadFromSettings(self):
         settings = self._settings
-        if( settings.drawArrow()):
+        if settings.drawArrow():
             self.setMode(self.ArrowTypeNone)
         else:
             self.setMode(settings.mode())
