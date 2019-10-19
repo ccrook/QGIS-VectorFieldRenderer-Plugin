@@ -50,6 +50,9 @@ class UnitButton(QObject):
 
 
 class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
+
+    ArrowTypeNone = 999
+
     def __init__(self, controller, layer):
         QWidget.__init__(self)
         self._controller = controller
@@ -105,7 +108,7 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
         ft.addButton(self.uFieldTypeCartesian, QgsVectorFieldSymbolLayer.Cartesian)
         ft.addButton(self.uFieldTypePolar, QgsVectorFieldSymbolLayer.Polar)
         ft.addButton(self.uFieldTypeHeight, QgsVectorFieldSymbolLayer.Height)
-        # ft.addButton(self.uFieldTypeNone, QgsVectorFieldSymbolLayer.NoArrow)
+        ft.addButton(self.uFieldTypeNone, self.ArrowTypeNone)
         ft.buttonClicked[int].connect(self.setMode)
         self.fieldTypeGroup = ft
 
@@ -136,9 +139,9 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
         elif mode == QgsVectorFieldSymbolLayer.Polar:
             self.uFieldTypePolar.setChecked(True)
             fields = ["Length attribute", "Angle attribute"]
-        # elif mode == QgsVectorFieldSymbolLayer.NoArrow:
-        #     self.uFieldTypeNone.setChecked(True)
-        #     fields = []
+        elif mode == self.ArrowTypeNone:
+            self.uFieldTypeNone.setChecked(True)
+            fields = []
         else:
             self.uFieldTypeCartesian.setChecked(True)
             mode == QgsVectorFieldSymbolLayer.Cartesian
@@ -248,7 +251,10 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
 
     def loadFromSettings(self):
         settings = self._settings
-        self.setMode(settings.mode())
+        if( settings.drawArrow()):
+            self.setMode(self.ArrowTypeNone)
+        else:
+            self.setMode(settings.mode())
         self.setEllipseMode(settings.ellipseMode())
         self.uXField.setField(settings.dxField())
         self.uYField.setField(settings.dyField())
@@ -302,7 +308,12 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
         # Avoid accidentally resetting scale group scale until we've
         # set the new scale group
         settings.setScaleGroup("")
-        settings.setMode(self.mode())
+        if self.mode() == self.ArrowTypeNone:
+            settings.setDrawArrow(False)
+            settings.setMode(QgsVectorFieldSymbolLayer.Cartesian)
+        else:
+            settings.setDrawArrow(True)
+            settings.setMode(self.mode())
         settings.setEllipseMode(self.ellipseMode())
         settings.setDxField(self.uXField.currentText())
         settings.setDyField(self.uYField.currentText())

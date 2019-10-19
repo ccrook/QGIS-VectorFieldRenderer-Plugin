@@ -625,7 +625,7 @@ class Ui_VectorFieldLayerWidget(object):
         self.uBaseColorLabel.setText(_translate("VectorFieldLayerWidget", "Fill?"))
         self.uBaseColor.setToolTip(_translate("VectorFieldLayerWidget", "Change the base symbol colour"))
         self.uBaseColor.setText(_translate("VectorFieldLayerWidget", "change"))
-        self.uArrowScaleLabel.setText(_translate("VectorFieldLayerWidget", "Scale:  "))
+        self.uArrowScaleLabel.setText(_translate("VectorFieldLayerWidget", "Vector scale:  "))
         self.uScaleUnits.setText(_translate("VectorFieldLayerWidget", "Millimeter"))
         self.uScaleGroupLabel.setText(_translate("VectorFieldLayerWidget", "    Scale group"))
         self.uLegendTextLabel.setText(_translate("VectorFieldLayerWidget", "Legend text"))

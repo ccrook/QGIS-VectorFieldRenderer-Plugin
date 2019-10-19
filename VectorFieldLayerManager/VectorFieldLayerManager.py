@@ -1,13 +1,13 @@
 #!/usr/bin/python3
 
-# TODO: look at vector scale options (map metres)
-# TODO: restore feature - no alignment to true north
-# TODO: scale down arrow when vector small
-# TODO: Handling of drawing no arrow
-# TODO: Handle map units for size of vector/ellipse
-# TODO: Check alternative map units (map metres?)
-# TODO: copy/paste/save vector settings
 # TODO: Fix QGIS error on exit
+# TODO: copy/paste/save vector settings
+# TODO: Handling of height error ellipse (ticks on line, build from 3 line symbols?)
+# TODO: look at vector scale options (map metres)
+# TODO: Check alternative map units (map metres?)
+# TODO: Handle map units for size of vector/ellipse
+# TODO: scale down arrow when vector small
+# TODO: restore feature - no alignment to true north
 # TODO: Live update
 # TODO: fix handling of scale groups
 # FIX: reinstall autoscale feature
