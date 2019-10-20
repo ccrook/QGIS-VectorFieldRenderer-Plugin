@@ -3,11 +3,8 @@
 # TODO: copy/paste/save vector settings
 # TODO: restore feature autoscale
 # TODO: restore feature scale down arrow when vector small
-# TODO: implement at vector scale options (map metres)
 # TODO: Handling of height error ellipse (ticks on line, build from 3 line symbols?)
 # TODO: Change dialog to dockable widget
-# TODO: Check alternative map units (map metres?)
-# TODO: Handle map units for size of vector/ellipse
 # TODO: restore feature - no alignment to true north
 # TODO: Live update
 # FIX: reinstall autoscale feature
@@ -105,7 +102,6 @@ class VectorFieldLayerManager(QObject):
 
         except:
             pass
-        # FIX scale = VectorFieldU
         return
 
     def findVectorFieldMarkerLayer(self, symbol):
@@ -175,7 +171,6 @@ class VectorFieldLayerManager(QObject):
         of a vector field layer if defined, else the scale layer variable.
         If neither is defined return None.
         """
-        # TODO: Fix this - ellipse without arrow doesn't include this :-(
         vector = self.findLayerVectorField(layer)
         if vector is not None:
             vectorlayer = vector[0]

@@ -1034,23 +1034,10 @@
        <property name="text">
         <string>Symbol units</string>
        </property>
-       <property name="buddy">
-        <cstring>uSymbolUnits</cstring>
-       </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="uSymbolUnits">
-       <property name="minimumSize">
-        <size>
-         <width>100</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Millimeter</string>
-       </property>
-      </widget>
+      <widget class="QComboBox" name="uSymbolUnits"/>
      </item>
      <item>
       <widget class="QLabel" name="uArrowBaseSizeLabel">
@@ -1162,17 +1149,7 @@
       <widget class="QLineEdit" name="uArrowScale"/>
      </item>
      <item>
-      <widget class="QPushButton" name="uScaleUnits">
-       <property name="minimumSize">
-        <size>
-         <width>100</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Millimeter</string>
-       </property>
-      </widget>
+      <widget class="QComboBox" name="uScaleUnits"/>
      </item>
      <item>
       <widget class="QLabel" name="uScaleGroupLabel">

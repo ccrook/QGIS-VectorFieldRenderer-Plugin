@@ -35,7 +35,7 @@ class VectorFieldLayerSettings:
         self._scale = 1.0
         self._dxField = ""
         self._dyField = ""
-        self._scaleUnitType = QgsUnitTypes.RenderMillimeters
+        self._scaleIsMetres = QgsUnitTypes.RenderMillimeters
         self._scaleGroup = ""
         self._scaleGroupFactor = 1.0
         self._symbolUnitType = QgsUnitTypes.RenderMillimeters
@@ -114,11 +114,11 @@ class VectorFieldLayerSettings:
     def setDyField(self, value):
         self._dyField = value
 
-    def scaleUnitType(self):
-        return self._scaleUnitType
+    def scaleIsMetres(self):
+        return self._scaleIsMetres
 
-    def setScaleUnitType(self, value):
-        self._scaleUnitType = value
+    def setScaleIsMetres(self, value):
+        self._scaleIsMetres = value
 
     def symbolUnitType(self):
         return self._symbolUnitType
@@ -320,11 +320,24 @@ class VectorFieldLayerSettings:
     # Create a copy of the current settings
     # Functions to construct symbology
 
+    # TODO: Is there an API call for quotedFieldExpression.
+
+    def quotedFieldExpression(self, field):
+        return '"' + field + '"'
+
+    def encodedSymbolUnit(self):
+        return QgsUnitTypes.encodeUnit(self._symbolUnitType)
+
+    def encodedScaleUnit(self):
+        if self._scaleIsMetres:
+            return QgsUnitTypes.encodeUnit(QgsUnitTypes.RenderMetersInMapUnits)
+        return self.encodedSymbolUnit()
+
     def basepointSymbol(self):
         """
         Creates a marker symbol for the base point
         """
-        symbolUnit = QgsUnitTypes.toAbbreviatedString(self._symbolUnitType)
+        symbolUnit = self.encodedSymbolUnit()
         basepointSymbol = QgsMarkerSymbol.createSimple(
             {
                 "name": "circle",
@@ -356,7 +369,7 @@ class VectorFieldLayerSettings:
 
         if not self._drawArrow:
             return None
-        symbolUnit = QgsUnitTypes.toAbbreviatedString(self._symbolUnitType)
+        symbolUnit = self.encodedSymbolUnit()
         arrow = QgsArrowSymbolLayer.create(
             {
                 "head_type": "0",
@@ -385,12 +398,6 @@ class VectorFieldLayerSettings:
         arrow.setSubSymbol(arrowFillSymbol)
         return arrow
 
-    # TODO: Must be an API call for this - not sure if there is a way to
-    # escape " in field
-
-    def _fieldExpression(self, field):
-        return '"' + field + '"'
-
     def ellipseSymbolLayer(self):
 
         if self._ellipseMode == self.NoEllipse:
@@ -398,12 +405,8 @@ class VectorFieldLayerSettings:
         # TODO: Currently don't handle ellipse defined by covariance
         if self._ellipseMode == self.CovarianceEllipse:
             return None
-        symbolUnit = QgsUnitTypes.toAbbreviatedString(self._symbolUnitType)
-        scaleUnit = QgsUnitTypes.toAbbreviatedString(self._scaleUnitType)
-        # Not sure why but in QGIS 3.8 this is needed to set the scale correctly for
-        # ellipse marker??
-        if scaleUnit == "m":
-            scaleUnit = "meters"
+        symbolUnit = self.encodedSymbolUnit()
+        scaleUnit = self.encodedScaleUnit()
         fillColor = self._ellipseFillColor.name(QColor.HexArgb)
         if not self._fillEllipse:
             fillColor = "#00000000"
@@ -427,13 +430,13 @@ class VectorFieldLayerSettings:
             ellipseScale = "(@" + self._scaleVariableName + " * " + str(scale) + ")"
         else:
             ellipseScale = str(scale * self._scale)
-        widthExpression = self._fieldExpression(self._emaxField) + "*" + ellipseScale
+        widthExpression = self.quotedFieldExpression(self._emaxField) + "*" + ellipseScale
 
         if self._ellipseMode == self.AxesEllipse:
-            heightExpression = self._fieldExpression(self._eminField) + "*" + ellipseScale
+            heightExpression = self.quotedFieldExpression(self._eminField) + "*" + ellipseScale
             ellipseLayer.setDataDefinedProperty(QgsSymbolLayer.PropertyWidth, QgsProperty.fromExpression(widthExpression))
             ellipseLayer.setDataDefinedProperty(QgsSymbolLayer.PropertyHeight, QgsProperty.fromExpression(heightExpression))
-            angleExpression = self._fieldExpression(self._emaxAzimuthField)
+            angleExpression = self.quotedFieldExpression(self._emaxAzimuthField)
             if not self._ellipseDegrees:
                 angleExpression = "radians(" + angleExpression + ")"
             if self._ellipseAngleFromNorth:
@@ -461,7 +464,7 @@ class VectorFieldLayerSettings:
         return ellipseLine
 
     def vectorFieldSymbol(self):
-        scaleUnit = QgsUnitTypes.toAbbreviatedString(self._scaleUnitType)
+        scaleUnit = QgsUnitTypes.toAbbreviatedString(self._scaleIsMetres)
         vfl = QgsVectorFieldSymbolLayer()
         vfl.setXAttribute(self._dxField)
         vfl.setYAttribute(self._dyField)
@@ -469,7 +472,10 @@ class VectorFieldLayerSettings:
         vfl.setVectorFieldType(self._mode)
         vfl.setAngleOrientation(self._angleOrientation)
         vfl.setAngleUnits(self._angleUnits)
-        vfl.setDistanceUnit(self._scaleUnitType)
+        if self._scaleIsMetres:
+            vfl.setDistanceUnit(QgsUnitTypes.RenderMetersInMapUnits)
+        else:
+            vfl.setDistanceUnit(self._symbolUnitType)
 
         # Create the symbology for the vector layer
         symbol = QgsLineSymbol()

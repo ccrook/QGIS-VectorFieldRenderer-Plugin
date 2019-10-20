@@ -9,42 +9,16 @@ from qgis.core import QgsFieldProxyModel, QgsUnitTypes, QgsVectorFieldSymbolLaye
 from .VectorFieldLayerSettings import VectorFieldLayerSettings
 from .Ui_VectorFieldLayerWidget import Ui_VectorFieldLayerWidget
 
-
-class UnitButton(QObject):
-
-    valueChanged = pyqtSignal(name="valueChanged")
-
-    def __init__(self, button, mmtext="Millimetres"):
-        QObject.__init__(self)
-        self._button = button
-        self._mmLabel = mmtext
-        self.setUnits(QgsUnitTypes.RenderMillimeters)
-        button.clicked.connect(self.clicked)
-
-    def units(self):
-        return self._units
-
-    def setUnits(self, units):
-        if units == QgsUnitTypes.RenderMillimeters:
-            self._units = QgsUnitTypes.RenderMillimeters
-            self._button.setText(self._mmLabel)
-        else:
-            self._units = QgsUnitTypes.RenderMetersInMapUnits
-            self._button.setText("Map metres")
-
-    def isMapUnit(self):
-        return self._units == QgsUnitTypes.RenderMetersInMapUnits
-
-    def setIsMapUnit(self, isMapUnits):
-        if isMapUnits:
-            self.setUnits(QgsUnitTypes.RenderMetersInMapUnits)
-        else:
-            self.setUnits(QgsUnitTypes.RenderMillimeters)
-        self.valueChanged.emit()
-
-    def clicked(self):
-        self.setIsMapUnit(not self.isMapUnit())
-
+SymbolRenderUnitList = [
+    QgsUnitTypes.RenderMillimeters,
+    QgsUnitTypes.RenderMapUnits,
+    QgsUnitTypes.RenderPixels,
+    QgsUnitTypes.RenderPercentage,
+    QgsUnitTypes.RenderPoints,
+    QgsUnitTypes.RenderInches,
+    QgsUnitTypes.RenderUnknownUnit,
+    QgsUnitTypes.RenderMetersInMapUnits,
+]
 
 # Vector field settings widget
 
@@ -92,9 +66,11 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
         self.uBaseBorderColor.setColorDialogTitle("Base symbol fill colour")
         self.uEllipseBorderColor.setColorDialogTitle("Ellipse line colour")
         self.uEllipseFillColor.setColorDialogTitle("Ellipse fill colour")
-
-        self.scaleUnits = UnitButton(self.uScaleUnits, "Symbol unit")
-        self.symbolUnits = UnitButton(self.uSymbolUnits)
+        for unit in SymbolRenderUnitList:
+            unitName = QgsUnitTypes.toString(unit)
+            self.uSymbolUnits.addItem(unitName, unit)
+        self.uScaleUnits.addItem("Symbol unit")
+        self.uScaleUnits.addItem("Map meters")
 
         re = QRegExp("\\d+\\.?\\d*(?:[Ee][+-]?\\d+)?")
         self.uArrowScale.setValidator(QRegExpValidator(re, self))
@@ -284,7 +260,7 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
         self.uEllipseOrientationNorth.setChecked(settings.ellipseAngleFromNorth())
         self.uEllipseOrientationEast.setChecked(not settings.ellipseAngleFromNorth())
         self.uArrowScale.setText(str(settings.scale()))
-        self.scaleUnits.setUnits(settings.scaleUnitType())
+        self.uScaleUnits.setCurrentIndex(1 if settings.scaleIsMetres() else 0)
         # self.uVectorIsTrueNorth.setChecked(settings.vectorIsTrueNorth())
         # self.uAlignToMapNorth.setChecked(settings.useMapNorth())
         self.uEllipseScale.setText(str(settings.ellipseScale()))
@@ -293,7 +269,10 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
         if group and factor != 1.0:
             group = group + "*" + str(factor)
         self.uScaleGroup.setText(group)
-        self.symbolUnits.setUnits(settings.symbolUnitType())
+        symbolIndex = 0
+        if settings.symbolUnitType in SymbolRenderUnitList:
+            symbolIndex = SymbolRenderUnitList.index(settings.symbolUnitType())
+        self.uSymbolUnits.setCurrentIndex(symbolIndex)
         self.uArrowHeadWidth.setValue(settings.arrowHeadWidth())
         self.uArrowShaftWidth.setValue(settings.arrowShaftWidth())
         self.uArrowHeadRelativeLength.setValue(settings.arrowHeadRelativeLength())
@@ -366,8 +345,8 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
                 pass
         settings.setScaleGroupFactor(factor)
         settings.setScaleGroup(group)
-        settings.setScaleUnitType(self.scaleUnits.units())
-        settings.setSymbolUnitType(self.symbolUnits.units())
+        settings.setScaleIsMetres(self.uScaleUnits.currentIndex() != 0)
+        settings.setSymbolUnitType(SymbolRenderUnitList[self.uSymbolUnits.currentIndex()])
         settings.setArrowHeadWidth(float(self.uArrowHeadWidth.value()))
         settings.setArrowShaftWidth(float(self.uArrowShaftWidth.value()))
         settings.setArrowHeadRelativeLength(float(self.uArrowHeadRelativeLength.value()))
@@ -390,4 +369,3 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
         # settings.setLegendText( self.uLegendText.text())
         # settings.setScaleBoxText( self.uScaleBoxText.text())
         # settings.setShowInScaleBox( self.uShowInScaleBox.isChecked())
-
