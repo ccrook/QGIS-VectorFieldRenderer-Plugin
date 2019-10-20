@@ -308,6 +308,15 @@ class VectorFieldLayerSettings:
     def setScaleVariableName(self, name):
         self._scaleVariableName = name
 
+    def copy(self):
+        copy = VectorFieldLayerSettings()
+        copy.readFromString(self.saveToString())
+        return copy
+
+    def sameAs(self, other):
+        return self.saveToString() == other.saveToString()
+
+    # Create a copy of the current settings
     # Functions to construct symbology
 
     def basepointSymbol(self):

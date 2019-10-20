@@ -30,7 +30,7 @@ class UnitButton(QObject):
             self._button.setText(self._mmLabel)
         else:
             self._units = QgsUnitTypes.RenderMapUnits
-            self._button.setText("Map units")
+            self._button.setText("Map metres")
 
     def isMapUnit(self):
         return self._units == QgsUnitTypes.RenderMapUnits
@@ -57,6 +57,7 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
         QWidget.__init__(self)
         self._controller = controller
         self._settings = VectorFieldLayerSettings()
+        self._originalSettings = VectorFieldLayerSettings()
 
         self._mode = QgsVectorFieldSymbolLayer.Cartesian
         self._ellipseMode = VectorFieldLayerSettings.NoEllipse
@@ -75,13 +76,8 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
         # Install information from layer
 
         self.setLayer(layer)
-        scale = self._controller.vectorFieldLayerScale(layer)
-        if scale is None:
-            scale = 1.0
-        self.uArrowScale.setText(str(scale))
-
-        # Try creating a new settings to save to ...
-        self._settings = VectorFieldLayerSettings()
+        self.setLayerScale(layer)
+        self._controller.vectorFieldLayerScaleChanged.connect(self.setLayerScale)
 
     def buildWidget(self):
         self.setupUi(self)
@@ -216,6 +212,13 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
         if layerid == self._layerId:
             self.setLayer(None)
 
+    def setLayerScale(self, layer):
+        if self._layer is not None and layer is not None and layer.id() == self._layerId:
+            scale = self._controller.vectorFieldLayerScale(self._layer)
+            if scale is not None:
+                self.uArrowScale.setText(str(scale))
+            self._originalSettings.setScale(scale)
+
     def setLayer(self, layer):
         if not self._controller.isValidLayerType(layer):
             if layer is None:
@@ -245,25 +248,27 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
         return self._settings
 
     def isModified(self):
-        return self._validLayer and self._originalSettings != self.settings().saveToString()
+        return self._validLayer and not self._originalSettings.sameAs(self.settings())
 
     def readFromLayer(self):
-        self._settings = self._controller.readSettingsFromLayer(self._layer)
+        layersettings = self._controller.readSettingsFromLayer(self._layer)
+        if layersettings is not None:
+            self._settings = layersettings
         self.loadFromSettings()
-        self._originalSettings = self.settings().saveToString()
+        self._originalSettings = self.settings().copy()
 
     def applyToLayer(self):
         if self._validLayer:
             settings = self.settings()
             self._controller.applySettingsToLayer(self._layer, settings)
-            self._originalSettings = settings.saveToString()
+            self._originalSettings = settings.copy()
 
     def loadFromSettings(self):
         settings = self._settings
         if settings.drawArrow():
-            self.setMode(self.ArrowTypeNone)
-        else:
             self.setMode(settings.mode())
+        else:
+            self.setMode(self.ArrowTypeNone)
         self.setEllipseMode(settings.ellipseMode())
         self.uXField.setField(settings.dxField())
         self.uYField.setField(settings.dyField())
@@ -278,10 +283,10 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
         self.uEllipseAngleUnitsRadians.setChecked(not settings.ellipseDegrees())
         self.uEllipseOrientationNorth.setChecked(settings.ellipseAngleFromNorth())
         self.uEllipseOrientationEast.setChecked(not settings.ellipseAngleFromNorth())
+        self.uArrowScale.setText(str(settings.scale()))
         self.scaleUnits.setUnits(settings.scaleUnitType())
         # self.uVectorIsTrueNorth.setChecked(settings.vectorIsTrueNorth())
         # self.uAlignToMapNorth.setChecked(settings.useMapNorth())
-        # self.uArrowScale.setText( str(settings.scale()))
         self.uEllipseScale.setText(str(settings.ellipseScale()))
         group = settings.scaleGroup()
         factor = settings.scaleGroupFactor()

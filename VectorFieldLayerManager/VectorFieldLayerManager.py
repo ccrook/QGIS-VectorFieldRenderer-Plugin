@@ -1,18 +1,21 @@
 #!/usr/bin/python3
 
 # TODO: copy/paste/save vector settings
+# TODO: restore feature autoscale
+# TODO: restore feature scale down arrow when vector small
 # TODO: Handling of height error ellipse (ticks on line, build from 3 line symbols?)
-# TODO: scale down arrow when vector small
 # TODO: Change dialog to dockable widget
 # TODO: Check alternative map units (map metres?)
 # TODO: Handle map units for size of vector/ellipse
 # TODO: restore feature - no alignment to true north
 # TODO: Live update
-# TODO: fix handling of scale groups
 # TODO: look at vector scale options (map metres)
 # FIX: reinstall autoscale feature
 
+from PyQt5.QtCore import QObject, pyqtSignal
+
 from qgis.core import (
+    QgsMapLayer,
     QgsMapLayerType,
     QgsSingleSymbolRenderer,
     QgsCategorizedSymbolRenderer,
@@ -29,9 +32,11 @@ VECTOR_SCALE_GROUP_PROP = "vfr_scale_group"
 VECTOR_SCALE_GROUP_FACTOR_PROP = "vfr_scale_group_factor"
 
 
-class VectorFieldLayerManager:
+class VectorFieldLayerManager(QObject):
 
     VectorFieldLayerTypeName = "VectorField"
+
+    vectorFieldLayerScaleChanged = pyqtSignal(QgsMapLayer, name="layerScaleChanged")
 
     @staticmethod
     def isValidLayerType(layer):
@@ -44,6 +49,7 @@ class VectorFieldLayerManager:
         return True
 
     def __init__(self, iface=None):
+        QObject.__init__(self)
         self._iface = iface
 
     def applySettingsToLayer(self, layer, settings):
@@ -199,6 +205,7 @@ class VectorFieldLayerManager:
         # Set a variable that can be used by symbology expressions
         QgsExpressionContextUtils.setLayerVariable(layer, VECTOR_SCALE_VARIABLE_NAME, str(scale))
         layer.triggerRepaint()
+        self.vectorFieldLayerScaleChanged.emit(layer)
         if propogate:
             self.propogateVectorFieldScale(layer)
 

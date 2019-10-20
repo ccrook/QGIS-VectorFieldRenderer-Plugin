@@ -224,6 +224,9 @@ class VectorFieldLayerToolbar:
         layer = self.currentLayer()
         self._controller.rescaleVectorFieldLayer(layer, 1.0 / self._factor)
 
+    def resetLayerScale(self, layer):
+        self._dialog.resetLayerScale(self, layer)
+
     # def setScaleBoxOptions(self):
     #     if VectorScaleBoxOptionsDialog.getOptions(self._scaleBox,self._iface.mainWindow()):
     #         self.setupScaleBox()
