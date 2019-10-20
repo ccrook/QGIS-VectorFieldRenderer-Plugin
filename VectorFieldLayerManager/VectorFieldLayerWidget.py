@@ -29,15 +29,15 @@ class UnitButton(QObject):
             self._units = QgsUnitTypes.RenderMillimeters
             self._button.setText(self._mmLabel)
         else:
-            self._units = QgsUnitTypes.RenderMapUnits
+            self._units = QgsUnitTypes.RenderMetersInMapUnits
             self._button.setText("Map metres")
 
     def isMapUnit(self):
-        return self._units == QgsUnitTypes.RenderMapUnits
+        return self._units == QgsUnitTypes.RenderMetersInMapUnits
 
     def setIsMapUnit(self, isMapUnits):
         if isMapUnits:
-            self.setUnits(QgsUnitTypes.RenderMapUnits)
+            self.setUnits(QgsUnitTypes.RenderMetersInMapUnits)
         else:
             self.setUnits(QgsUnitTypes.RenderMillimeters)
         self.valueChanged.emit()

@@ -67,6 +67,7 @@ class VectorFieldLayerSettings:
         self._drawEllipse = True
         self._drawEllipseAxes = False
         self._ellipseTickSize = 2.0
+        # Layer variable used to automatically change the scale...
         self._scaleVariableName = ""
 
         # Not used in current version of renderer
@@ -321,7 +322,7 @@ class VectorFieldLayerSettings:
 
     def basepointSymbol(self):
         """
-        Creates a markser symbol for the base point
+        Creates a marker symbol for the base point
         """
         symbolUnit = QgsUnitTypes.toAbbreviatedString(self._symbolUnitType)
         basepointSymbol = QgsMarkerSymbol.createSimple(
@@ -399,6 +400,10 @@ class VectorFieldLayerSettings:
             return None
         symbolUnit = QgsUnitTypes.toAbbreviatedString(self._symbolUnitType)
         scaleUnit = QgsUnitTypes.toAbbreviatedString(self._scaleUnitType)
+        # Not sure why but in QGIS 3.8 this is needed to set the scale correctly for
+        # ellipse marker??
+        if scaleUnit == "m":
+            scaleUnit = "meters"
         fillColor = self._ellipseFillColor.name(QColor.HexArgb)
         if not self._fillEllipse:
             fillColor = "#00000000"

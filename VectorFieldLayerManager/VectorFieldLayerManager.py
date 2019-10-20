@@ -3,13 +3,13 @@
 # TODO: copy/paste/save vector settings
 # TODO: restore feature autoscale
 # TODO: restore feature scale down arrow when vector small
+# TODO: implement at vector scale options (map metres)
 # TODO: Handling of height error ellipse (ticks on line, build from 3 line symbols?)
 # TODO: Change dialog to dockable widget
 # TODO: Check alternative map units (map metres?)
 # TODO: Handle map units for size of vector/ellipse
 # TODO: restore feature - no alignment to true north
 # TODO: Live update
-# TODO: look at vector scale options (map metres)
 # FIX: reinstall autoscale feature
 
 from PyQt5.QtCore import QObject, pyqtSignal
