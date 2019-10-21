@@ -211,10 +211,10 @@ class VectorFieldLayerToolbar:
     #     self.repaintScaleBox()
 
     def autoRescale(self):
-        pass
-        # layer, settings = self.findSettings()
-        # if settings and settings.autoRescale(layer,self._iface.mapCanvas()):
-        #     self.refreshLayer(layer)
+        layer = self.currentLayer()
+        scale = self._controller.estimateOptimalScale(layer, self._iface.mapCanvas())
+        if scale is not None:
+            self._controller.setVectorFieldLayerScale(layer, scale)
 
     def enlarge(self):
         layer = self.currentLayer()

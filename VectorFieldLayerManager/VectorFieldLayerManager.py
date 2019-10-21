@@ -1,13 +1,13 @@
 #!/usr/bin/python3
 
 # TODO: copy/paste/save vector settings
-# TODO: restore feature autoscale
 # TODO: restore feature scale down arrow when vector small
 # TODO: Handling of height error ellipse (ticks on line, build from 3 line symbols?)
 # TODO: Change dialog to dockable widget
 # TODO: restore feature - no alignment to true north
 # TODO: Live update
-# FIX: reinstall autoscale feature
+
+import math
 
 from PyQt5.QtCore import QObject, pyqtSignal
 
@@ -19,6 +19,10 @@ from qgis.core import (
     QgsGraduatedSymbolRenderer,
     QgsWkbTypes,
     QgsExpressionContextUtils,
+    QgsFeatureRequest,
+    QgsUnitTypes,
+    QgsRenderContext,
+    QgsMapUnitScale,
 )
 
 from .VectorFieldLayerSettings import VectorFieldLayerSettings
@@ -241,3 +245,71 @@ class VectorFieldLayerManager(QObject):
         if scale is not None:
             scale *= factor
             self.setVectorFieldLayerScale(layer, scale, propogate=True)
+
+    def estimateOptimalScale(self, layer, canvas):
+        settings = self.readSettingsFromLayer(layer)
+        if settings is None:
+            return None
+        mapextent = canvas.extent()
+        mapsettings = canvas.mapSettings()
+        layerExtent = mapsettings.outputExtentToLayerExtent(layer, mapextent)
+        request = QgsFeatureRequest()
+        request.setFilterRect(layerExtent)
+
+        attributes = settings.usedAttributes()
+        if len(attributes) == 0:
+            return None
+
+        # Would be more efficient to select attributes ...
+        # Attributes needs to be integer ids...
+        # fields = layer.fields()
+        # ...
+        # request.setSubsetOfAttributes(attributes)
+
+        nFeatures = 0
+        nErrors = 0
+        maxLength = 0.0
+        sumLength = 0.0
+        sumLength2 = 0.0
+
+        for feature in layer.getFeatures(request):
+            try:
+                size = settings.estimatedVectorSize(feature)
+                if size is not None:
+                    nFeatures += 1
+                    maxLength = max(maxLength, size)
+                    sumLength += size
+                    sumLength2 += size * size
+                else:
+                    nErrors += 1
+            except:
+                nErrors += 1
+        if nFeatures == 0:
+            return None
+
+        # Compute a representative vector size trying to ignore
+        # outliers
+
+        size = math.sqrt(sumLength2 / nFeatures)
+        size = min(size * 2, maxLength)
+        if size <= 0.0:
+            return None
+
+        # Compute the desired length on the map - based on the number
+        # of features, ie shorter arrows if more points on the map
+
+        mapsize = math.sqrt(mapextent.width() * mapextent.height())
+        maplen = mapsize / math.sqrt(16.0 + nFeatures)
+        maplen = max(min(maplen, mapsize / 10), mapsize / 100) / 2
+
+        # Set the scale - the scale conversion is required if not
+        # using map units for rendering the arrow, as we have
+        # calculated the scale in map units
+
+        units = settings.vectorScaleUnit()
+        if units != QgsUnitTypes.RenderMapUnits:
+            ctx = QgsRenderContext.fromMapSettings(mapsettings)
+            size = ctx.convertToMapUnits(size, units)
+
+        scale = maplen / size
+        return scale

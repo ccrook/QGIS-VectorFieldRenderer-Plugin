@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import json
 import re
+import math
 
 from PyQt5.QtGui import QColor
 from qgis.core import (
@@ -333,6 +334,11 @@ class VectorFieldLayerSettings:
             return QgsUnitTypes.encodeUnit(QgsUnitTypes.RenderMetersInMapUnits)
         return self.encodedSymbolUnit()
 
+    def vectorScaleUnit(self):
+        if self._scaleIsMetres:
+            return QgsUnitTypes.RenderMetersInMapUnits
+        return self._symbolUnitType
+
     def basepointSymbol(self):
         """
         Creates a marker symbol for the base point
@@ -506,6 +512,41 @@ class VectorFieldLayerSettings:
             if ellipse is not None:
                 symbol.insertSymbolLayer(0, ellipse)
         return symbol
+
+    def estimatedVectorSize(self, feature):
+        size = 0.0
+        if self._drawArrow:
+            try:
+                ds = abs(float(feature.attribute(self._dxField)))
+                if self._mode == QgsVectorFieldSymbolLayer.Cartesian:
+                    dy = float(feature.attribute(self._dyField))
+                    ds = math.sqrt(ds * ds + dy * dy)
+                size = ds
+            except:
+                pass
+        if self._ellipseMode != self.NoEllipse:
+            try:
+                ds = abs(float(feature.attribute(self._emaxField)))
+                if self._ellipseMode == self.AxesEllipse:
+                    dmin = abs(float(feature.attribute(self._eminField)))
+                    ds = max(ds, dmin)
+                size += ds * self._ellipseScale
+            except:
+                pass
+        return size
+
+    def usedAttributes(self):
+        attributes = set()
+        if self._drawArrow:
+            attributes.add(self._dxField)
+            if self._mode == QgsVectorFieldSymbolLayer.Cartesian:
+                attributes.add(self._dyField)
+        if self._ellipseMode != self.NoEllipse:
+            attributes.add(self._emaxField)
+            if self._ellipseMode == self.AxesEllipse:
+                attributes.add(self._eminField)
+                # _emaxAzimuth not added as this is currently only used for estimating size
+        return attributes
 
     def saveToString(self):
         """
