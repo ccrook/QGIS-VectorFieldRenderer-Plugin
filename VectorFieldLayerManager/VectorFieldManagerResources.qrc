@@ -4,6 +4,8 @@
     <file>AutoscaleVectorFieldIcon.png</file>
     <file>MagnifyVectorFieldIcon.png</file>
     <file>ShrinkVectorFieldIcon.png</file>
+    <file>CopyVectorSettingsIcon.png</file>
+    <file>PasteVectorSettingsIcon.png</file>
     <file>VectorFieldLayerManagerHelpIcon.png</file>
   </qresource>
 </RCC>

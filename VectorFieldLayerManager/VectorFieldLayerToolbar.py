@@ -13,7 +13,7 @@ from . import VectorFieldManagerResources
 
 class VectorFieldLayerToolbar:
 
-    toolBarName = "Vector field controller"
+    toolBarName = "Vector field manager"
 
     def __init__(self, iface):
         self._iface = iface
@@ -30,26 +30,26 @@ class VectorFieldLayerToolbar:
         toolbar = iface.addToolBar(self.toolBarName)
         self._toolbar = toolbar
 
-        action1 = QAction(
+        actionAutosize = QAction(
             QIcon(":/plugins/VectorFieldLayerManager/AutoscaleVectorFieldIcon.png"), "Autosize arrows", iface.mainWindow()
         )
-        action1.setWhatsThis("Resize the arrows to a suggested scale for the current view")
-        action1.setStatusTip("Resize the arrows to a suggested scale for the current view")
-        action1.triggered.connect(self.autoRescale)
+        actionAutosize.setWhatsThis("Resize the arrows to a suggested scale for the current view")
+        actionAutosize.setStatusTip("Resize the arrows to a suggested scale for the current view")
+        actionAutosize.triggered.connect(self.autoRescale)
 
-        action2 = QAction(
+        actionEnlarge = QAction(
             QIcon(":/plugins/VectorFieldLayerManager/MagnifyVectorFieldIcon.png"), "Enlarge arrows", iface.mainWindow()
         )
-        action2.setWhatsThis("Increase the arrow size")
-        action2.setStatusTip("Increase the arrow size")
-        action2.triggered.connect(self.enlarge)
+        actionEnlarge.setWhatsThis("Increase the arrow size")
+        actionEnlarge.setStatusTip("Increase the arrow size")
+        actionEnlarge.triggered.connect(self.enlarge)
 
-        action3 = QAction(
+        actionShrink = QAction(
             QIcon(":/plugins/VectorFieldLayerManager/ShrinkVectorFieldIcon.png"), "Shrink arrows", iface.mainWindow()
         )
-        action3.setWhatsThis("Decrease the arrow size")
-        action3.setStatusTip("Decrease the arrow size")
-        action3.triggered.connect(self.shrink)
+        actionShrink.setWhatsThis("Decrease the arrow size")
+        actionShrink.setStatusTip("Decrease the arrow size")
+        actionShrink.triggered.connect(self.shrink)
 
         # action4 = QAction(QIcon(":/plugins/VectorFieldLayerManager/VectorScaleBoxOptionsIcon.png"),
         #           "Display the vector scale box", iface.mainWindow())
@@ -57,37 +57,59 @@ class VectorFieldLayerToolbar:
         # action4.setStatusTip("Display the vector scale box")
         # action4.triggered.connect(self.setScaleBoxOptions)
 
-        action5 = QAction(
+        actionEdit = QAction(
             QIcon(":plugins/VectorFieldLayerManager/VectorFieldLayerManagerIcon.png"),
-            "Apply vector settings to current layer",
+            "Edit vector field settings for current layer",
             iface.mainWindow(),
         )
-        action5.setWhatsThis("Apply vector settings to current layer")
-        action5.setStatusTip("Apply vector settings to current layer")
-        action5.triggered.connect(self.showLayerDialog)
+        actionEdit.setWhatsThis("Edit vector field settings for current layer")
+        actionEdit.setStatusTip("Edit vector field settings for current layer")
+        actionEdit.triggered.connect(self.showLayerDialog)
 
-        action6 = QAction(
+        actionCopy = QAction(
+            QIcon(":plugins/VectorFieldLayerManager/CopyVectorSettingsIcon.png"),
+            "Copy current layer vector settings to clipboard",
+            iface.mainWindow(),
+        )
+        actionCopy.setWhatsThis("Copy current layer vector settings to clipboard")
+        actionCopy.setStatusTip("Copy current layer vector settings to clipboard")
+        actionCopy.triggered.connect(self.copySettings)
+
+        actionPaste = QAction(
+            QIcon(":plugins/VectorFieldLayerManager/PasteVectorSettingsIcon.png"),
+            "Paste vector settings from clipboard to current layer",
+            iface.mainWindow(),
+        )
+        actionPaste.setWhatsThis("Paste vector settings from clipboard to current layer")
+        actionPaste.setStatusTip("Paste vector settings from clipboard to current layer")
+        actionPaste.triggered.connect(self.pasteSettings)
+
+        actionHelp = QAction(
             QIcon(":plugins/VectorFieldLayerManager/VectorFieldLayerManagerHelpIcon.png"),
             "Vector field settings help",
             iface.mainWindow(),
         )
-        action6.setWhatsThis("Show vector field settings help")
-        action6.setStatusTip("Show vector field settings help")
-        action6.triggered.connect(self.showHelp)
+        actionHelp.setWhatsThis("Show vector field settings help")
+        actionHelp.setStatusTip("Show vector field settings help")
+        actionHelp.triggered.connect(self.showHelp)
 
-        toolbar.addAction(action1)
-        toolbar.addAction(action2)
-        toolbar.addAction(action3)
+        toolbar.addAction(actionAutosize)
+        toolbar.addAction(actionEnlarge)
+        toolbar.addAction(actionShrink)
         # toolbar.addAction(action4)
-        toolbar.addAction(action5)
-        toolbar.addAction(action6)
+        toolbar.addAction(actionEdit)
+        toolbar.addAction(actionCopy)
+        toolbar.addAction(actionPaste)
+        toolbar.addAction(actionHelp)
 
-        self._rescaleAction = action1
-        self._enlargeAction = action2
-        self._shrinkAction = action3
+        self._rescaleAction = actionAutosize
+        self._enlargeAction = actionEnlarge
+        self._shrinkAction = actionShrink
         # self._scaleOptionsAction = action4
-        self._layerDialog = action5
-        self._helpAction = action6
+        self._copyAction = actionCopy
+        self._pasteAction = actionPaste
+        self._editAction = actionEdit
+        self._helpAction = actionHelp
 
         # Only enable when active layer has a Vector Field settings, also
         # disable and check whenever the canvas has redrawn (eg after
@@ -138,11 +160,13 @@ class VectorFieldLayerToolbar:
     def enableActions(self):
         layer = self.currentLayer()
         isvectorlayer = self._controller.isVectorFieldLayer(layer)
+        isvalidlayer = self._controller.isValidLayerType(layer)
         self._rescaleAction.setEnabled(isvectorlayer)
         self._enlargeAction.setEnabled(isvectorlayer)
         self._shrinkAction.setEnabled(isvectorlayer)
-        isvalidlayer = self._controller.isValidLayerType(layer)
-        self._layerDialog.setEnabled(isvalidlayer)
+        self._copyAction.setEnabled(isvectorlayer)
+        self._editAction.setEnabled(isvalidlayer)
+        self._pasteAction.setEnabled(isvalidlayer)
 
     def currentLayerChanged(self, layer):
         self._dialog.setLayer(layer)
@@ -159,7 +183,7 @@ class VectorFieldLayerToolbar:
     #     # self.setupScaleBox()
 
     def currentLayer(self):
-        return self._iface.mapCanvas().currentLayer()
+        return self._iface.activeLayer()
 
     # def findSettings(self):
     #     layer = self.currentLayer()
@@ -235,6 +259,24 @@ class VectorFieldLayerToolbar:
     def showLayerDialog(self):
         self._dialog.show()
         self._dialog.raise_()
+
+    def copySettings(self):
+        layer = self.currentLayer()
+        settings = self._controller.readSettingsFromLayer(layer)
+        if settings is not None:
+            QgsApplication.clipboard().setText(settings.saveToString())
+
+    def pasteSettings(self):
+        clipboard = QgsApplication.clipboard()
+        text = clipboard.text()
+        settings = VectorFieldLayerSettings()
+        try:
+            if settings.readFromString(text, ignore_errors=False):
+                for layer in self._iface.layerTreeView().selectedLayers():
+                    if self._controller.applySettingsToLayer(layer, settings):
+                        self._dialog.layerUpdated(layer)
+        except:
+            pass
 
     def showHelp(self):
         utils.showPluginHelp()

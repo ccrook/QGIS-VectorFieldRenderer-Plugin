@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 
-# TODO: copy/paste/save vector settings
 # TODO: restore feature scale down arrow when vector small
 # TODO: Change dialog to dockable widget
 # TODO: Documentation

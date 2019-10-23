@@ -187,6 +187,10 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
         if layerid == self._layerId:
             self.setLayer(None)
 
+    def layerUpdated(self, layerid ):
+        if layerid == self._layerId:
+            self.setLayer(self._layer)
+
     def setLayerScale(self, layer):
         if self._layer is not None and layer is not None and layer.id() == self._layerId:
             scale = self._controller.vectorFieldLayerScale(self._layer)

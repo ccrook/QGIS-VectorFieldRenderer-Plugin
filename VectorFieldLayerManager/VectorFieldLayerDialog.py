@@ -34,8 +34,11 @@ class VectorFieldLayerDialog(QDialog):
     def layerRemoved(self, layerid):
         self._widget.layerRemoved(layerid)
 
-    def setLayer(self, layer):
-        if self._widget.isModified():
+    def layerUpdated(self, layer):
+        self._widget.layerUpdated(layer.id())
+
+    def setLayer(self, layer, force=False):
+        if self._widget.isModified() and not force:
             message = (
                 "The vector field settings for layer {0} have been modified.\n"
                 + "Do you want to apply these changes before changing the layer?"

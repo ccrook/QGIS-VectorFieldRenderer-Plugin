@@ -394,14 +394,14 @@ class VectorFieldLayerSettings:
         settingstr = json.dumps(settings, sort_keys=True)
         return settingstr
 
-    def readFromString(self, settingstr):
+    def readFromString(self, settingstr, ignore_errors=True):
         """
         Read the layer settings from a JSON formatted string
         """
         result = False
         try:
             settings = json.loads(settingstr)
-            self.set(ignore_errors=True, **settings)
+            self.set(ignore_errors=ignore_errors, **settings)
             result = True
         except:
             pass
