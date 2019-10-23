@@ -231,13 +231,13 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
         if layersettings is not None:
             self._settings = layersettings
         self.loadFromSettings()
-        self._originalSettings = self.settings().copy()
+        self._originalSettings = self.settings().clone()
 
     def applyToLayer(self):
         if self._validLayer:
             settings = self.settings()
             self._controller.applySettingsToLayer(self._layer, settings)
-            self._originalSettings = settings.copy()
+            self._originalSettings = settings.clone()
 
     def loadFromSettings(self):
         settings = self._settings

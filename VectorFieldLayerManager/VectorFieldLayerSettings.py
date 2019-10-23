@@ -29,296 +29,81 @@ class VectorFieldLayerSettings:
     CircularEllipse = 3
     HeightEllipse = 4
 
-    def __init__(self):
-        self._mode = QgsVectorFieldSymbolLayer.Cartesian
-        self._angleOrientation = QgsVectorFieldSymbolLayer.ClockwiseFromNorth
-        self._angleUnits = QgsVectorFieldSymbolLayer.Degrees
-        self._scale = 1.0
-        self._dxField = ""
-        self._dyField = ""
-        self._scaleIsMetres = QgsUnitTypes.RenderMillimeters
-        self._scaleGroup = ""
-        self._scaleGroupFactor = 1.0
-        self._symbolUnitType = QgsUnitTypes.RenderMillimeters
-        self._ellipseMode = VectorFieldLayerSettings.AxesEllipse
-        self._ellipseAngleFromNorth = True
-        self._ellipseDegrees = True
-        self._ellipseScale = 1.0
-        self._drawArrow = True
-        self._arrowShaftWidth = 1.5
-        self._arrowHeadWidth = 3.0
-        self._arrowHeadRelativeLength = 2.0
-        self._arrowBorderWidth = 0.0
-        self._arrowMaxRelativeHeadSize = 0.3
-        self._arrowFillColor = QColor(0, 0, 0)
-        self._fillArrow = True
-        self._arrowBorderColor = QColor(0, 0, 0)
-        self._baseSize = 2.0
-        self._fillBase = True
-        self._baseFillColor = QColor(255, 0, 0)
-        self._baseBorderWidth = 0.0
-        self._baseBorderColor = QColor(0, 0, 0)
-        self._ellipseBorderWidth = 0.7
-        self._emaxField = ""
-        self._eminField = ""
-        self._emaxAzimuthField = ""
-        self._ellipseBorderColor = QColor(0, 0, 0)
-        self._ellipseFillColor = QColor(0, 0, 0)
-        self._fillEllipse = False
-        self._drawEllipse = True
-        self._drawEllipseAxes = False
-        self._ellipseTickSize = 2.0
+    _defaults = dict(
+        mode=QgsVectorFieldSymbolLayer.Cartesian,
+        angleOrientation=QgsVectorFieldSymbolLayer.ClockwiseFromNorth,
+        angleUnits=QgsVectorFieldSymbolLayer.Degrees,
+        scale=1.0,
+        dxField="",
+        dyField="",
+        scaleIsMetres=False,
+        scaleGroup="",
+        scaleGroupFactor=1.0,
+        symbolUnitType=QgsUnitTypes.RenderMillimeters,
+        ellipseMode=AxesEllipse,
+        ellipseAngleFromNorth=True,
+        ellipseDegrees=True,
+        ellipseScale=1.0,
+        drawArrow=True,
+        arrowShaftWidth=1.5,
+        arrowHeadWidth=3.0,
+        arrowHeadRelativeLength=2.0,
+        arrowBorderWidth=0.0,
+        arrowMaxRelativeHeadSize=0.3,
+        arrowFillColor=QColor(0, 0, 0),
+        fillArrow=True,
+        arrowBorderColor=QColor(0, 0, 0),
+        baseSize=2.0,
+        fillBase=True,
+        baseFillColor=QColor(255, 0, 0),
+        baseBorderWidth=0.0,
+        baseBorderColor=QColor(0, 0, 0),
+        ellipseBorderWidth=0.7,
+        emaxField="",
+        eminField="",
+        emaxAzimuthField="",
+        ellipseBorderColor=QColor(0, 0, 0),
+        ellipseFillColor=QColor(0, 0, 0),
+        fillEllipse=False,
+        drawEllipse=True,
+        drawEllipseAxes=False,
+        ellipseTickSize=2.0,
+    )
+
+    _types = {k: type(v) for k, v in _defaults.items()}
+
+    # Not used in current version of renderer
+    # self._vectorIsTrueNorth = True
+    # self._useMapNorth = True
+    # self._layerId = None
+    # self._legendText = ""
+    # self._showInScaleBox = True
+    # self._scaleBoxText = ""
+
+    def __init__(self, **settings):
         # Layer variable used to automatically change the scale...
+        self._settings = dict(self._defaults)
         self._scaleVariableName = ""
-
-        # Not used in current version of renderer
-        # self._vectorIsTrueNorth = True
-        # self._useMapNorth = True
-        # self._layerId = None
-        # self._legendText = ""
-        # self._showInScaleBox = True
-        # self._scaleBoxText = ""
-
-    def mode(self):
-        return self._mode
-
-    def setMode(self, value):
-        self._mode = value
-
-    def angleOrientation(self):
-        return self._angleOrientation
-
-    def setAngleOrientation(self, value):
-        self._angleOrientation = value
-
-    def angleUnits(self):
-        return self._angleUnits
-
-    def setAngleUnits(self, value):
-        self._angleUnits = value
-
-    def scale(self):
-        return self._scale
-
-    def setScale(self, value):
-        self._scale = value
-
-    def dxField(self):
-        return self._dxField
-
-    def setDxField(self, value):
-        self._dxField = value
-
-    def dyField(self):
-        return self._dyField
-
-    def setDyField(self, value):
-        self._dyField = value
-
-    def scaleIsMetres(self):
-        return self._scaleIsMetres
-
-    def setScaleIsMetres(self, value):
-        self._scaleIsMetres = value
-
-    def symbolUnitType(self):
-        return self._symbolUnitType
-
-    def setSymbolUnitType(self, value):
-        self._symbolUnitType = value
-
-    def scaleGroup(self):
-        return self._scaleGroup
-
-    def setScaleGroup(self, value):
-        self._scaleGroup = value
-
-    def scaleGroupFactor(self):
-        return self._scaleGroupFactor
-
-    def setScaleGroupFactor(self, value):
-        self._scaleGroupFactor = value
-
-    def ellipseMode(self):
-        return self._ellipseMode
-
-    def setEllipseMode(self, value):
-        self._ellipseMode = value
-
-    def ellipseAngleFromNorth(self):
-        return self._ellipseAngleFromNorth
-
-    def setEllipseAngleFromNorth(self, value):
-        self._ellipseAngleFromNorth = value
-
-    def ellipseDegrees(self):
-        return self._ellipseDegrees
-
-    def setEllipseDegrees(self, value):
-        self._ellipseDegrees = value
-
-    def ellipseScale(self):
-        return self._ellipseScale
-
-    def setEllipseScale(self, value):
-        self._ellipseScale = value
-
-    def drawArrow(self):
-        return self._drawArrow
-
-    def setDrawArrow(self, value):
-        self._drawArrow = value
-
-    def arrowShaftWidth(self):
-        return self._arrowShaftWidth
-
-    def setArrowShaftWidth(self, value):
-        self._arrowShaftWidth = value
-
-    def arrowMaxRelativeHeadSize(self):
-        return self._arrowMaxRelativeHeadSize
-
-    def setArrowMaxRelativeHeadSize(self, value):
-        self._arrowMaxRelativeHeadSize = value
-
-    def arrowHeadWidth(self):
-        return self._arrowHeadWidth
-
-    def setArrowHeadWidth(self, value):
-        self._arrowHeadWidth = value
-
-    def arrowHeadRelativeLength(self):
-        return self._arrowHeadRelativeLength
-
-    def setArrowHeadRelativeLength(self, value):
-        self._arrowHeadRelativeLength = value
-
-    def arrowBorderWidth(self):
-        return self._arrowBorderWidth
-
-    def setArrowBorderWidth(self, value):
-        self._arrowBorderWidth = value
-
-    def arrowFillColor(self):
-        return self._arrowFillColor
-
-    def setArrowFillColor(self, value):
-        self._arrowFillColor = value
-
-    def fillArrow(self):
-        return self._fillArrow
-
-    def setFillArrow(self, value):
-        self._fillArrow = value
-
-    def arrowBorderColor(self):
-        return self._arrowBorderColor
-
-    def setArrowBorderColor(self, value):
-        self._arrowBorderColor = value
-
-    def baseSize(self):
-        return self._baseSize
-
-    def setBaseSize(self, value):
-        self._baseSize = value
-
-    def fillBase(self):
-        return self._fillBase
-
-    def setFillBase(self, value):
-        self._fillBase = value
-
-    def baseFillColor(self):
-        return self._baseFillColor
-
-    def setBaseFillColor(self, value):
-        self._baseFillColor = value
-
-    def baseBorderWidth(self):
-        return self._baseBorderWidth
-
-    def setBaseBorderWidth(self, value):
-        self._baseBorderWidth = value
-
-    def baseBorderColor(self):
-        return self._baseBorderColor
-
-    def setBaseBorderColor(self, value):
-        self._baseBorderColor = value
-
-    def ellipseBorderWidth(self):
-        return self._ellipseBorderWidth
-
-    def setEllipseBorderWidth(self, value):
-        self._ellipseBorderWidth = value
-
-    def emaxField(self):
-        return self._emaxField
-
-    def setEmaxField(self, value):
-        self._emaxField = value
-
-    def eminField(self):
-        return self._eminField
-
-    def setEminField(self, value):
-        self._eminField = value
-
-    def emaxAzimuthField(self):
-        return self._emaxAzimuthField
-
-    def setEmaxAzimuthField(self, value):
-        self._emaxAzimuthField = value
-
-    def ellipseBorderColor(self):
-        return self._ellipseBorderColor
-
-    def setEllipseBorderColor(self, value):
-        self._ellipseBorderColor = value
-
-    def ellipseFillColor(self):
-        return self._ellipseFillColor
-
-    def setEllipseFillColor(self, value):
-        self._ellipseFillColor = value
-
-    def fillEllipse(self):
-        return self._fillEllipse
-
-    def setFillEllipse(self, value):
-        self._fillEllipse = value
-
-    def drawEllipse(self):
-        return self._drawEllipse
-
-    def setDrawEllipse(self, value):
-        self._drawEllipse = value
-
-    def drawEllipseAxes(self):
-        return self._drawEllipseAxes
-
-    def setDrawEllipseAxes(self, value):
-        self._drawEllipseAxes = value
-
-    def ellipseTickSize(self):
-        return self._ellipseTickSize
-
-    def setEllipseTickSize(self, value):
-        self._ellipseTickSize = value
+        self.set(**settings)
+
+    def set(self, ignore_errors=False, **settings):
+        for k, v in settings.items():
+            if k not in self._types:
+                if not ignore_errors:
+                    raise KeyError(k)
+                continue
+            self._settings[k] = self._types[k](v)
 
     def setScaleVariableName(self, name):
         self._scaleVariableName = name
 
-    def copy(self):
-        copy = VectorFieldLayerSettings()
-        copy.readFromString(self.saveToString())
-        return copy
+    def clone(self):
+        clone = VectorFieldLayerSettings(**self._settings)
+        return clone
 
     def sameAs(self, other):
         return self.saveToString() == other.saveToString()
 
-    # Create a copy of the current settings
     # Functions to construct symbology
 
     # TODO: Is there an API call for quotedFieldExpression.
@@ -327,17 +112,17 @@ class VectorFieldLayerSettings:
         return '"' + field + '"'
 
     def encodedSymbolUnit(self):
-        return QgsUnitTypes.encodeUnit(self._symbolUnitType)
+        return QgsUnitTypes.encodeUnit(self.symbolUnitType())
 
     def encodedScaleUnit(self):
-        if self._scaleIsMetres:
+        if self.scaleIsMetres():
             return QgsUnitTypes.encodeUnit(QgsUnitTypes.RenderMetersInMapUnits)
         return self.encodedSymbolUnit()
 
     def vectorScaleUnit(self):
-        if self._scaleIsMetres:
+        if self.scaleIsMetres():
             return QgsUnitTypes.RenderMetersInMapUnits
-        return self._symbolUnitType
+        return self.symbolUnitType()
 
     def basepointSymbol(self):
         """
@@ -347,10 +132,10 @@ class VectorFieldLayerSettings:
         basepointSymbol = QgsMarkerSymbol.createSimple(
             {
                 "name": "circle",
-                "size": str(self._baseSize),
-                "color": self._baseFillColor.name(QColor.HexArgb),
-                "outline_width": str(self._baseBorderWidth),
-                "outline_color": self._baseBorderColor.name(QColor.HexArgb),
+                "size": str(self.baseSize()),
+                "color": self.baseFillColor().name(QColor.HexArgb),
+                "outline_width": str(self.baseBorderWidth()),
+                "outline_color": self.baseBorderColor().name(QColor.HexArgb),
                 "size_unit": symbolUnit,
                 "outline_width_unit": symbolUnit,
             }
@@ -373,17 +158,17 @@ class VectorFieldLayerSettings:
         Creates a line symbol layer for the arrow.  
         """
 
-        if not self._drawArrow:
+        if not self.drawArrow():
             return None
         symbolUnit = self.encodedSymbolUnit()
         arrow = QgsArrowSymbolLayer.create(
             {
                 "head_type": "0",
                 "arrow_type": "0",
-                "arrow_width": str(self._arrowShaftWidth),
-                "arrow_start_width": str(self._arrowShaftWidth),
-                "head_thickness": str(self._arrowHeadWidth),
-                "head_length": str(self._arrowHeadWidth * self._arrowHeadRelativeLength),
+                "arrow_width": str(self.arrowShaftWidth()),
+                "arrow_start_width": str(self.arrowShaftWidth()),
+                "head_thickness": str(self.arrowHeadWidth()),
+                "head_length": str(self.arrowHeadWidth() * self.arrowHeadRelativeLength()),
                 "arrow_start_width_unit": symbolUnit,
                 "arrow_width_unit": symbolUnit,
                 "arrow_head_thickness_unit": symbolUnit,
@@ -392,12 +177,12 @@ class VectorFieldLayerSettings:
         )
         arrowFillSymbol = QgsFillSymbol.createSimple(
             {
-                "color": self._arrowFillColor.name(QColor.HexArgb),
-                "style": "solid" if self._fillArrow else "no",
+                "color": self.arrowFillColor().name(QColor.HexArgb),
+                "style": "solid" if self.fillArrow() else "no",
                 "outline_style": "solid",
-                "outline_width": str(self._arrowBorderWidth),
+                "outline_width": str(self.arrowBorderWidth()),
                 "outline_width_unit": symbolUnit,
-                "outline_color": self._arrowBorderColor.name(QColor.HexArgb),
+                "outline_color": self.arrowBorderColor().name(QColor.HexArgb),
                 "joinstyle": "miter",
             }
         )
@@ -406,15 +191,15 @@ class VectorFieldLayerSettings:
 
     def ellipseSymbolLayer(self):
 
-        if self._ellipseMode == self.NoEllipse:
+        if self.ellipseMode() == self.NoEllipse:
             return None
         # TODO: Currently don't handle ellipse defined by covariance
-        if self._ellipseMode == self.CovarianceEllipse:
+        if self.ellipseMode() == self.CovarianceEllipse:
             return None
         symbolUnit = self.encodedSymbolUnit()
         scaleUnit = self.encodedScaleUnit()
-        fillColor = self._ellipseFillColor.name(QColor.HexArgb)
-        if not self._fillEllipse:
+        fillColor = self.ellipseFillColor().name(QColor.HexArgb)
+        if not self.fillEllipse():
             fillColor = "#00000000"
         ellipseLayer = QgsEllipseSymbolLayer.create(
             {
@@ -422,36 +207,36 @@ class VectorFieldLayerSettings:
                 "symbol_width_unit": scaleUnit,
                 "symbol_height": "0",
                 "symbol_height_unit": scaleUnit,
-                "symbol_name": ("circle" if self._drawEllipse else "cross"),
+                "symbol_name": ("circle" if self.drawEllipse() else "cross"),
                 "angle": "0",
-                "outline_width": str(self._ellipseBorderWidth),
+                "outline_width": str(self.ellipseBorderWidth()),
                 "outline_width_unit": symbolUnit,
-                "outline_color": self._ellipseBorderColor.name(QColor.HexArgb),
+                "outline_color": self.ellipseBorderColor().name(QColor.HexArgb),
                 "fill_color": fillColor,
             }
         )
-        scale = self._ellipseScale
+        scale = self.ellipseScale()
         useproperty = self._scaleVariableName != ""
         if useproperty:
             ellipseScale = "(@" + self._scaleVariableName + " * " + str(scale) + ")"
         else:
-            ellipseScale = str(scale * self._scale)
-        widthExpression = self.quotedFieldExpression(self._emaxField) + "*" + ellipseScale
+            ellipseScale = str(scale * self.scale())
+        widthExpression = self.quotedFieldExpression(self.emaxField()) + "*" + ellipseScale
 
-        if self._ellipseMode == self.AxesEllipse:
-            heightExpression = self.quotedFieldExpression(self._eminField) + "*" + ellipseScale
+        if self.ellipseMode() == self.AxesEllipse:
+            heightExpression = self.quotedFieldExpression(self.eminField()) + "*" + ellipseScale
             ellipseLayer.setDataDefinedProperty(QgsSymbolLayer.PropertyWidth, QgsProperty.fromExpression(widthExpression))
             ellipseLayer.setDataDefinedProperty(QgsSymbolLayer.PropertyHeight, QgsProperty.fromExpression(heightExpression))
-            angleExpression = self.quotedFieldExpression(self._emaxAzimuthField)
-            if not self._ellipseDegrees:
+            angleExpression = self.quotedFieldExpression(self.emaxAzimuthField())
+            if not self.ellipseDegrees():
                 angleExpression = "radians(" + angleExpression + ")"
-            if self._ellipseAngleFromNorth:
+            if self.ellipseAngleFromNorth():
                 angleExpression = "(90.0-" + angleExpression + ")"
             ellipseLayer.setDataDefinedProperty(QgsSymbolLayer.PropertyAngle, QgsProperty.fromExpression(angleExpression))
-        elif self._ellipseMode == self.CircularEllipse:
+        elif self.ellipseMode() == self.CircularEllipse:
             ellipseLayer.setDataDefinedProperty(QgsSymbolLayer.PropertyWidth, QgsProperty.fromExpression(widthExpression))
             ellipseLayer.setDataDefinedProperty(QgsSymbolLayer.PropertyHeight, QgsProperty.fromExpression(widthExpression))
-        elif self._ellipseMode == self.HeightEllipse:
+        elif self.ellipseMode() == self.HeightEllipse:
             ellipseLayer.setDataDefinedProperty(QgsSymbolLayer.PropertyHeight, QgsProperty.fromExpression(widthExpression))
         else:
             return None
@@ -470,18 +255,18 @@ class VectorFieldLayerSettings:
         return ellipseLine
 
     def vectorFieldSymbol(self):
-        scaleUnit = QgsUnitTypes.toAbbreviatedString(self._scaleIsMetres)
+        scaleUnit = QgsUnitTypes.toAbbreviatedString(self.scaleIsMetres())
         vfl = QgsVectorFieldSymbolLayer()
-        vfl.setXAttribute(self._dxField)
-        vfl.setYAttribute(self._dyField)
-        vfl.setScale(self._scale)
-        vfl.setVectorFieldType(self._mode)
-        vfl.setAngleOrientation(self._angleOrientation)
-        vfl.setAngleUnits(self._angleUnits)
-        if self._scaleIsMetres:
+        vfl.setXAttribute(self.dxField())
+        vfl.setYAttribute(self.dyField())
+        vfl.setScale(self.scale())
+        vfl.setVectorFieldType(self.mode())
+        vfl.setAngleOrientation(self.angleOrientation())
+        vfl.setAngleUnits(self.angleUnits())
+        if self.scaleIsMetres():
             vfl.setDistanceUnit(QgsUnitTypes.RenderMetersInMapUnits)
         else:
-            vfl.setDistanceUnit(self._symbolUnitType)
+            vfl.setDistanceUnit(self.symbolUnitType())
 
         # Create the symbology for the vector layer
         symbol = QgsLineSymbol()
@@ -504,7 +289,7 @@ class VectorFieldLayerSettings:
         return vflsymbol
 
     def symbol(self):
-        if self._drawArrow:
+        if self.drawArrow():
             symbol = self.vectorFieldSymbol()
         else:
             symbol = self.basepointSymbol()
@@ -515,36 +300,36 @@ class VectorFieldLayerSettings:
 
     def estimatedVectorSize(self, feature):
         size = 0.0
-        if self._drawArrow:
+        if self.drawArrow():
             try:
-                ds = abs(float(feature.attribute(self._dxField)))
-                if self._mode == QgsVectorFieldSymbolLayer.Cartesian:
-                    dy = float(feature.attribute(self._dyField))
+                ds = abs(float(feature.attribute(self.dxField())))
+                if self.mode() == QgsVectorFieldSymbolLayer.Cartesian:
+                    dy = float(feature.attribute(self.dyField()))
                     ds = math.sqrt(ds * ds + dy * dy)
                 size = ds
             except:
                 pass
-        if self._ellipseMode != self.NoEllipse:
+        if self.ellipseMode() != self.NoEllipse:
             try:
-                ds = abs(float(feature.attribute(self._emaxField)))
-                if self._ellipseMode == self.AxesEllipse:
-                    dmin = abs(float(feature.attribute(self._eminField)))
+                ds = abs(float(feature.attribute(self.emaxField())))
+                if self.ellipseMode() == self.AxesEllipse:
+                    dmin = abs(float(feature.attribute(self.eminField())))
                     ds = max(ds, dmin)
-                size += ds * self._ellipseScale
+                size += ds * self.ellipseScale()
             except:
                 pass
         return size
 
     def usedAttributes(self):
         attributes = set()
-        if self._drawArrow:
-            attributes.add(self._dxField)
-            if self._mode == QgsVectorFieldSymbolLayer.Cartesian:
-                attributes.add(self._dyField)
-        if self._ellipseMode != self.NoEllipse:
-            attributes.add(self._emaxField)
-            if self._ellipseMode == self.AxesEllipse:
-                attributes.add(self._eminField)
+        if self.drawArrow():
+            attributes.add(self.dxField())
+            if self.mode() == QgsVectorFieldSymbolLayer.Cartesian:
+                attributes.add(self.dyField())
+        if self.ellipseMode() != self.NoEllipse:
+            attributes.add(self.emaxField())
+            if self.ellipseMode() == self.AxesEllipse:
+                attributes.add(self.eminField())
                 # _emaxAzimuth not added as this is currently only used for estimating size
         return attributes
 
@@ -552,18 +337,7 @@ class VectorFieldLayerSettings:
         """
         Write the layer settings to a string 
         """
-        settings = {}
-        for setting in self.__dict__:
-            if re.match(r"_[a-z]", setting):
-                value = self.__dict__[setting]
-                key = setting[1:]
-                if callable(value):
-                    continue
-                if setting == "_scaleVariableName":
-                    continue
-                if type(value) == QColor:
-                    value = value.name(QColor.HexArgb)
-                settings[key] = value
+        settings = {k: v.name(QColor.HexArgb) if self._types[k] == QColor else v for k, v in self._settings.items()}
         settingstr = json.dumps(settings, sort_keys=True)
         return settingstr
 
@@ -574,26 +348,19 @@ class VectorFieldLayerSettings:
         result = False
         try:
             settings = json.loads(settingstr)
-            newvalues = {}
-            for setting in self.__dict__:
-                if re.match(r"_[a-z]", setting):
-                    value = self.__dict__[setting]
-                    valueType = type(value)
-                    if callable(value):
-                        continue
-                    key = setting[1:]
-                    if key not in settings:
-                        continue
-                    value = settings.get(key)
-                    if value is None:
-                        continue
-                    try:
-                        value = valueType(value)
-                        newvalues[setting] = value
-                    except:
-                        pass
-            self.__dict__.update(newvalues)
+            self.set(ignore_errors=True, **settings)
             result = True
         except:
             pass
         return result
+
+
+def _createAccessors(key):
+    setattr(VectorFieldLayerSettings, key, lambda self: self._settings[key])
+    setfunc = "set" + key[0].upper() + key[1:]
+    setattr(VectorFieldLayerSettings, setfunc, lambda self, value: self.set(**{key: value}))
+
+
+for key in VectorFieldLayerSettings._types:
+    _createAccessors(key)
+

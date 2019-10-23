@@ -31,7 +31,7 @@ class VectorFieldLayerSettingsTestCase(fileunittest.TestCase):
         vs.setScale(0.2)
         vs.setDxField("de")
         vs.setDyField("dn")
-        vs.setScaleUnitType(1)
+        vs.setScaleIsMetres(True)
         vs.setScaleGroup("def")
         vs.setScaleGroupFactor(0.3)
         vs.setEllipseMode(4)
