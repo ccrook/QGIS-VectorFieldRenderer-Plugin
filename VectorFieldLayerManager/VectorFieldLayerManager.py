@@ -216,7 +216,7 @@ class VectorFieldLayerManager(QObject):
             group = None
         factor = 1.0
         if group is not None:
-            factor = layer.customProperty(VECTOR_SCALE_GROUP_FACTOR_PROP, 1.0)
+            factor = float(layer.customProperty(VECTOR_SCALE_GROUP_FACTOR_PROP, 1.0))
             if factor <= 0:
                 factor = 1.0
         return group, factor

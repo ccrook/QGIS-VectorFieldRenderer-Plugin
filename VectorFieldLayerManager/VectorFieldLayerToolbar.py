@@ -77,11 +77,11 @@ class VectorFieldLayerToolbar:
 
         actionPaste = QAction(
             QIcon(":plugins/VectorFieldLayerManager/PasteVectorSettingsIcon.png"),
-            "Paste vector settings from clipboard to current layer",
+            "Paste vector settings from clipboard to selected layer(s)",
             iface.mainWindow(),
         )
-        actionPaste.setWhatsThis("Paste vector settings from clipboard to current layer")
-        actionPaste.setStatusTip("Paste vector settings from clipboard to current layer")
+        actionPaste.setWhatsThis("Paste vector settings from clipboard to selected layer(s)")
+        actionPaste.setStatusTip("Paste vector settings from clipboard to selected layer(s)")
         actionPaste.triggered.connect(self.pasteSettings)
 
         actionHelp = QAction(
@@ -164,8 +164,8 @@ class VectorFieldLayerToolbar:
         self._rescaleAction.setEnabled(isvectorlayer)
         self._enlargeAction.setEnabled(isvectorlayer)
         self._shrinkAction.setEnabled(isvectorlayer)
-        self._copyAction.setEnabled(isvectorlayer)
         self._editAction.setEnabled(isvalidlayer)
+        self._copyAction.setEnabled(isvectorlayer)
         self._pasteAction.setEnabled(isvalidlayer)
 
     def currentLayerChanged(self, layer):
@@ -265,18 +265,34 @@ class VectorFieldLayerToolbar:
         settings = self._controller.readSettingsFromLayer(layer)
         if settings is not None:
             QgsApplication.clipboard().setText(settings.saveToString())
+            self._iface.messageBar().pushInfo(
+                "Vector settings copied", "The current layer vector settings have been copied to the clipboard."
+            )
+        else:
+            self._iface.messageBar().pushWarning(
+                "Vector settings copy error", "The current layer does not have vector settings - not copied."
+            )
 
     def pasteSettings(self):
         clipboard = QgsApplication.clipboard()
         text = clipboard.text()
         settings = VectorFieldLayerSettings()
         try:
+            nbad = 0
             if settings.readFromString(text, ignore_errors=False):
                 for layer in self._iface.layerTreeView().selectedLayers():
                     if self._controller.applySettingsToLayer(layer, settings):
                         self._dialog.layerUpdated(layer)
+                    else:
+                        nbad += 1
+            if nbad > 0:
+                self._iface.messageBar().pushWarning(
+                    "Vector settings paste error", "Could not apply vector field settings to {0} layers".format(nbad)
+                )
         except:
-            pass
+            self._iface.messageBar().pushWarning(
+                "Vector settings paste error", "Could not read vector field settings from the clipboard"
+            )
 
     def showHelp(self):
         utils.showPluginHelp()
