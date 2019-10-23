@@ -43,8 +43,6 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
         # Hide fields not used in current implementation
         self.uVectorLegendFieldsFrame.hide()
         self.uEllipseTypeCovariance.hide()
-        self.uEllipseTickSizeLabel.hide()
-        self.uEllipseTickSize.hide()
         self.uVectorFieldAlignmentFrame.hide()
 
         # Install information from layer
@@ -180,6 +178,7 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
         self.uAxisAngleUnitsGroupBox.setEnabled(isPolar)
         self.uAxisOrientationGroupBox.setEnabled(isPolar)
         self.uEllipseFormatGroup.setEnabled(mode != VectorFieldLayerSettings.NoEllipse)
+        self.uEllipseTickSize.setEnabled(mode == VectorFieldLayerSettings.HeightEllipse)
 
     def layer(self):
         return self._layer

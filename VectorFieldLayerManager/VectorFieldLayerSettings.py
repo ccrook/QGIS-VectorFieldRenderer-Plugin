@@ -15,6 +15,7 @@ from qgis.core import (
     QgsUnitTypes,
     QgsVectorFieldSymbolLayer,
     QgsEllipseSymbolLayer,
+    QgsSimpleMarkerSymbolLayer,
     QgsSymbolLayer,
     QgsProperty,
     QgsWkbTypes,
@@ -148,7 +149,7 @@ class VectorFieldLayerSettings:
         with a marker at the first vertex.
         """
         basepointSymbol = self.basepointSymbol()
-        basepointLine = QgsMarkerLineSymbolLayer()
+        basepointLine = QgsMarkerLineSymbolLayer(rotateMarker=False)
         basepointLine.setPlacement(QgsMarkerLineSymbolLayer.FirstVertex)
         basepointLine.setSubSymbol(basepointSymbol)
         return basepointLine
@@ -189,6 +190,48 @@ class VectorFieldLayerSettings:
         arrow.setSubSymbol(arrowFillSymbol)
         return arrow
 
+    def heightErrorSymbolLayers(self):
+        symbolUnit = self.encodedSymbolUnit()
+        scaleUnit = self.encodedScaleUnit()
+        tick1 = QgsSimpleMarkerSymbolLayer.create(
+            {
+                "name": "line",
+                "size": "0.0",
+                "angle": "0.0",
+                "color": self.ellipseBorderColor().name(QColor.HexArgb),
+                "line_width": str(self.baseBorderWidth()),
+                "line_color": self.ellipseBorderColor().name(QColor.HexArgb),
+                "size_unit": scaleUnit,
+            }
+        )
+        tick2 = QgsSimpleMarkerSymbolLayer.create(
+            {
+                "name": "line",
+                "size": str(self.ellipseTickSize()),
+                "angle": "90.0",
+                "color": self.ellipseBorderColor().name(QColor.HexArgb),
+                "line_width": str(self.baseBorderWidth()),
+                "line_color": self.ellipseBorderColor().name(QColor.HexArgb),
+                "size_unit": symbolUnit,
+                "offset_unit": scaleUnit,
+            }
+        )
+
+        scale = self.ellipseScale() * 2.0
+        useproperty = self._scaleVariableName != ""
+        if useproperty:
+            ellipseScale = "(@" + self._scaleVariableName + " * " + str(scale) + ")"
+        else:
+            ellipseScale = str(scale * self.scale())
+        sizeExpression = self.quotedFieldExpression(self.emaxField()) + "*" + ellipseScale
+        tick3 = tick2.clone()
+        tick1.setDataDefinedProperty(QgsSymbolLayer.PropertySize, QgsProperty.fromExpression(sizeExpression))
+        offset2 = "to_string(0.5*" + sizeExpression + ") || ',0.0'"
+        offset3 = "to_string(-0.5*" + sizeExpression + ") || ',0.0'"
+        tick2.setDataDefinedProperty(QgsSymbolLayer.PropertyOffset, QgsProperty.fromExpression(offset2))
+        tick3.setDataDefinedProperty(QgsSymbolLayer.PropertyOffset, QgsProperty.fromExpression(offset3))
+        return [tick1, tick2, tick3]
+
     def ellipseSymbolLayer(self):
 
         if self.ellipseMode() == self.NoEllipse:
@@ -215,7 +258,7 @@ class VectorFieldLayerSettings:
                 "fill_color": fillColor,
             }
         )
-        scale = self.ellipseScale()
+        scale = self.ellipseScale() * 2.0  # As symbol measured on diameter
         useproperty = self._scaleVariableName != ""
         if useproperty:
             ellipseScale = "(@" + self._scaleVariableName + " * " + str(scale) + ")"
@@ -242,14 +285,23 @@ class VectorFieldLayerSettings:
             return None
         return ellipseLayer
 
-    def ellipseLineSymbolLayer(self):
+    def errorSymbolLayers(self):
+        if self.ellipseMode() == self.HeightEllipse:
+            return self.heightErrorSymbolLayers()
         ellipseLayer = self.ellipseSymbolLayer()
-        if ellipseLayer is None:
+        if ellipseLayer is not None:
+            return [ellipseLayer]
+        return None
+
+    def ellipseLineSymbolLayer(self):
+        errorLayers = self.errorSymbolLayers()
+        if errorLayers is None:
             return None
         ellipseSymbol = QgsMarkerSymbol()
         ellipseSymbol.deleteSymbolLayer(0)
-        ellipseSymbol.appendSymbolLayer(ellipseLayer)
-        ellipseLine = QgsMarkerLineSymbolLayer()
+        for errorLayer in errorLayers:
+            ellipseSymbol.appendSymbolLayer(errorLayer)
+        ellipseLine = QgsMarkerLineSymbolLayer(rotateMarker=False)
         ellipseLine.setPlacement(QgsMarkerLineSymbolLayer.LastVertex)
         ellipseLine.setSubSymbol(ellipseSymbol)
         return ellipseLine
@@ -293,9 +345,10 @@ class VectorFieldLayerSettings:
             symbol = self.vectorFieldSymbol()
         else:
             symbol = self.basepointSymbol()
-            ellipse = self.ellipseSymbolLayer()
-            if ellipse is not None:
-                symbol.insertSymbolLayer(0, ellipse)
+            errorLayers = self.errorSymbolLayers()
+            if errorLayers is not None:
+                for errorLayer in errorLayers:
+                    symbol.insertSymbolLayer(0, errorLayer)
         return symbol
 
     def estimatedVectorSize(self, feature):

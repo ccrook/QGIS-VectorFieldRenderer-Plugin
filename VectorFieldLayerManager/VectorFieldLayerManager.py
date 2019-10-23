@@ -2,10 +2,13 @@
 
 # TODO: copy/paste/save vector settings
 # TODO: restore feature scale down arrow when vector small
-# TODO: Handling of height error ellipse (ticks on line, build from 3 line symbols?)
 # TODO: Change dialog to dockable widget
-# TODO: restore feature - no alignment to true north
-# TODO: Live update
+# TODO: Documentation
+# TODO: Compile into plugin
+# TODO: restore feature: optional alignment to true north
+# TODO: restore feature: scale box
+# TODO: restore feature: expressions for vector components and covariance (could do with geometry generator layer)
+# TODO: enhancement: Live update
 
 import math
 

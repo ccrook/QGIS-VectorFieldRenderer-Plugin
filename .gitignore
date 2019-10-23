@@ -3,3 +3,4 @@ Thumbs.db
 .svn
 *.swp
 temp
+test/testVectorFieldLayerSettings.results.new
