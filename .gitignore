@@ -4,3 +4,4 @@ Thumbs.db
 *.swp
 temp
 test/testVectorFieldLayerSettings.results.new
+.vscode

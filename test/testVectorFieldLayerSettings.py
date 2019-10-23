@@ -16,7 +16,7 @@ class VectorFieldLayerSettingsTestCase(fileunittest.TestCase):
         Test vector field layer settings
         """
         vs = VectorFieldLayerSettings()
-        settings = vs.saveToString()
+        settings = vs.toString()
         self.check("001: Dump default settings", settings)
         self.checkRun("001: Reload settings", lambda: vs.readFromString(settings))
 
@@ -62,12 +62,31 @@ class VectorFieldLayerSettingsTestCase(fileunittest.TestCase):
         vs.setDrawEllipse(False)
         vs.setDrawEllipseAxes(True)
         vs.setEllipseTickSize(0.003)
-        settings = vs.saveToString()
+        settings = vs.toString()
         self.check("002: Setter functions", settings)
         vs2 = VectorFieldLayerSettings()
         self.checkRun("002: Reload modified settings", lambda: vs2.readFromString(settings))
-        settings2 = vs2.saveToString()
+        settings2 = vs2.toString()
         self.check("002: Modified settings reloaded correctly", settings == settings2)
+
+    def test003_alias(self):
+        """
+        Test vector field layer settings
+        """
+        vs = VectorFieldLayerSettings()
+        vs.set(color="#FF00FF")
+        self.check("003: Set color alias", vs.toString())
+        vs = VectorFieldLayerSettings()
+        vs.set(heightField="dh")
+        self.check("003: Set heightField alias", vs.toString())
+        # Invalid settings
+        vs = VectorFieldLayerSettings()
+        self.checkRun("003: Invalid setting key", lambda: vs.set(garbage="Something"))
+        vs = VectorFieldLayerSettings()
+        self.checkRun("003: Invalid key - ignore errors", lambda: vs.set(ignore_errors=True, garbage="Something"))
+        vs = VectorFieldLayerSettings()
+        self.checkRun("003: Invalid key value", lambda: vs.set(color="not a colour"))
+        self.check("004: Invalid key not set", vs.toString())
 
 
 if __name__ == "__main__":

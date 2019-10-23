@@ -264,7 +264,7 @@ class VectorFieldLayerToolbar:
         layer = self.currentLayer()
         settings = self._controller.readSettingsFromLayer(layer)
         if settings is not None:
-            QgsApplication.clipboard().setText(settings.saveToString())
+            QgsApplication.clipboard().setText(settings.toString())
             self._iface.messageBar().pushInfo(
                 "Vector settings copied", "The current layer vector settings have been copied to the clipboard."
             )

@@ -2,6 +2,7 @@
 
 # TODO: restore feature scale down arrow when vector small
 # TODO: Change dialog to dockable widget
+# TODO: Consider migrating vector field renderer settings on project load
 # TODO: Documentation
 # TODO: Compile into plugin
 # TODO: restore feature: optional alignment to true north
@@ -55,10 +56,14 @@ class VectorFieldLayerManager(QObject):
         QObject.__init__(self)
         self._iface = iface
 
+    def setLayerToVectorField(self, layer, **settings):
+        settings = VectorFieldLayerSettings(**settings)
+        self.applySettingsToLayer(layer, settings)
+
     def applySettingsToLayer(self, layer, settings):
         if not self.isValidLayerType(layer):
             return False
-        settingstr = settings.saveToString()
+        settingstr = settings.toString()
         layer.setCustomProperty(VECTOR_SETTINGS_PROP, settingstr)
         layer.setCustomProperty(VECTOR_SCALE_GROUP_PROP, settings.scaleGroup())
         layer.setCustomProperty(VECTOR_SCALE_GROUP_FACTOR_PROP, settings.scaleGroupFactor())

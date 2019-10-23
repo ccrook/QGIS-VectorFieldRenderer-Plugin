@@ -72,6 +72,14 @@ class VectorFieldLayerSettings:
     )
 
     _types = {k: type(v) for k, v in _defaults.items()}
+    _normalize = {k.lower(): k for k in _defaults}
+    _alias = {
+        "heightfield": {"dxField": None, "mode": QgsVectorFieldSymbolLayer.Height},
+        "lengthfield": {"dxField": None, "mode": QgsVectorFieldSymbolLayer.Polar},
+        "directionfield": {"dxField": None, "mode": QgsVectorFieldSymbolLayer.Polar},
+        "errorfield": {"emaxField": None, "ellipseMode": CircularEllipse},
+        "heighterrorfield": {"emaxField": None, "ellipseMode": HeightEllipse},
+    }
 
     # Not used in current version of renderer
     # self._vectorIsTrueNorth = True
@@ -88,7 +96,22 @@ class VectorFieldLayerSettings:
         self.set(**settings)
 
     def set(self, ignore_errors=False, **settings):
+        settings = {k.lower(): v for k, v in settings.items()}
+        # Handle colour first to allow override of specific colours
+        if "color" in settings:
+            v = settings["color"]
+            for k, t in self._types.items():
+                if t == QColor:
+                    self.set(**{k: v})
         for k, v in settings.items():
+            k = k.lower()
+            if k == "color":
+                continue
+            if k in self._alias:
+                alias = {ak: av if av is not None else v for ak, av in self._alias[k].items()}
+                self.set(**alias)
+                continue
+            k = self._normalize.get(k, k)
             if k not in self._types:
                 if not ignore_errors:
                     raise KeyError(k)
@@ -103,7 +126,7 @@ class VectorFieldLayerSettings:
         return clone
 
     def sameAs(self, other):
-        return self.saveToString() == other.saveToString()
+        return self.toString() == other.toString()
 
     # Functions to construct symbology
 
@@ -124,6 +147,24 @@ class VectorFieldLayerSettings:
         if self.scaleIsMetres():
             return QgsUnitTypes.RenderMetersInMapUnits
         return self.symbolUnitType()
+
+    def haveArrow(self):
+        if not self.drawArrow() or self.dxField() == "":
+            return False
+        mode = self.mode()
+        if mode in (QgsVectorFieldSymbolLayer.Cartesian, QgsVectorFieldSymbolLayer.Polar):
+            if self.dyField() == "":
+                return False
+        return True
+
+    def haveEllipse(self):
+        if not self.drawEllipse() or self.emaxField() == "":
+            return False
+        mode = self.ellipseMode()
+        if mode == self.AxesEllipse:
+            if self.eminField() == "" or self.emaxAzimuthField() == "":
+                return False
+        return True
 
     def basepointSymbol(self):
         """
@@ -159,7 +200,7 @@ class VectorFieldLayerSettings:
         Creates a line symbol layer for the arrow.  
         """
 
-        if not self.drawArrow():
+        if not self.haveArrow():
             return None
         symbolUnit = self.encodedSymbolUnit()
         arrow = QgsArrowSymbolLayer.create(
@@ -191,6 +232,8 @@ class VectorFieldLayerSettings:
         return arrow
 
     def heightErrorSymbolLayers(self):
+        if not self.haveEllipse():
+            return None
         symbolUnit = self.encodedSymbolUnit()
         scaleUnit = self.encodedScaleUnit()
         tick1 = QgsSimpleMarkerSymbolLayer.create(
@@ -234,7 +277,7 @@ class VectorFieldLayerSettings:
 
     def ellipseSymbolLayer(self):
 
-        if self.ellipseMode() == self.NoEllipse:
+        if not self.haveEllipse():
             return None
         # TODO: Currently don't handle ellipse defined by covariance
         if self.ellipseMode() == self.CovarianceEllipse:
@@ -286,6 +329,8 @@ class VectorFieldLayerSettings:
         return ellipseLayer
 
     def errorSymbolLayers(self):
+        if not self.haveEllipse():
+            return None
         if self.ellipseMode() == self.HeightEllipse:
             return self.heightErrorSymbolLayers()
         ellipseLayer = self.ellipseSymbolLayer()
@@ -386,7 +431,7 @@ class VectorFieldLayerSettings:
                 # _emaxAzimuth not added as this is currently only used for estimating size
         return attributes
 
-    def saveToString(self):
+    def toString(self):
         """
         Write the layer settings to a string 
         """
