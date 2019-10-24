@@ -16,6 +16,7 @@ from qgis.core import (
     QgsVectorFieldSymbolLayer,
     QgsEllipseSymbolLayer,
     QgsSimpleMarkerSymbolLayer,
+    QgsSimpleFillSymbolLayer,
     QgsSymbolLayer,
     QgsProperty,
     QgsWkbTypes,
@@ -92,7 +93,8 @@ class VectorFieldLayerSettings:
     def __init__(self, **settings):
         # Layer variable used to automatically change the scale...
         self._settings = dict(self._defaults)
-        self._scaleVariableName = ""
+        self._scaleVariable = ""
+        self._metresConversionVariable = ""
         self.set(**settings)
 
     def set(self, ignore_errors=False, **settings):
@@ -119,7 +121,10 @@ class VectorFieldLayerSettings:
             self._settings[k] = self._types[k](v)
 
     def setScaleVariableName(self, name):
-        self._scaleVariableName = name
+        self._scaleVariable = name
+
+    def setMetresToUnitsVariableName(self, name):
+        self._metresConversionVariable = name
 
     def clone(self):
         clone = VectorFieldLayerSettings(**self._settings)
@@ -203,21 +208,24 @@ class VectorFieldLayerSettings:
         if not self.haveArrow():
             return None
         symbolUnit = self.encodedSymbolUnit()
+        width = str(self.arrowShaftWidth())
+        headWidth = str(self.arrowHeadWidth())
+        headLength = str(self.arrowHeadWidth() * self.arrowHeadRelativeLength())
         arrow = QgsArrowSymbolLayer.create(
             {
                 "head_type": "0",
                 "arrow_type": "0",
-                "arrow_width": str(self.arrowShaftWidth()),
-                "arrow_start_width": str(self.arrowShaftWidth()),
-                "head_thickness": str(self.arrowHeadWidth()),
-                "head_length": str(self.arrowHeadWidth() * self.arrowHeadRelativeLength()),
+                "arrow_width": width,
+                "arrow_start_width": width,
+                "head_thickness": headWidth,
+                "head_length": headLength,
                 "arrow_start_width_unit": symbolUnit,
                 "arrow_width_unit": symbolUnit,
                 "arrow_head_thickness_unit": symbolUnit,
                 "arrow_head_length_unit": symbolUnit,
             }
         )
-        arrowFillSymbol = QgsFillSymbol.createSimple(
+        arrowFillSymbolLayer = QgsSimpleFillSymbolLayer.create(
             {
                 "color": self.arrowFillColor().name(QColor.HexArgb),
                 "style": "solid" if self.fillArrow() else "no",
@@ -228,7 +236,39 @@ class VectorFieldLayerSettings:
                 "joinstyle": "miter",
             }
         )
-        arrow.setSubSymbol(arrowFillSymbol)
+
+        shrinkArrow = self.arrowMaxRelativeHeadSize() > 0
+        needConversion = self.scaleIsMetres and self.symbolUnitType != QgsUnitTypes.RenderMetersInMapUnits
+        # If need a conversion to from vector scale unit to symbol units  then need a metres to units conversion to apply scale
+        if needConversion and (self._metresConversionVariable == "" or self._scaleVariable == ""):
+            shrinkArrow = False
+        
+        if self.arrowHeadWidth() * self.arrowHeadRelativeLength() <= 0:
+            shrinkArrow = False
+        if shrinkArrow:
+            if self.mode() == self.AxesEllipse:
+                lengthVar = 'sqrt("{0}"*"{0}"+"{1}"*"{1}")'.format(self.dxField(), self.dyField())
+            else:
+                lengthVar = 'abs("{0}")'.format(self.dxField())
+            if needConversion:
+                lengthVar = "(@{0}*{1})".format(self._metresConversionVariable, lengthVar)
+            lengthVar="(@{0}*{1})".format(self._scaleVariable,lengthVar)
+            scaleVar = "min({0}*{1}/{2},1.0)".format(lengthVar, self.arrowMaxRelativeHeadSize(), headLength)
+            widthVar = "{0}*{1}".format(scaleVar, width)
+            headWidthVar = "{0}*{1}".format(scaleVar, headWidth)
+            headLengthVar = "{0}*{1}".format(scaleVar, headLength)
+            outlineWidthVar = "{0}*{1}".format(scaleVar, self.arrowBorderWidth())
+            arrow.setDataDefinedProperty(QgsSymbolLayer.PropertyArrowWidth, QgsProperty.fromExpression(widthVar))
+            arrow.setDataDefinedProperty(QgsSymbolLayer.PropertyArrowStartWidth, QgsProperty.fromExpression(widthVar))
+            arrow.setDataDefinedProperty(QgsSymbolLayer.PropertyArrowHeadThickness, QgsProperty.fromExpression(headWidthVar))
+            arrow.setDataDefinedProperty(QgsSymbolLayer.PropertyArrowHeadLength, QgsProperty.fromExpression(headLengthVar))
+            arrowFillSymbolLayer.setDataDefinedProperty(
+                QgsSymbolLayer.PropertyStrokeWidth, QgsProperty.fromExpression(outlineWidthVar)
+            )
+
+        arrowFill = QgsFillSymbol()
+        arrowFill.changeSymbolLayer(0, arrowFillSymbolLayer)
+        arrow.setSubSymbol(arrowFill)
         return arrow
 
     def heightErrorSymbolLayers(self):
@@ -261,9 +301,9 @@ class VectorFieldLayerSettings:
         )
 
         scale = self.ellipseScale() * 2.0
-        useproperty = self._scaleVariableName != ""
+        useproperty = self._scaleVariable != ""
         if useproperty:
-            ellipseScale = "(@" + self._scaleVariableName + " * " + str(scale) + ")"
+            ellipseScale = "(@" + self._scaleVariable + " * " + str(scale) + ")"
         else:
             ellipseScale = str(scale * self.scale())
         sizeExpression = self.quotedFieldExpression(self.emaxField()) + "*" + ellipseScale
@@ -302,9 +342,9 @@ class VectorFieldLayerSettings:
             }
         )
         scale = self.ellipseScale() * 2.0  # As symbol measured on diameter
-        useproperty = self._scaleVariableName != ""
+        useproperty = self._scaleVariable != ""
         if useproperty:
-            ellipseScale = "(@" + self._scaleVariableName + " * " + str(scale) + ")"
+            ellipseScale = "(@" + self._scaleVariable + " * " + str(scale) + ")"
         else:
             ellipseScale = str(scale * self.scale())
         widthExpression = self.quotedFieldExpression(self.emaxField()) + "*" + ellipseScale

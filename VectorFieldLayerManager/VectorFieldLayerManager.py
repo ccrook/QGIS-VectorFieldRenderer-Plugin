@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 
-# TODO: restore feature scale down arrow when vector small
 # TODO: Change dialog to dockable widget
 # TODO: Consider migrating vector field renderer settings on project load
 # TODO: Documentation
@@ -9,12 +8,14 @@
 # TODO: restore feature: scale box
 # TODO: restore feature: expressions for vector components and covariance (could do with geometry generator layer)
 # TODO: enhancement: Live update
+# TODO: enhancement: check box for single color for layer
 
 import math
 
 from PyQt5.QtCore import QObject, pyqtSignal
 
 from qgis.core import (
+    QgsProject,
     QgsMapLayer,
     QgsMapLayerType,
     QgsSingleSymbolRenderer,
@@ -31,9 +32,10 @@ from qgis.core import (
 from .VectorFieldLayerSettings import VectorFieldLayerSettings
 
 VECTOR_SETTINGS_PROP = "vfr_settings"
-VECTOR_SCALE_VARIABLE_NAME = "vfr_scale"
 VECTOR_SCALE_GROUP_PROP = "vfr_scale_group"
 VECTOR_SCALE_GROUP_FACTOR_PROP = "vfr_scale_group_factor"
+VECTOR_SCALE_VARIABLE_NAME = "vfr_scale"
+METRES_TO_UNITS_VARIABLE_NAME = "vfr_metres_to_unit"
 
 
 class VectorFieldLayerManager(QObject):
@@ -55,6 +57,8 @@ class VectorFieldLayerManager(QObject):
     def __init__(self, iface=None):
         QObject.__init__(self)
         self._iface = iface
+        if iface is not None:
+            iface.mapCanvas().scaleChanged.connect(self.mapScaleChange)
 
     def setLayerToVectorField(self, layer, **settings):
         settings = VectorFieldLayerSettings(**settings)
@@ -68,6 +72,7 @@ class VectorFieldLayerManager(QObject):
         layer.setCustomProperty(VECTOR_SCALE_GROUP_PROP, settings.scaleGroup())
         layer.setCustomProperty(VECTOR_SCALE_GROUP_FACTOR_PROP, settings.scaleGroupFactor())
         settings.setScaleVariableName(VECTOR_SCALE_VARIABLE_NAME)
+        settings.setMetresToUnitsVariableName(METRES_TO_UNITS_VARIABLE_NAME)
         symbol = settings.symbol()
         renderer = QgsSingleSymbolRenderer(symbol)
         layer.setRenderer(renderer)
@@ -195,6 +200,28 @@ class VectorFieldLayerManager(QObject):
                 pass
         return None
 
+    def setLayerMetresToUnits(self, layer, canvas=None):
+        if canvas is None:
+            canvas = self._iface.mapCanvas()
+        if canvas is None:
+            return None
+        settings = self.readSettingsFromLayer(layer)
+        scope = QgsExpressionContextUtils.layerScope(layer)
+        if settings is None:
+            scope.removeVariable(METRES_TO_UNITS_VARIABLE_NAME)
+            return
+        mapsettings = canvas.mapSettings()
+        ctx = QgsRenderContext.fromMapSettings(mapsettings)
+        units = settings.symbolUnitType()
+        conversion = ctx.convertMetersToMapUnits(1.0)
+        conversion = ctx.convertFromMapUnits(conversion, units)
+        QgsExpressionContextUtils.setLayerVariable(layer, METRES_TO_UNITS_VARIABLE_NAME, str(conversion))
+        print("Setting conversion to {0} for layer {1}".format(conversion, layer.id()))
+
+    def mapScaleChange(self):
+        for layer in QgsProject.instance().mapLayers().values():
+            self.setLayerMetresToUnits(layer)
+
     def setVectorFieldLayerScale(self, layer, scale, force=False, propogate=True):
         """
         Reset the scale of the vector field layer. Updates the scale value in vector field
@@ -206,6 +233,8 @@ class VectorFieldLayerManager(QObject):
         vector = self.findLayerVectorField(layer)
         if vector is not None:
             vectorlayer, symbol, setsymbol = vector
+            if scale == vectorlayer.scale():
+                return
             vectorlayer.setScale(scale)
             setsymbol(symbol)
         # Set a variable that can be used by symbology expressions
@@ -253,7 +282,11 @@ class VectorFieldLayerManager(QObject):
             scale *= factor
             self.setVectorFieldLayerScale(layer, scale, propogate=True)
 
-    def estimateOptimalScale(self, layer, canvas):
+    def estimateOptimalScale(self, layer, canvas=None):
+        if canvas is None:
+            canvas = self._iface.mapCanvas()
+        if canvas is None:
+            return None
         settings = self.readSettingsFromLayer(layer)
         if settings is None:
             return None

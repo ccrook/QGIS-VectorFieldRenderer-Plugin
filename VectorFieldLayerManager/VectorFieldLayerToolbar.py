@@ -236,7 +236,7 @@ class VectorFieldLayerToolbar:
 
     def autoRescale(self):
         layer = self.currentLayer()
-        scale = self._controller.estimateOptimalScale(layer, self._iface.mapCanvas())
+        scale = self._controller.estimateOptimalScale(layer)
         if scale is not None:
             self._controller.setVectorFieldLayerScale(layer, scale)
 
