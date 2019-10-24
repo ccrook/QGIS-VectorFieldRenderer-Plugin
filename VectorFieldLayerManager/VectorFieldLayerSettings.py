@@ -176,11 +176,14 @@ class VectorFieldLayerSettings:
         Creates a marker symbol for the base point
         """
         symbolUnit = self.encodedSymbolUnit()
+        basecolor=QColor(self.baseFillColor())
+        if not self.fillBase():
+            basecolor.setAlpha(0)
         basepointSymbol = QgsMarkerSymbol.createSimple(
             {
                 "name": "circle",
                 "size": str(self.baseSize()),
-                "color": self.baseFillColor().name(QColor.HexArgb),
+                "color": basecolor.name(QColor.HexArgb),
                 "outline_width": str(self.baseBorderWidth()),
                 "outline_color": self.baseBorderColor().name(QColor.HexArgb),
                 "size_unit": symbolUnit,
@@ -238,21 +241,21 @@ class VectorFieldLayerSettings:
         )
 
         shrinkArrow = self.arrowMaxRelativeHeadSize() > 0
-        needConversion = self.scaleIsMetres and self.symbolUnitType != QgsUnitTypes.RenderMetersInMapUnits
+        needConversion = self.scaleIsMetres() and self.symbolUnitType() != QgsUnitTypes.RenderMetersInMapUnits
         # If need a conversion to from vector scale unit to symbol units  then need a metres to units conversion to apply scale
         if needConversion and (self._metresConversionVariable == "" or self._scaleVariable == ""):
             shrinkArrow = False
-        
+
         if self.arrowHeadWidth() * self.arrowHeadRelativeLength() <= 0:
             shrinkArrow = False
         if shrinkArrow:
-            if self.mode() == self.AxesEllipse:
+            if self.mode() == QgsVectorFieldSymbolLayer.Cartesian:
                 lengthVar = 'sqrt("{0}"*"{0}"+"{1}"*"{1}")'.format(self.dxField(), self.dyField())
             else:
                 lengthVar = 'abs("{0}")'.format(self.dxField())
             if needConversion:
                 lengthVar = "(@{0}*{1})".format(self._metresConversionVariable, lengthVar)
-            lengthVar="(@{0}*{1})".format(self._scaleVariable,lengthVar)
+            lengthVar = "(@{0}*{1})".format(self._scaleVariable, lengthVar)
             scaleVar = "min({0}*{1}/{2},1.0)".format(lengthVar, self.arrowMaxRelativeHeadSize(), headLength)
             widthVar = "{0}*{1}".format(scaleVar, width)
             headWidthVar = "{0}*{1}".format(scaleVar, headWidth)

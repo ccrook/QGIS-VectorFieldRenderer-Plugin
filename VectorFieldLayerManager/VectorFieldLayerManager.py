@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 
-# TODO: Change dialog to dockable widget
 # TODO: Consider migrating vector field renderer settings on project load
 # TODO: Documentation
 # TODO: Compile into plugin
@@ -216,7 +215,6 @@ class VectorFieldLayerManager(QObject):
         conversion = ctx.convertMetersToMapUnits(1.0)
         conversion = ctx.convertFromMapUnits(conversion, units)
         QgsExpressionContextUtils.setLayerVariable(layer, METRES_TO_UNITS_VARIABLE_NAME, str(conversion))
-        print("Setting conversion to {0} for layer {1}".format(conversion, layer.id()))
 
     def mapScaleChange(self):
         for layer in QgsProject.instance().mapLayers().values():
