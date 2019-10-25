@@ -1,21 +1,20 @@
 [general]
-name=Vector field renderer
+name=Vector field layer manager
 description=Draw a point layer with arrow symbols
-about=Renders a point layer with arrows representing vectors.  The 
+about=Provides a capability  a point layer with arrows representing vectors.  The 
   size and orientation of the arrow is data defined.  Typically this
   would be used to represent movement, fluid flow or ground deformation
   for example.  The plugin can also draw an ellipse representing the
   error covariance of the vector.  The scale of the arrows can be easily
-  changed using buttons on the toolbar.  The plugin can also
-  draw a scale box on the map showing the magnitude of vectors.
+  changed using buttons on the toolbar.  
 category=Vector
-version=3.6.2
-experimental=False
-qgisMinimumVersion=2.99
+version=1.0.1
+experimental=True
+qgisMinimumVersion=3.0
 qgisMaximumVersion=3.99
 homepage=http://github.com/ccrook/QGIS-VectorFieldRenderer-Plugin
 repository=https://github.com/ccrook/QGIS-VectorFieldRenderer-Plugin
 tracker=https://github.com/ccrook/QGIS-VectorFieldRenderer-Plugin/issues
 author=Chris Crook
 email=ccrook@linz.govt.nz
-icon=./VectorFieldRenderer.png
+icon=./VectorFieldLayerManager.png

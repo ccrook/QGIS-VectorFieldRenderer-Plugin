@@ -8,6 +8,7 @@
 # TODO: restore feature: expressions for vector components and covariance (could do with geometry generator layer)
 # TODO: enhancement: Live update
 # TODO: enhancement: check box for single color for layer
+# TODO: enhancement: configure vector layer rendering using processor function
 
 import math
 
@@ -59,9 +60,13 @@ class VectorFieldLayerManager(QObject):
         if iface is not None:
             iface.mapCanvas().scaleChanged.connect(self.mapScaleChange)
 
-    def setLayerToVectorField(self, layer, **settings):
+    def renderLayerAsVectorField(self, layer, autoscale=False, **settings):
         settings = VectorFieldLayerSettings(**settings)
         self.applySettingsToLayer(layer, settings)
+        if autoscale:
+            scale = self.estimateOptimalScale(layer)
+            if scale is not None:
+                self.setVectorFieldLayerScale(layer, scale)
 
     def applySettingsToLayer(self, layer, settings):
         if not self.isValidLayerType(layer):
@@ -211,7 +216,7 @@ class VectorFieldLayerManager(QObject):
             return
         mapsettings = canvas.mapSettings()
         ctx = QgsRenderContext.fromMapSettings(mapsettings)
-        units = settings.symbolUnitType()
+        units = settings.symbolRenderUnit()
         conversion = ctx.convertMetersToMapUnits(1.0)
         conversion = ctx.convertFromMapUnits(conversion, units)
         QgsExpressionContextUtils.setLayerVariable(layer, METRES_TO_UNITS_VARIABLE_NAME, str(conversion))
@@ -231,11 +236,12 @@ class VectorFieldLayerManager(QObject):
         vector = self.findLayerVectorField(layer)
         if vector is not None:
             vectorlayer, symbol, setsymbol = vector
-            if scale == vectorlayer.scale():
+            if not force and scale == vectorlayer.scale():
                 return
             vectorlayer.setScale(scale)
             setsymbol(symbol)
-        # Set a variable that can be used by symbology expressions
+        # Set the variables used by symbology expressions
+        self.setLayerMetresToUnits(layer)
         QgsExpressionContextUtils.setLayerVariable(layer, VECTOR_SCALE_VARIABLE_NAME, str(scale))
         layer.triggerRepaint()
         self.vectorFieldLayerScaleChanged.emit(layer)

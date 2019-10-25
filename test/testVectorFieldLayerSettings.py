@@ -16,29 +16,31 @@ class VectorFieldLayerSettingsTestCase(fileunittest.TestCase):
         Test vector field layer settings
         """
         vs = VectorFieldLayerSettings()
-        settings = vs.toString()
+        settings = vs.toString(indent=2)
         self.check("001: Dump default settings", settings)
-        self.checkRun("001: Reload settings", lambda: vs.readFromString(settings))
+        self.checkRun("001: Reload settings", lambda: vs.readFromString(settings, ignore_errors=False))
+        reloadedSettings = vs.toString(indent=2)
+        self.check("001: Reload values correct", (settings == reloadedSettings))
 
     def test002_Setters(self):
         """
         Test vector field layer settings
         """
         vs = VectorFieldLayerSettings()
-        vs.setMode(2)
-        vs.setAngleOrientation(1)
-        vs.setAngleUnits(1)
+        vs.setArrowMode(2)
+        vs.setArrowAngleFromNorth(False)
+        vs.setArrowAngleDegrees(False)
         vs.setScale(0.2)
         vs.setDxField("de")
         vs.setDyField("dn")
         vs.setScaleIsMetres(True)
         vs.setScaleGroup("def")
         vs.setScaleGroupFactor(0.3)
-        vs.setEllipseMode(4)
+        vs.setEllipseMode(3)
         vs.setEllipseAngleFromNorth(False)
         vs.setEllipseDegrees(False)
         vs.setEllipseScale(0.7)
-        vs.setSymbolUnitType(1)
+        vs.setSymbolRenderUnit(5)
         vs.setArrowBorderColor(QColor("#ffbbffcc"))
         vs.setArrowHeadWidth(2.5)
         vs.setArrowHeadRelativeLength(2.3)
@@ -62,12 +64,15 @@ class VectorFieldLayerSettingsTestCase(fileunittest.TestCase):
         vs.setDrawEllipse(False)
         vs.setDrawEllipseAxes(True)
         vs.setEllipseTickSize(0.003)
-        settings = vs.toString()
+        settings = vs.toString(indent=2)
         self.check("002: Setter functions", settings)
         vs2 = VectorFieldLayerSettings()
-        self.checkRun("002: Reload modified settings", lambda: vs2.readFromString(settings))
-        settings2 = vs2.toString()
+        self.checkRun("002: Reload modified settings", lambda: vs2.readFromString(settings, ignore_errors=False))
+        settings2 = vs2.toString(indent=2)
         self.check("002: Modified settings reloaded correctly", settings == settings2)
+        vsclone = vs2.clone()
+        settingsclone = vsclone.toString(indent=2)
+        self.check("002: Cloned settings correct", settingsclone == settings)
 
     def test003_alias(self):
         """
@@ -75,10 +80,10 @@ class VectorFieldLayerSettingsTestCase(fileunittest.TestCase):
         """
         vs = VectorFieldLayerSettings()
         vs.set(color="#FF00FF")
-        self.check("003: Set color alias", vs.toString())
+        self.check("003: Set color alias", vs.toString(indent=2))
         vs = VectorFieldLayerSettings()
         vs.set(heightField="dh")
-        self.check("003: Set heightField alias", vs.toString())
+        self.check("003: Set heightField alias", vs.toString(indent=2))
         # Invalid settings
         vs = VectorFieldLayerSettings()
         self.checkRun("003: Invalid setting key", lambda: vs.set(garbage="Something"))
@@ -86,7 +91,7 @@ class VectorFieldLayerSettingsTestCase(fileunittest.TestCase):
         self.checkRun("003: Invalid key - ignore errors", lambda: vs.set(ignore_errors=True, garbage="Something"))
         vs = VectorFieldLayerSettings()
         self.checkRun("003: Invalid key value", lambda: vs.set(color="not a colour"))
-        self.check("004: Invalid key not set", vs.toString())
+        self.check("004: Invalid key not set", vs.toString(indent=2))
 
 
 if __name__ == "__main__":

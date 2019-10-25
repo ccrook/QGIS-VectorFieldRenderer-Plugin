@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>791</width>
+    <width>765</width>
     <height>535</height>
    </rect>
   </property>
@@ -423,6 +423,13 @@
              <widget class="QDoubleSpinBox" name="uArrowBorderWidth">
               <property name="toolTip">
                <string>Width of the arrow shaft</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="uArrowBorderColorLabel">
+              <property name="text">
+               <string>Colour</string>
               </property>
              </widget>
             </item>
@@ -1030,14 +1037,14 @@
       <number>0</number>
      </property>
      <item>
-      <widget class="QLabel" name="uSymbolUnitsLabel">
+      <widget class="QLabel" name="uSymbolRenderUnitsLabel">
        <property name="text">
         <string>Symbol units</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="uSymbolUnits"/>
+      <widget class="QComboBox" name="uSymbolRenderUnits"/>
      </item>
      <item>
       <widget class="QLabel" name="uArrowBaseSizeLabel">
@@ -1062,7 +1069,7 @@
      <item>
       <widget class="QLabel" name="uBaseBorderColorLabel">
        <property name="text">
-        <string>Colours: Border</string>
+        <string>Border</string>
        </property>
        <property name="buddy">
         <cstring>uBaseBorderColor</cstring>
@@ -1109,6 +1116,16 @@
        </property>
        <property name="allowOpacity">
         <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="uOneColor">
+       <property name="layoutDirection">
+        <enum>Qt::RightToLeft</enum>
+       </property>
+       <property name="text">
+        <string>One colour?</string>
        </property>
       </widget>
      </item>
@@ -1272,11 +1289,12 @@
   <tabstop>uEllipseBorderColor</tabstop>
   <tabstop>uFillEllipse</tabstop>
   <tabstop>uEllipseFillColor</tabstop>
-  <tabstop>uSymbolUnits</tabstop>
+  <tabstop>uSymbolRenderUnits</tabstop>
   <tabstop>uArrowBaseSize</tabstop>
   <tabstop>uBaseBorderColor</tabstop>
   <tabstop>uFillBase</tabstop>
   <tabstop>uBaseColor</tabstop>
+  <tabstop>uOneColor</tabstop>
   <tabstop>uArrowScale</tabstop>
   <tabstop>uScaleUnits</tabstop>
   <tabstop>uScaleGroup</tabstop>

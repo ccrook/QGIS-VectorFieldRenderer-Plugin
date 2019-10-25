@@ -1,0 +1,658 @@
+<html>
+
+<head>
+    <title>Vector field manager help</title>
+
+    <style type="text/css">
+        body {
+            background-color: #ffffff;
+            font-family: verdana, arial, sans-serif;
+            font-size: 80%;
+        }
+
+        h1 {
+            font-size: 120%;
+        }
+
+        h2 {
+            font-size: 100%;
+        }
+
+        td {
+            padding: 10px 5px 2px 5px;
+            vertical-align: top;
+            font-size: 75%;
+        }
+
+        table.details,
+        table.buttonlist {
+            margin-left: 15px;
+        }
+
+        table.details tr td {
+            padding: 2px 5px 2px 5px;
+        }
+
+        img {
+            border-color: #000000;
+            border-style: solid;
+            border-width: 1px;
+        }
+
+        img.button {
+            background-color: #CCCCCC;
+            height: 32px;
+            width: 32px;
+        }
+
+        pre {
+            border-style: solid;
+            border-width: 1px;
+            border-color: #CCCCFF;
+            background-color: #EEEEEE;
+            color: #000044;
+            margin: 2em;
+            padding: 2em;
+        }
+
+        pre span.comment {
+            color: #008800;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Vector field manager</h1>
+    <h2>Contents</h2>
+    <ul>
+        <li><a href="#introduction">Introduction</a></li>
+        <li><a href="#rendering">Rendering a vector field</a></li>
+        <li><a href="#ellipse">Rendering error ellipses</a></li>
+        <li><a href="#toolbar">Modifying the vector field - the vector field toolbar</a></li>
+        <li><a href="#scalebox">Configuring the scale box</a></li>
+        <li><a href="#python">Configuring the renderer from python</a></li>
+        <li><a href="#issues">Issues</a></li>
+        <li><a href="#history">Change history</a></li>
+    </ul>
+    <h2><a name="introduction">Introduction</a></h2>
+
+    <p>The vector field manager is used to support displaying vector field data such as earth deformation, tidal flows,
+        and the like.
+        It displays the vectors as arrows that are scaled and oriented according selected attributes of data points.
+        It can only be used to render point data - line and polygon layers are not drawn by this symbology.
+    </p>
+    <p>The vector field is defined by attributes in the data, which can represent the field either
+        by cartesian components (x and y components of the field), or polar coordinates.
+        If polar coordinates are used, the angle may be measured either eastwards from north, or northwards from east,
+        and may be either in degrees or radians. The magnitude of field can be scaled up or down to an appropriate size
+        for viewing the field.</p>
+    <p>As a special case the renderer can also display "height only" data, which displays a vertical arrow scaled using
+        an attribute of the data.
+        This is appropriate for displaying the vertical component of deformation, for example.
+    </p>
+    <p>The renderer also has options for displaying an error ellipse associated with the vector. The error
+        ellipse is displayed centred on the end of the arrow. It is defined by attributes of the data which can be
+        one of
+    </p>
+    <ul>
+        <!-- <li>Covariance components.  These represent the variance of the X component (Cxx), the variance of the 
+    Y component (Cyy), and the covariance of the X and Y components (Cxy).</li> -->
+        <li>Error ellipse axes. The ellipse is defined in terms of the length of the semi-major and
+            semi-minor axes, and the orientation of the semi-major axis. In the same way as the vector orientation,
+            this can be measured eastwards from north, or northwards from east, and can be in degrees or radians.</li>
+        <li>Circular. The error is circular and defined just by the radius (ie the standard error of the X and Y
+            components). </li>
+        <li>Height. The &quot;ellipse&quot; is defined by the error of a height component. In this case the
+            error is displayed as a vertical bar rather than an ellipse. This corresponds to the height type
+            vector field.</li>
+    </ul>
+    <p>Whichever form of error ellipse is used, it can be scaled by a constant value, for example multiplying by 2.45 to
+        convert variances to a 95% confidence limit.</p>
+    <p>The renderer can be used to display just the error ellipse by selecting an vector field type of &quot;No
+        Arrow&quot;.</p>
+
+    <p>Note that the renderer does not take account of on-the-fly projection of the map or rotation of the map. The
+        arrows and error ellipses
+        are drawn as if north is towards the top of the map.
+    </p>
+    <img src="help/VectorFieldManagerToolbar.png" alt="Vector field manager toolbar" style="float:right" />
+    <h2><a name="toolbar">Displaying the vector field</a></h2>
+    <p>
+        Displaying vector fields is managed with the vector field manager toolbar.
+        This provides the following functions:
+    </p>
+    <table class="buttonlist">
+        <tr>
+            <td>
+                <img src="icon/VectorFieldLayerManagerIcon.png" class="button">
+            </td>
+            <td>
+                Configure the vector field symbology for the current layer. The layer must be a
+                point based vector layer.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <img src="icon/AutoscaleVectorFieldIcon.png" class="button">
+            </td>
+            <td>
+                Rescale the arrows of the current layer to an appropriate view. The scaling is based on the maximum size
+                and the number of arrows in the current view.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <img src="icon/MagnifyVectorFieldIcon.png" class="button">
+            </td>
+            <td>
+                Increase the scale of the arrows.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <img src="icon/ShrinkVectorFieldIcon.png" class="button">
+            </td>
+            <td>
+                Reduce the scale of the arrows.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <img src="icon/CopyVectorSettingsIcon.png" class="button">
+            </td>
+            <td>
+                Copy vector settings from the current layer to the clipboard.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <img src="icon/PasteVectorSettingsIcon.png" class="button">
+            </td>
+            <td>
+                Paste the settings from the clipboard to the layer (or layers) selected in the layers panel.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <img src="icon/VectorFieldLayerManagerHelpIcon.png" class="button">
+            </td>
+            <td>
+                Display this help information
+            </td>
+        </tr>
+    </table>
+    <div style="clear:both" />
+
+    <img src="help/VectorFieldManagerDialog.png" alt="Vector field manager dialog" style="float:right" width="500" />
+    <h2><a name="rendering">Rendering a vector field</a></h2>
+    <p>Vector field symbology is configured using the vector field manager dialog box. The dialog has two main sections
+        - the top section defines how the vector field is expressed in the data, and the
+        bottom section defines characteristics of the arrow symbology. The dialog also has a tab for
+        configuring the error ellipse.
+    </p>
+    <p>The fields in the dialog are:</p>
+
+    <table>
+
+        <tr>
+            <td>Vector field type
+            </td>
+            <td>Selects the field type - cartesian, polar, or height only, as described above.
+            </td>
+        </tr>
+
+        <tr>
+            <td>... attribute
+            </td>
+            <td>Selects the data attributes which define the vector field, either X/Y for cartesian fields, length/angle
+                for polar fields, or height for the height only field
+            </td>
+        </tr>
+        <tr>
+            <td>Angle orientation/units
+            </td>
+            <td>Defines how the angle is defined in the data. The orientation is one of North from East (North is
+                0&deg;, East is 90&deg;) or East from North (East is 0&deg;, North is 90&deg;). The units are either
+                degrees or radians.
+            </td>
+        </tr>
+
+
+        <tr>
+            <td>Arrow style
+            </td>
+            <td>Defines the size of the components of the arrow. The arrow has three components - the arrow head, the
+                shaft, and the base. The head may change size according to the length of the vector - the shaft width
+                and base size are fixed. The sizes are:
+                <table class="details">
+                    <tr>
+                        <td>Head</td>
+                        <td>The width of the head of the length of the arrow. </td>
+                    </tr>
+                    <tr>
+                        <td>Shaft</td>
+                        <td>The width of the arrow shaft. The size is in terms of the symbol units (see below)</td>
+                    </tr>
+                    <tr>
+                        <td>Relative head length</td>
+                        <td>The length of the arrow head border as a multiple of its width.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Max relative head size</td>
+                        <td>The maximum length of the arrow head relative to the total length of the arrow. If the
+                            length of the arrow is short then the whole arrow will be shrunk to ensure the head of the
+                            arrow is no more than this proportion of the length of the arrow. If this is zero then the
+                            size of the arrow head is the same regardless of the length of the arrow.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Border width
+                        </td>
+                        <td>The width of the arrow border.</td>
+                    </tr>
+                    <tr>
+                        <td>Colour
+                        </td>
+                        <td>The colour of the arrow border.</td>
+                    </tr>
+                    <tr>
+                        <td>Fill arrow
+                        </td>
+                        <td>If checked then the arrow is filled with the selected colour.</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <tr>
+            <td>Symbol units</td>
+            <td>The units used for the symbology. This is used for all aspects of the symbology apart from the
+                length of the vector arrow and error ellipse. The may either be in the symbol units, or in metres
+                at map scale.
+            </td>
+        </tr>
+
+        <tr>
+            <td>Base size</td>
+            <td>The size of the base symbol (the symbol at the base of the arrow or the centre of the ellipse)</td>
+        </tr>
+
+        <tr>
+            <td>Base border</td>
+            <td>The border of the base symbol</td>
+        </tr>
+
+        <tr>
+            <td>Fill</td>
+            <td>If checked then the base symbol is filled with the selected colour</td>
+        </tr>
+        <tr>
+            <td>One colour?</td>
+            <td>If checked then same colour is used for then entire symbol. Otherwise the colours of each component can
+                be
+                individually selected.
+            </td>
+        </tr>
+
+        <tr>
+            <td>Vector scale
+            </td>
+            <td>A factor by which the attribute values are multiplied to work out the length of the arrow and the size
+                of the error ellipse. This can be changed using the toolbar buttons to increase or decrease the value.
+                This can define the size either in terms of metres at map scale, or in terms of the scale used for the
+                rest of the symbol.
+            </td>
+        </tr>
+
+        <tr>
+            <td>Scale group
+            </td>
+            <td>Defines a scale group label for the layer. Layers rendered with the same scale group will be forced to
+                use the same scale. This must be a simple name, for example "displacement". The name can optionally
+                followed by "*" and a mupltiple, which scale the arrow at the specified multiple of the group scale (for
+                example "displacement*2").
+            </td>
+        </tr>
+
+    </table>
+
+    <div style="clear:both" />
+    <img src="help/VectorFieldManagerEllipseDialog.png" alt="Renderer ellipse dialog" style="float:right" width="500" />
+    <h2><a name="ellipse">Rendering error ellipses</a></h2>
+    <p>
+        The error ellipse tab is used to configure plotting error ellipses or vertical error bars.
+    </p>
+    <p>In the same way as the vector field tab this has two main sections - the top section defines how the error
+        ellipse is expressed in the data, and the bottom section defines characteristics of the ellipse symbology
+    </p>
+    <p>The fields in the dialog are:</p>
+
+    <table>
+
+        <tr>
+            <td>Error ellipse type
+            </td>
+            <td>Selects the ellipse type -axes, circular, height as described above, or none.
+            </td>
+        </tr>
+        <tr>
+            <td>Attribute fields</td>
+            <td>Depending on the ellipse type up to three attributes must be selected to define the
+                ellipse size and shape.
+            </td>
+        </tr>
+
+        <tr>
+            <td>Ellipse scale factor</td>
+            <td>This is a number by which the ellipse size defined by the attributes is multiplied. Note that the plot
+                scale and scale group defined at the bottom of the dialog still apply to the error ellipse.</td>
+        </tr>
+
+        <tr>
+            <td>Ellipse axis orientation/units
+            </td>
+            <td>Defines how the orientation of the error ellipse axes are defined in the data (for ellipses defined
+                in terms of axes). The orientation is one of North from East (North is 0&deg;, East is 90&deg;) or East
+                from North (East is 0&deg;, North is 90&deg;). The units are either degrees or radians.
+            </td>
+        </tr>
+
+        <tr>
+            <td>Draw ellipse/axes
+            </td>
+            <td>Defines whether the error ellipse is represented as an ellipse, or just as the ellipse axes.
+            </td>
+        </tr>
+
+        <tr>
+            <td>Border width
+            </td>
+            <td>Defines the plotted width of the ellipse border in terms of the symbol units.
+            </td>
+        </tr>
+
+        <tr>
+            <td>Tick size
+            </td>
+            <td>When plotting height errors this defines the size of the tick at each end of the error symbol.
+            </td>
+        </tr>
+
+        <tr>
+            <td>Colours: Border/axes colour
+            </td>
+            <td>Defines the colour of the border of the ellipse, or the ellipse axes or height error symbol.
+            </td>
+        </tr>
+
+        <tr>
+            <td>Fill colour
+            </td>
+            <td>If this is checked then the ellipse is filled with the selected colour.
+            </td>
+        </tr>
+
+    </table>
+    <p>The settings for scale, base symbol, and legend and scale box text are common with the settings for the
+        vector field.</p>
+    <div style="clear:both" />
+    <div style="clear:both" />
+    <h2><a name="python">Configuring the renderer from python</a></h2>
+
+    <p>The following example code shows how to configure the renderer for a layer
+        from python code.</p>
+
+    <pre>
+
+        <span class="comment"># Render a layer as a vector field</span>
+        
+    from VectorFieldLayerManager.VectorFieldLayerManager import VectorFieldLayerManager
+    layer=iface.mapCanvas().currentLayer()
+    manager=VectorFieldLayerManager(iface)
+    manager.renderLayerAsVectorField( layer,
+        dxField='dx',
+        dyField='dy',
+        color='#0000dd',
+        autoscale=True,
+        )
+        
+    </pre>
+
+    <p>This renders the layer using blue arrows. The renderLayerAsVectorField method can take the following settings:
+    </p>
+
+    <table>
+        <tr>
+            <td>symbolRenderUnit</td>
+            <td>The symbol unit type - one of &quot;mm&quot;, &quot;map units&quot;, &quot;px&quot;, &quot;%&quot;,
+                &quot;pt&quot;, &quot;in&quot;, &quot;unknown&quot;, &quot;m&quot;</td>
+        </tr>
+        <tr>
+            <td>baseSize</td>
+            <td>The size of the base symbol</td>
+        </tr>
+        <tr>
+            <td>baseBorderWidth</td>
+            <td>The width of the outline of the base symbol</td>
+        </tr>
+
+        <tr>
+            <td>baseBorderColor</td>
+            <td>The colour of the outline of the base symbol</td>
+        </tr>
+        <tr>
+            <td>fillBase</td>
+            <td>If True then the base symbol is filled, otherwis it is transparent</td>
+        </tr>
+        <tr>
+            <td>baseFillColor</td>
+            <td>The colour used to fill the base symbol</td>
+        </tr>
+
+        <tr>
+            <td>drawArrow</td>
+            <td>If True then an arrow symbol is drawn</td>
+        </tr>
+        <tr>
+            <td>arrowMode</td>
+            <td>The arrow mode, one of &quot;xy&quot;, &quot;polar&quot;, or &quot;height&quot;</td>
+        </tr>
+        <tr>
+            <td>dxField</td>
+            <td>
+                The first data field, can be the dx (east) field, vector length for a polar arrow, or height for a
+                height arrow.
+            </td>
+        </tr>
+        <tr>
+            <td>dyField</td>
+            <td>
+                The second data field, can be the dy (north) field or vector direction for a polar arrow.
+            </td>
+        </tr>
+        <tr>
+            <td>lengthField</td>
+            <td>An alternative name for the the dx field. If this name is used it also sets the arrow mode to polar.
+            </td>
+        </tr>
+        <tr>
+            <td>directionField</td>
+            <td>An alternative name for the dy field. If this name is used it also sets the arrow mode to polar.</td>
+        </tr>
+        <tr>
+            <td>heightField</td>
+            <td>An alternative name for the dx field. If this name is used it also sets the arrow mode to height.</td>
+        </tr>
+        <tr>
+            <td>arrowAngleFromNorth</td>
+            <td>True if the arrow angle is measured clockwise from north, False if it is anticlockwise from east.</td>
+        </tr>
+        <tr>
+            <td>arrowAngleDegrees</td>
+            <td>True if the arrow angle is measured in degrees, false if it is in radians.</td>
+        </tr>
+        <tr>
+            <td>arrowHeadWidth</td>
+            <td>The width of the arrow head</td>
+        </tr>
+        <tr>
+            <td>arrowHeadRelativeLength</td>
+            <td>The length of the arrow head relative to its width</td>
+        </tr>
+        <tr>
+            <td>arrowMaxRelativeHeadSize</td>
+            <td>The maximum length of the arrow head as a multiple of the length of the vector</td>
+        </tr>
+        <tr>
+            <td>arrowShaftWidth</td>
+            <td>The width of the arrow shaft</td>
+        </tr>
+        <tr>
+            <td>arrowBorderWidth</td>
+            <td>The width of the border of the arrow.</td>
+        </tr>
+        <tr>
+            <td>arrowBorderColor</td>
+            <td>The colour used for the arrow border</td>
+        </tr>
+        <tr>
+            <td>fillArrow</td>
+            <td>If true then the arrow will be filled (default is true).</td>
+        </tr>
+        <tr>
+            <td>arrowFillColor</td>
+            <td>The colour used to fill the arrow.</td>
+        </tr>
+
+        <tr>
+            <td>drawEllipse</td>
+            <td>If true then an error ellipse (or height error) is drawn</td>
+        </tr>
+        <tr>
+            <td>ellipseMode</td>
+            <td>The mode of the ellipse, one of &quot;axes&quot;, &quot;circular&quot;, or &quot;height&quot;.</td>
+        </tr>
+        <tr>
+            <td>emaxField</td>
+            <td>The field defining the length of the ellipse semi-major axis.</td>
+        </tr>
+        <tr>
+            <td>eminField</td>
+            <td>The field defining the length of the ellipse semi-minor axis.</td>
+        </tr>
+        <tr>
+            <td>emaxAzimuthField</td>
+            <td>The field defining the azimuth of the ellipse semi-major axis.</td>
+        </tr>
+        <tr>
+            <td>radiusField</td>
+            <td>Equivalent of emaxField, specifies the field defining the radius of the cirular error ellipse.
+                Also sets the ellipse mode to circular.</td>
+        </tr>
+        <tr>
+            <td>heightErrorField</td>
+            <td>Equivalent of the emaxField, specifies the field defining the size of a height error. Also
+                sets the ellipse mode to height.
+            </td>
+        </tr>
+        <tr>
+            <td>ellipseAngleFromNorth</td>
+            <td>If true the ellipse semi-major axis azimuth is measured clockwise from north, otherwise anticlockwise
+                from east.</td>
+        </tr>
+        <tr>
+            <td>ellipseDegrees</td>
+            <td>If true the ellipse semi-major axis azimuth is measured in degrees, otherwise in radians.</td>
+        </tr>
+        <tr>
+            <td>ellipseScale</td>
+            <td>The scale of the ellipse axes or height error relative to the scale of the vector arrow. </td>
+        </tr>
+        <tr>
+            <td>drawEllipseAxes</td>
+            <td>If true then the ellipse is represented by the semi-major and semi-minor axes, otherwise it is
+                represented by the outline of the ellipse.</td>
+        </tr>
+        <tr>
+            <td>ellipseBorderWidth</td>
+            <td>The width of the ellipse border or height error tick mark</td>
+        </tr>
+        <tr>
+            <td>ellipseTickSize</td>
+            <td>The size of the ticks at each end of the height error bar.</td>
+        </tr>
+        <tr>
+            <td>ellipseBorderColor</td>
+            <td>The colour of the ellipse border.</td>
+        </tr>
+        <tr>
+            <td>fillEllipse</td>
+            <td>If true then the ellipse is filled with colour, otherwise it is not.</td>
+        </tr>
+        <tr>
+            <td>ellipseFillColor</td>
+            <td>The colour used to fill the ellipse.</td>
+        </tr>
+
+        <tr>
+            <td>scaleIsMetres</td>
+            <td>If true then the vector arrow and error ellipse sizes are in terms of metres at map scale, otherwise in
+                the same units as the symbol.</td>
+        </tr>
+        <tr>
+            <td>scaleGroup</td>
+            <td>The scale group is a name defining a grouping of vector field layers. All vectors in the same scale
+                group
+                are plotted based on the same group factor. If one changes scale the others in the group all change
+                scale
+                to match.
+        </tr>
+        <tr>
+            <td>scaleGroupFactor</td>
+            <td>The factor by which the common scale group scale is multiplied to define the scale of this layer.</td>
+        </tr>
+        <tr>
+            <td>scale</td>
+            <td>The scale of the arrows and error ellipses for this layer.</td>
+        </tr>
+        <tr>
+            <td>autoscale</td>
+            <td>If true then a suitable scale for plotting the vector field will be calculated based on the vectors
+                visible in the current view.
+        </tr>
+        <tr>
+            <td>color</td>
+            <td>This is a shorthand for defining the colours used for the symbology. Any colour not explicitly defined
+                will be set to this value.</td>
+        </tr>
+    </table>
+    <p>Setting names and setting values are case-insensitive.
+        Colour values can be defined using hex RGB (red, green, blue) values, such as &quot;#ffcc00&quot;. This can also
+        include an alpha value, eg &quot;#CCFFcc00&quot;. Also some colour names can be used, eg &quot;red&quot;.
+
+    </p>
+
+    <div style="clear:both" />
+    <h2><a name="issues">History</a></h2>
+    <p>The VectorFieldManager plugin for QGIS 3.0 is a partial replacement for the VectorFieldRenderer plugin in QGIS2.
+        The vector field renderer method of implementation proved difficult to migrate to QGIS3. This plugin replicates
+        the majority of that functionality.
+    </p>
+    <p>The main features not implemented in this plugin are:</p>
+    <ul>
+        <li>The scale box which displays a box on the map canvas showing the scale of the vector field arrows and error
+            ellipses</li>
+        <li>Options for orienting the vectors relative to true north rather than the canvas grid north</li>
+        <li>Rotating the vectors if the map canvas is rotated</li>
+        <li>Defining vector components as expressions rather than as data fields</li>
+        <li>The symbology is not configured using the layer properties symbology tab - it is configured with a separate
+            dialog.</li>
+    </ul>
+
+    <div style="clear:both" />
+    <h2><a name="history">Change history</a></h2>
+    <p><i>Version 1.0.1: 25 October 2019</i>Initial implementation</p>
+</body>
+
+</html>

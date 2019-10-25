@@ -1,11 +1,11 @@
 <RCC>
   <qresource prefix="plugins/VectorFieldLayerManager" >
-    <file>VectorFieldLayerManagerIcon.png</file>
-    <file>AutoscaleVectorFieldIcon.png</file>
-    <file>MagnifyVectorFieldIcon.png</file>
-    <file>ShrinkVectorFieldIcon.png</file>
-    <file>CopyVectorSettingsIcon.png</file>
-    <file>PasteVectorSettingsIcon.png</file>
-    <file>VectorFieldLayerManagerHelpIcon.png</file>
+    <file>icon/VectorFieldLayerManagerIcon.png</file>
+    <file>icon/AutoscaleVectorFieldIcon.png</file>
+    <file>icon/MagnifyVectorFieldIcon.png</file>
+    <file>icon/ShrinkVectorFieldIcon.png</file>
+    <file>icon/CopyVectorSettingsIcon.png</file>
+    <file>icon/PasteVectorSettingsIcon.png</file>
+    <file>icon/VectorFieldLayerManagerHelpIcon.png</file>
   </qresource>
 </RCC>

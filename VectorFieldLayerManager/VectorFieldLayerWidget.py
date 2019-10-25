@@ -1,7 +1,7 @@
 import sys
 
 from PyQt5.QtCore import QObject, QRegExp, pyqtSignal
-from PyQt5.QtGui import QRegExpValidator
+from PyQt5.QtGui import QColor, QRegExpValidator
 from PyQt5.QtWidgets import QButtonGroup, QLabel, QVBoxLayout, QWidget
 
 from qgis.core import QgsFieldProxyModel, QgsUnitTypes, QgsVectorFieldSymbolLayer
@@ -16,7 +16,6 @@ SymbolRenderUnitList = [
     QgsUnitTypes.RenderPercentage,
     QgsUnitTypes.RenderPoints,
     QgsUnitTypes.RenderInches,
-    QgsUnitTypes.RenderUnknownUnit,
     QgsUnitTypes.RenderMetersInMapUnits,
 ]
 
@@ -26,6 +25,7 @@ SymbolRenderUnitList = [
 class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
 
     ArrowTypeNone = 999
+    EllipseTypeNone = 999
 
     def __init__(self, controller, layer):
         QWidget.__init__(self)
@@ -34,9 +34,16 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
         self._originalSettings = VectorFieldLayerSettings()
 
         self._mode = QgsVectorFieldSymbolLayer.Cartesian
-        self._ellipseMode = VectorFieldLayerSettings.NoEllipse
+        self._ellipseMode = self.EllipseTypeNone
         self._layer = None
         self._layerId = ""
+        self._oneColor = False
+        self._savedBaseBorderColor = QColor("#000000")
+        self._savedBaseFillColor = QColor("#ffffff")
+        self._savedArrowBorderColor = QColor("#000000")
+        self._savedArrowFillColor = QColor("#000000")
+        self._savedEllipseBorderColor = QColor("#000000")
+        self._savedEllipseFillColor = QColor("#ffffff")
         self._validLayer = False
         self.buildWidget()
 
@@ -66,7 +73,7 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
         self.uEllipseFillColor.setColorDialogTitle("Ellipse fill colour")
         for unit in SymbolRenderUnitList:
             unitName = QgsUnitTypes.toString(unit)
-            self.uSymbolUnits.addItem(unitName, unit)
+            self.uSymbolRenderUnits.addItem(unitName, unit)
         self.uScaleUnits.addItem("Symbol unit")
         self.uScaleUnits.addItem("Map meters")
 
@@ -81,18 +88,19 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
         ft.addButton(self.uFieldTypePolar, QgsVectorFieldSymbolLayer.Polar)
         ft.addButton(self.uFieldTypeHeight, QgsVectorFieldSymbolLayer.Height)
         ft.addButton(self.uFieldTypeNone, self.ArrowTypeNone)
-        ft.buttonClicked[int].connect(self.setMode)
+        ft.buttonClicked[int].connect(self.setArrowMode)
         self.fieldTypeGroup = ft
 
         et = QButtonGroup()
-        et.addButton(self.uEllipseTypeCovariance, VectorFieldLayerSettings.CovarianceEllipse)
         et.addButton(self.uEllipseTypeAxes, VectorFieldLayerSettings.AxesEllipse)
         et.addButton(self.uEllipseTypeCircular, VectorFieldLayerSettings.CircularEllipse)
         et.addButton(self.uEllipseTypeHeight, VectorFieldLayerSettings.HeightEllipse)
-        et.addButton(self.uEllipseTypeNone, VectorFieldLayerSettings.NoEllipse)
+        et.addButton(self.uEllipseTypeNone, self.EllipseTypeNone)
         et.buttonClicked[int].connect(self.setEllipseMode)
         self.ellipseTypeGroup = et
 
+        self.uOneColor.clicked.connect(self.oneColorUpdated)
+        self.uBaseBorderColor.colorChanged.connect(self.baseBorderColorUpdated)
         # self.uHelpButton.clicked.connect( self.showHelp )
 
     # event handlers
@@ -101,10 +109,10 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
         pass
         # VectorFieldLayerSettings.showHelp()
 
-    def mode(self):
+    def arrowMode(self):
         return self._mode
 
-    def setMode(self, mode):
+    def setArrowMode(self, mode):
         if mode == QgsVectorFieldSymbolLayer.Height:
             self.uFieldTypeHeight.setChecked(True)
             fields = ["Height attribute"]
@@ -148,12 +156,9 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
         elif mode == VectorFieldLayerSettings.AxesEllipse:
             self.uEllipseTypeAxes.setChecked(True)
             fields = ["Semi-major axis", "Semi-minor axis", "Major axis orientation"]
-        elif mode == VectorFieldLayerSettings.CovarianceEllipse:
-            self.uEllipseTypeCovariance.setChecked(True)
-            fields = ["Emax covariance", "Emin covariance", "EmaxAzimuth covariance"]
         else:
             self.uEllipseTypeNone.setChecked(True)
-            mode == VectorFieldLayerSettings.NoEllipse
+            mode == self.EllipseTypeNone
             fields = []
 
         self._ellipseMode = mode
@@ -177,7 +182,7 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
         isPolar = mode == VectorFieldLayerSettings.AxesEllipse
         self.uAxisAngleUnitsGroupBox.setEnabled(isPolar)
         self.uAxisOrientationGroupBox.setEnabled(isPolar)
-        self.uEllipseFormatGroup.setEnabled(mode != VectorFieldLayerSettings.NoEllipse)
+        self.uEllipseFormatGroup.setEnabled(mode != self.EllipseTypeNone)
         self.uEllipseTickSize.setEnabled(mode == VectorFieldLayerSettings.HeightEllipse)
 
     def layer(self):
@@ -187,7 +192,7 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
         if layerid == self._layerId:
             self.setLayer(None)
 
-    def layerUpdated(self, layerid ):
+    def layerUpdated(self, layerid):
         if layerid == self._layerId:
             self.setLayer(self._layer)
 
@@ -196,7 +201,7 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
             scale = self._controller.vectorFieldLayerScale(self._layer)
             if scale is not None:
                 self.uArrowScale.setText(str(scale))
-            self._originalSettings.setScale(scale)
+                self._originalSettings.setScale(scale)
 
     def setLayer(self, layer):
         if not self._controller.isValidLayerType(layer):
@@ -245,19 +250,22 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
     def loadFromSettings(self):
         settings = self._settings
         if settings.drawArrow():
-            self.setMode(settings.mode())
+            self.setArrowMode(settings.arrowMode())
         else:
-            self.setMode(self.ArrowTypeNone)
-        self.setEllipseMode(settings.ellipseMode())
+            self.setArrowMode(self.ArrowTypeNone)
+        if settings.drawEllipse():
+            self.setEllipseMode(settings.ellipseMode())
+        else:
+            self.setEllipseMode(self.EllipseTypeNone)
         self.uXField.setField(settings.dxField())
         self.uYField.setField(settings.dyField())
         self.uEmaxField.setField(settings.emaxField())
         self.uEminField.setField(settings.eminField())
         self.uEmaxAzimuthField.setField(settings.emaxAzimuthField())
-        self.uAngleUnitsDegrees.setChecked(settings.angleUnits() == QgsVectorFieldSymbolLayer.Degrees)
+        self.uAngleUnitsDegrees.setChecked(settings.arrowAngleDegrees())
         self.uAngleUnitsRadians.setChecked(self.uAngleUnitsDegrees.isChecked())
-        self.uAngleOrientationNorth.setChecked(settings.angleOrientation() == QgsVectorFieldSymbolLayer.ClockwiseFromNorth)
-        self.uAngleOrientationEast.setChecked(settings.angleOrientation() != QgsVectorFieldSymbolLayer.ClockwiseFromNorth)
+        self.uAngleOrientationNorth.setChecked(settings.arrowAngleFromNorth())
+        self.uAngleOrientationEast.setChecked(not self.uAngleOrientationNorth.isChecked())
         self.uEllipseAngleUnitsDegrees.setChecked(settings.ellipseDegrees())
         self.uEllipseAngleUnitsRadians.setChecked(not settings.ellipseDegrees())
         self.uEllipseOrientationNorth.setChecked(settings.ellipseAngleFromNorth())
@@ -273,9 +281,9 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
             group = group + "*" + str(factor)
         self.uScaleGroup.setText(group)
         symbolIndex = 0
-        if settings.symbolUnitType in SymbolRenderUnitList:
-            symbolIndex = SymbolRenderUnitList.index(settings.symbolUnitType())
-        self.uSymbolUnits.setCurrentIndex(symbolIndex)
+        if settings.symbolRenderUnit() in SymbolRenderUnitList:
+            symbolIndex = SymbolRenderUnitList.index(settings.symbolRenderUnit())
+        self.uSymbolRenderUnits.setCurrentIndex(symbolIndex)
         self.uArrowHeadWidth.setValue(settings.arrowHeadWidth())
         self.uArrowShaftWidth.setValue(settings.arrowShaftWidth())
         self.uArrowHeadRelativeLength.setValue(settings.arrowHeadRelativeLength())
@@ -287,7 +295,7 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
         self.uArrowBorderColor.setColor(settings.arrowBorderColor())
         self.uBaseColor.setColor(settings.baseFillColor())
         self.uFillBase.setChecked(settings.fillBase())
-        self.uDrawEllipse.setChecked(settings.drawEllipse())
+        self.uDrawEllipse.setChecked(not settings.drawEllipseAxes())
         self.uDrawEllipseAxes.setChecked(settings.drawEllipseAxes())
         self.uBaseBorderColor.setColor(settings.baseBorderColor())
         self.uEllipseBorderWidth.setValue(settings.ellipseBorderWidth())
@@ -295,36 +303,86 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
         self.uEllipseBorderColor.setColor(settings.ellipseBorderColor())
         self.uFillEllipse.setChecked(settings.fillEllipse())
         self.uEllipseFillColor.setColor(settings.ellipseFillColor())
-        # self.uLegendText.setText( settings.legendText())
-        # self.uScaleBoxText.setText( settings.scaleBoxText())
-        # self.uShowInScaleBox.setChecked( settings.showInScaleBox())
+
+        self.saveColors()
+        sameColor = (
+            self._savedBaseFillColor == self._savedBaseBorderColor
+            and self._savedBaseFillColor == self._savedBaseBorderColor
+            and self._savedArrowBorderColor == self._savedBaseBorderColor
+            and self._savedArrowFillColor == self._savedBaseBorderColor
+            and self._savedEllipseBorderColor == self._savedBaseBorderColor
+            and self._savedEllipseFillColor == self._savedBaseBorderColor
+        )
+        self._useOneColor = False
+        self.setOneColor(sameColor)
+
+    def saveColors(self):
+        self._savedBaseBorderColor = self.uBaseBorderColor.color()
+        self._savedBaseFillColor = self.uBaseColor.color()
+        self._savedArrowBorderColor = self.uArrowBorderColor.color()
+        self._savedArrowFillColor = self.uArrowFillColor.color()
+        self._savedEllipseBorderColor = self.uEllipseBorderColor.color()
+        self._savedEllipseFillColor = self.uEllipseFillColor.color()
+
+    def restoreColors(self):
+        # self.uBaseBorderColor.setColor(self._savedBaseBorderColor)
+        self.uBaseColor.setColor(self._savedBaseFillColor)
+        self.uArrowBorderColor.setColor(self._savedArrowBorderColor)
+        self.uArrowFillColor.setColor(self._savedArrowFillColor)
+        self.uEllipseBorderColor.setColor(self._savedEllipseBorderColor)
+        self.uEllipseFillColor.setColor(self._savedEllipseFillColor)
+
+    def oneColorUpdated(self):
+        self.setOneColor(self.uOneColor.isChecked())
+
+    def baseBorderColorUpdated(self):
+        if self._oneColor:
+            self.copyColors()
+
+    def setOneColor(self, useOneColor):
+        if not self._oneColor:
+            self.saveColors()
+        self.uOneColor.setChecked(useOneColor)
+        self.uBaseColor.setEnabled(not useOneColor)
+        self.uArrowBorderColor.setEnabled(not useOneColor)
+        self.uArrowFillColor.setEnabled(not useOneColor)
+        self.uEllipseBorderColor.setEnabled(not useOneColor)
+        self.uEllipseFillColor.setEnabled(not useOneColor)
+        self._oneColor = useOneColor
+        if useOneColor:
+            self.copyColors()
+        else:
+            self.restoreColors()
+
+    def copyColors(self):
+        self.uBaseColor.setColor(self.uBaseBorderColor.color())
+        self.uArrowBorderColor.setColor(self.uBaseBorderColor.color())
+        self.uArrowFillColor.setColor(self.uBaseBorderColor.color())
+        self.uEllipseBorderColor.setColor(self.uBaseBorderColor.color())
+        self.uEllipseFillColor.setColor(self.uBaseBorderColor.color())
 
     def saveToSettings(self):
         settings = self._settings
         # Avoid accidentally resetting scale group scale until we've
         # set the new scale group
         settings.setScaleGroup("")
-        if self.mode() == self.ArrowTypeNone:
+        if self.arrowMode() == self.ArrowTypeNone:
             settings.setDrawArrow(False)
-            settings.setMode(QgsVectorFieldSymbolLayer.Cartesian)
         else:
             settings.setDrawArrow(True)
-            settings.setMode(self.mode())
-        settings.setEllipseMode(self.ellipseMode())
+            settings.setArrowMode(self.arrowMode())
+        if self.ellipseMode() == self.EllipseTypeNone:
+            settings.setDrawEllipse(False)
+        else:
+            settings.setDrawEllipse(True)
+            settings.setEllipseMode(self.ellipseMode())
         settings.setDxField(self.uXField.currentText())
         settings.setDyField(self.uYField.currentText())
         settings.setEmaxField(self.uEmaxField.currentText())
         settings.setEminField(self.uEminField.currentText())
         settings.setEmaxAzimuthField(self.uEmaxAzimuthField.currentText())
-        angleUnits = (
-            QgsVectorFieldSymbolLayer.Degrees if self.uAngleUnitsDegrees.isChecked() else QgsVectorFieldSymbolLayer.Radians
-        )
-        settings.setAngleUnits(angleUnits)
-        settings.setAngleOrientation(
-            QgsVectorFieldSymbolLayer.ClockwiseFromNorth
-            if self.uAngleOrientationNorth.isChecked()
-            else QgsVectorFieldSymbolLayer.CounterclockwiseFromEast
-        )
+        settings.setArrowAngleDegrees(self.uAngleUnitsDegrees.isChecked())
+        settings.setArrowAngleFromNorth(self.uAngleOrientationNorth.isChecked())
         settings.setEllipseDegrees(self.uEllipseAngleUnitsDegrees.isChecked())
         settings.setEllipseAngleFromNorth(self.uEllipseOrientationNorth.isChecked())
         try:
@@ -349,7 +407,7 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
         settings.setScaleGroupFactor(factor)
         settings.setScaleGroup(group)
         settings.setScaleIsMetres(self.uScaleUnits.currentIndex() != 0)
-        settings.setSymbolUnitType(SymbolRenderUnitList[self.uSymbolUnits.currentIndex()])
+        settings.setSymbolRenderUnit(SymbolRenderUnitList[self.uSymbolRenderUnits.currentIndex()])
         settings.setArrowHeadWidth(float(self.uArrowHeadWidth.value()))
         settings.setArrowShaftWidth(float(self.uArrowShaftWidth.value()))
         settings.setArrowHeadRelativeLength(float(self.uArrowHeadRelativeLength.value()))
@@ -360,7 +418,6 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
         settings.setArrowFillColor(self.uArrowFillColor.color())
         settings.setFillBase(self.uFillBase.isChecked())
         settings.setFillArrow(self.uFillArrow.isChecked())
-        settings.setDrawEllipse(self.uDrawEllipse.isChecked())
         settings.setDrawEllipseAxes(self.uDrawEllipseAxes.isChecked())
         settings.setBaseFillColor(self.uBaseColor.color())
         settings.setBaseBorderColor(self.uBaseBorderColor.color())

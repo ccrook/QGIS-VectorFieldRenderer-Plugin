@@ -15,7 +15,7 @@
    version="1.1"
    inkscape:version="0.92.3 (2405546, 2018-03-11)"
    sodipodi:docname="pluginIcon.svg"
-   inkscape:export-filename="/home/ccrook/projects/qgis/plugins/qgis3/VectorFieldRenderer/iconSource/PasteVectorSettingsIcon.png"
+   inkscape:export-filename="/home/ccrook/projects/qgis/plugins/qgis3/VectorFieldRenderer/iconSource/CopyVectorSettingsIcon.png"
    inkscape:export-xdpi="90"
    inkscape:export-ydpi="90">
   <defs
@@ -181,15 +181,15 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="11.05833"
-     inkscape:cx="9.9419729"
+     inkscape:cx="13.585516"
      inkscape:cy="11.746699"
      inkscape:document-units="px"
      inkscape:current-layer="g4831"
      showgrid="true"
      inkscape:window-width="1043"
      inkscape:window-height="836"
-     inkscape:window-x="2534"
-     inkscape:window-y="110"
+     inkscape:window-x="751"
+     inkscape:window-y="191"
      inkscape:window-maximized="0">
     <inkscape:grid
        type="xygrid"
@@ -597,18 +597,21 @@
        transform="translate(2.1764717,1)">
       <g
          transform="translate(-1,8)"
-         id="g4684">
+         id="g4684"
+         style="fill:#80ffb3">
         <g
-           id="g4687">
+           id="g4687"
+           style="fill:#80ffb3">
           <g
-             id="g4690">
+             id="g4690"
+             style="fill:#80ffb3">
             <rect
                id="rect3817"
                width="14.823529"
                height="14"
                x="3"
                y="4"
-               style="fill:#b3b3b3;stroke:#000000" />
+               style="fill:#80ffb3;stroke:#000000" />
           </g>
         </g>
       </g>
@@ -678,6 +681,87 @@
      inkscape:groupmode="layer"
      style="display:inline">
     <g
+       id="g4732">
+      <g
+         id="g4829"
+         transform="translate(9.9999983,-2.0000033)">
+        <g
+           style="fill:#80ffb3"
+           transform="translate(-1,8)"
+           id="g4805">
+          <g
+             style="fill:#80ffb3"
+             id="g4803">
+            <rect
+               style="fill:#80ffb3;stroke:#000000"
+               y="4"
+               x="3"
+               height="14"
+               width="14.823529"
+               id="rect4801" />
+          </g>
+        </g>
+        <g
+           transform="matrix(0.23125083,-0.32357087,0.32202492,0.232361,-330.41632,-219.59175)"
+           id="g4817"
+           style="display:inline">
+          <circle
+             r="4"
+             cy="7"
+             cx="5"
+             style="fill:#000000;fill-opacity:1;stroke:none"
+             id="circle4809"
+             transform="translate(1,1033.3622)" />
+          <circle
+             r="2"
+             cy="7"
+             cx="5"
+             style="fill:#ff0000;fill-opacity:1;stroke:none"
+             id="circle4811"
+             transform="translate(1,1033.3622)" />
+          <path
+             style="fill:none;stroke:#000000;stroke-width:1.34164083;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow2Mend-3)"
+             d="M 9,1040.3622 H 24"
+             id="path4813"
+             inkscape:connector-curvature="0" />
+          <path
+             style="fill:none;stroke:#000000;stroke-width:2.23606801;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+             d="M 9,1040.3622 H 19"
+             id="path4815"
+             inkscape:connector-curvature="0" />
+        </g>
+        <g
+           transform="matrix(0.23125083,-0.32357087,0.32202492,0.232361,-326.10381,-216.82746)"
+           id="g4827"
+           style="display:inline">
+          <circle
+             r="4"
+             cy="7"
+             cx="5"
+             style="fill:#000000;fill-opacity:1;stroke:none"
+             id="circle4819"
+             transform="translate(1,1033.3622)" />
+          <circle
+             r="2"
+             cy="7"
+             cx="5"
+             style="fill:#ff0000;fill-opacity:1;stroke:none"
+             id="circle4821"
+             transform="translate(1,1033.3622)" />
+          <path
+             style="fill:none;stroke:#000000;stroke-width:1.34164083;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow2Mend-3-2)"
+             d="M 9,1040.3622 H 24"
+             id="path4823"
+             inkscape:connector-curvature="0" />
+          <path
+             style="fill:none;stroke:#000000;stroke-width:2.23606801;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+             d="M 9,1040.3622 H 19"
+             id="path4825"
+             inkscape:connector-curvature="0" />
+        </g>
+      </g>
+    </g>
+    <g
        style="display:inline"
        transform="translate(12.68749,0.23570538)"
        id="g4829-2">
@@ -689,7 +773,7 @@
           <g
              id="g4803-8">
             <rect
-               style="fill:#b3b3b3;stroke:#000000"
+               style="fill:#80ffb3;stroke:#000000"
                y="4"
                x="3"
                height="14"
@@ -758,82 +842,84 @@
       </g>
     </g>
     <g
-       transform="translate(9.9999983,-2.0000033)"
-       id="g4829">
+       id="g4762">
       <g
-         id="g4807"
-         transform="translate(-1,8)">
+         transform="translate(9.9999983,-2.0000033)"
+         id="g4760">
         <g
-           id="g4805">
+           id="g4738"
+           transform="translate(-1,8)"
+           style="fill:#80ffb3">
           <g
-             id="g4803">
+             id="g4736"
+             style="fill:#80ffb3">
             <rect
-               style="fill:#b3b3b3;stroke:#000000"
-               y="4"
-               x="3"
-               height="14"
+               id="rect4734"
                width="14.823529"
-               id="rect4801" />
+               height="14"
+               x="3"
+               y="4"
+               style="fill:#80ffb3;stroke:#000000" />
           </g>
         </g>
-      </g>
-      <g
-         style="display:inline"
-         id="g4817"
-         transform="matrix(0.23125083,-0.32357087,0.32202492,0.232361,-330.41632,-219.59175)">
-        <circle
-           transform="translate(1,1033.3622)"
-           id="circle4809"
-           style="fill:#000000;fill-opacity:1;stroke:none"
-           cx="5"
-           cy="7"
-           r="4" />
-        <circle
-           transform="translate(1,1033.3622)"
-           id="circle4811"
-           style="fill:#ff0000;fill-opacity:1;stroke:none"
-           cx="5"
-           cy="7"
-           r="2" />
-        <path
-           inkscape:connector-curvature="0"
-           id="path4813"
-           d="M 9,1040.3622 H 24"
-           style="fill:none;stroke:#000000;stroke-width:1.34164083;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow2Mend-3)" />
-        <path
-           inkscape:connector-curvature="0"
-           id="path4815"
-           d="M 9,1040.3622 H 19"
-           style="fill:none;stroke:#000000;stroke-width:2.23606801;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
-      </g>
-      <g
-         style="display:inline"
-         id="g4827"
-         transform="matrix(0.23125083,-0.32357087,0.32202492,0.232361,-326.10381,-216.82746)">
-        <circle
-           transform="translate(1,1033.3622)"
-           id="circle4819"
-           style="fill:#000000;fill-opacity:1;stroke:none"
-           cx="5"
-           cy="7"
-           r="4" />
-        <circle
-           transform="translate(1,1033.3622)"
-           id="circle4821"
-           style="fill:#ff0000;fill-opacity:1;stroke:none"
-           cx="5"
-           cy="7"
-           r="2" />
-        <path
-           inkscape:connector-curvature="0"
-           id="path4823"
-           d="M 9,1040.3622 H 24"
-           style="fill:none;stroke:#000000;stroke-width:1.34164083;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow2Mend-3-2)" />
-        <path
-           inkscape:connector-curvature="0"
-           id="path4825"
-           d="M 9,1040.3622 H 19"
-           style="fill:none;stroke:#000000;stroke-width:2.23606801;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+        <g
+           style="display:inline"
+           id="g4748"
+           transform="matrix(0.23125083,-0.32357087,0.32202492,0.232361,-330.41632,-219.59175)">
+          <circle
+             transform="translate(1,1033.3622)"
+             id="circle4740"
+             style="fill:#000000;fill-opacity:1;stroke:none"
+             cx="5"
+             cy="7"
+             r="4" />
+          <circle
+             transform="translate(1,1033.3622)"
+             id="circle4742"
+             style="fill:#ff0000;fill-opacity:1;stroke:none"
+             cx="5"
+             cy="7"
+             r="2" />
+          <path
+             inkscape:connector-curvature="0"
+             id="path4744"
+             d="M 9,1040.3622 H 24"
+             style="fill:none;stroke:#000000;stroke-width:1.34164083;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow2Mend-3)" />
+          <path
+             inkscape:connector-curvature="0"
+             id="path4746"
+             d="M 9,1040.3622 H 19"
+             style="fill:none;stroke:#000000;stroke-width:2.23606801;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+        </g>
+        <g
+           style="display:inline"
+           id="g4758"
+           transform="matrix(0.23125083,-0.32357087,0.32202492,0.232361,-326.10381,-216.82746)">
+          <circle
+             transform="translate(1,1033.3622)"
+             id="circle4750"
+             style="fill:#000000;fill-opacity:1;stroke:none"
+             cx="5"
+             cy="7"
+             r="4" />
+          <circle
+             transform="translate(1,1033.3622)"
+             id="circle4752"
+             style="fill:#ff0000;fill-opacity:1;stroke:none"
+             cx="5"
+             cy="7"
+             r="2" />
+          <path
+             inkscape:connector-curvature="0"
+             id="path4754"
+             d="M 9,1040.3622 H 24"
+             style="fill:none;stroke:#000000;stroke-width:1.34164083;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow2Mend-3-2)" />
+          <path
+             inkscape:connector-curvature="0"
+             id="path4756"
+             d="M 9,1040.3622 H 19"
+             style="fill:none;stroke:#000000;stroke-width:2.23606801;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+        </g>
       </g>
     </g>
     <g

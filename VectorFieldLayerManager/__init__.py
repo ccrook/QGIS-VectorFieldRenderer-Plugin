@@ -1,9 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
 #       __init__.py
 #
-#       Copyright 2009 Chris Crook (ccrook@linz.govt.nz)
+#       Copyright 2019 Land Information New Zealand (www.linz.govt.nz)
 #
 #       This program is free software; you can redistribute it and/or modify
 #       it under the terms of the GNU General Public License as published by
@@ -20,7 +20,8 @@
 #       Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #       MA 02110-1301, USA.
 
-# from .VectorFieldRendererPlugin import Plugin
+from .Plugin import Plugin
 
-# def classFactory(iface):
-#     return Plugin(iface)
+
+def classFactory(iface):
+    return Plugin(iface)
