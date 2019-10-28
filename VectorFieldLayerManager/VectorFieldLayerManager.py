@@ -30,6 +30,7 @@ from qgis.core import (
 )
 
 from .VectorFieldLayerSettings import VectorFieldLayerSettings
+from .VectorFieldRendererSettingsImporter import VectorFieldRendererSettingsImporter
 
 VECTOR_SETTINGS_PROP = "vfr_settings"
 VECTOR_SCALE_GROUP_PROP = "vfr_scale_group"
@@ -57,16 +58,27 @@ class VectorFieldLayerManager(QObject):
     def __init__(self, iface=None):
         QObject.__init__(self)
         self._iface = iface
+        self._project = QgsProject.instance()
         if iface is not None:
             iface.mapCanvas().scaleChanged.connect(self.mapScaleChange)
+        self._project.homePathChanged.connect(self.importSettings)
 
-    def renderLayerAsVectorField(self, layer, autoscale=False, **settings):
+    def unload(self):
+        self._iface.mapCanvas().scaleChanged.disconnect(self.mapScaleChanged)
+        self._project.homePathChanged.disconnect(self.importSettings)
+
+    def importSettings(self):
+        " Import settings from Vector Field Renderer "
+        importer = VectorFieldRendererSettingsImporter(self, self._project)
+        importer.importSettings()
+
+    def renderLayerAsVectorField(self, layer, autoscale=False, propogate=True, **settings):
         settings = VectorFieldLayerSettings(**settings)
         self.applySettingsToLayer(layer, settings)
         if autoscale:
             scale = self.estimateOptimalScale(layer)
             if scale is not None:
-                self.setVectorFieldLayerScale(layer, scale)
+                self.setVectorFieldLayerScale(layer, scale, propogate=propogate)
 
     def applySettingsToLayer(self, layer, settings):
         if not self.isValidLayerType(layer):

@@ -106,6 +106,7 @@ class VectorFieldLayerToolbar:
         QgsProject.instance().layerRemoved.connect(self.layerRemoved)
 
     def unload(self):
+        self._controller.unload()
         self._iface.currentLayerChanged[QgsMapLayer].disconnect(self.currentLayerChanged)
         self._iface.mainWindow().removeToolBar(self._toolbar)
 
