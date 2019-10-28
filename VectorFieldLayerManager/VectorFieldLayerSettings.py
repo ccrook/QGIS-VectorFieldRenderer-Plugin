@@ -43,9 +43,9 @@ class VectorFieldLayerSettings:
         dyField="",
         arrowAngleDegrees=True,
         arrowAngleFromNorth=True,
-        arrowShaftWidth=1.5,
+        arrowShaftWidth=0.75,
         arrowHeadWidth=3.0,
-        arrowHeadRelativeLength=2.0,
+        arrowHeadRelativeLength=1.5,
         arrowMaxRelativeHeadSize=0.3,
         arrowBorderWidth=0.0,
         arrowBorderColor=QColor(0, 0, 0),
@@ -224,7 +224,7 @@ class VectorFieldLayerSettings:
             return None
         symbolRenderUnit = self.encodedSymbolRenderUnit()
         width = str(self.arrowShaftWidth())
-        headWidth = str(self.arrowHeadWidth())
+        headWidth = str(self.arrowHeadWidth() / 2.0)
         headLength = str(self.arrowHeadWidth() * self.arrowHeadRelativeLength())
         arrow = QgsArrowSymbolLayer.create(
             {
@@ -409,7 +409,10 @@ class VectorFieldLayerSettings:
         scaleUnit = QgsUnitTypes.toAbbreviatedString(self.scaleIsMetres())
         vfl = QgsVectorFieldSymbolLayer()
         vfl.setXAttribute(self.dxField())
-        vfl.setYAttribute(self.dyField())
+        if self.arrowMode() == QgsVectorFieldSymbolLayer.Height:
+            vfl.setYAttribute(self.dxField())
+        else:
+            vfl.setYAttribute(self.dyField())
         vfl.setScale(self.scale())
         vfl.setVectorFieldType(self.arrowMode())
         angleOrientation = (

@@ -1,14 +1,10 @@
 #!/usr/bin/python3
 
-# TODO: Consider migrating vector field renderer settings on project load
-# TODO: Documentation
-# TODO: Compile into plugin
 # TODO: restore feature: optional alignment to true north
 # TODO: restore feature: scale box
 # TODO: restore feature: expressions for vector components and covariance (could do with geometry generator layer)
-# TODO: enhancement: Live update
-# TODO: enhancement: check box for single color for layer
 # TODO: enhancement: configure vector layer rendering using processor function
+# TODO: enhancement: Live update
 
 import math
 
@@ -60,7 +56,7 @@ class VectorFieldLayerManager(QObject):
         self._iface = iface
         self._project = QgsProject.instance()
         if iface is not None:
-            iface.mapCanvas().scaleChanged.connect(self.mapScaleChange)
+            iface.mapCanvas().scaleChanged.connect(self.mapScaleChanged)
         self._project.homePathChanged.connect(self.importSettings)
 
     def unload(self):
@@ -69,7 +65,7 @@ class VectorFieldLayerManager(QObject):
 
     def importSettings(self):
         " Import settings from Vector Field Renderer "
-        importer = VectorFieldRendererSettingsImporter(self, self._project)
+        importer = VectorFieldRendererSettingsImporter(self._iface, self, self._project)
         importer.importSettings()
 
     def renderLayerAsVectorField(self, layer, autoscale=False, propogate=True, **settings):
@@ -233,7 +229,7 @@ class VectorFieldLayerManager(QObject):
         conversion = ctx.convertFromMapUnits(conversion, units)
         QgsExpressionContextUtils.setLayerVariable(layer, METRES_TO_UNITS_VARIABLE_NAME, str(conversion))
 
-    def mapScaleChange(self):
+    def mapScaleChanged(self):
         for layer in QgsProject.instance().mapLayers().values():
             self.setLayerMetresToUnits(layer)
 

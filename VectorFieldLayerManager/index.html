@@ -66,18 +66,18 @@
     <h2>Contents</h2>
     <ul>
         <li><a href="#introduction">Introduction</a></li>
+        <li><a href="#toolbar">Managing vector field layers</a></li>
         <li><a href="#rendering">Rendering a vector field</a></li>
         <li><a href="#ellipse">Rendering error ellipses</a></li>
-        <li><a href="#toolbar">Modifying the vector field - the vector field toolbar</a></li>
-        <li><a href="#scalebox">Configuring the scale box</a></li>
         <li><a href="#python">Configuring the renderer from python</a></li>
-        <li><a href="#issues">Issues</a></li>
-        <li><a href="#history">Change history</a></li>
+        <li><a href="#history">History</a></li>
+        <li><a href="#changelog">Change log</a></li>
     </ul>
     <h2><a name="introduction">Introduction</a></h2>
 
-    <p>The vector field manager is used to support displaying vector field data such as earth deformation, tidal flows,
-        and the like.
+    <p>The vector field manager is used to support displaying vector field data such as earth deformation, tidal in
+        which
+        attributes of point features define a vector quantity - one with distance and direction.
         It displays the vectors as arrows that are scaled and oriented according selected attributes of data points.
         It can only be used to render point data - line and polygon layers are not drawn by this symbology.
     </p>
@@ -116,7 +116,7 @@
         are drawn as if north is towards the top of the map.
     </p>
     <img src="help/VectorFieldManagerToolbar.png" alt="Vector field manager toolbar" style="float:right" />
-    <h2><a name="toolbar">Displaying the vector field</a></h2>
+    <h2><a name="toolbar">Managing vector field layers</a></h2>
     <p>
         Displaying vector fields is managed with the vector field manager toolbar.
         This provides the following functions:
@@ -634,7 +634,7 @@
     </p>
 
     <div style="clear:both" />
-    <h2><a name="issues">History</a></h2>
+    <h2><a name="history">History</a></h2>
     <p>The VectorFieldManager plugin for QGIS 3.0 is a partial replacement for the VectorFieldRenderer plugin in QGIS2.
         The vector field renderer method of implementation proved difficult to migrate to QGIS3. This plugin replicates
         the majority of that functionality.
@@ -651,7 +651,7 @@
     </ul>
 
     <div style="clear:both" />
-    <h2><a name="history">Change history</a></h2>
+    <h2><a name="changelog">Change log</a></h2>
     <p><i>Version 1.0.1: 25 October 2019</i>Initial implementation</p>
 </body>
 
