@@ -2,7 +2,6 @@ from PyQt5.QtGui import QIcon, QPainter
 from PyQt5.QtWidgets import QDialog, QMessageBox, QAction
 
 from qgis.core import QgsApplication, QgsMapLayer, QgsProject
-from qgis.gui import QgsMessageBar
 from qgis import utils
 
 from .VectorFieldLayerDialog import VectorFieldLayerDialog
@@ -187,4 +186,4 @@ class VectorFieldLayerToolbar:
             )
 
     def showHelp(self):
-        utils.showPluginHelp(filename="index.html")
+        utils.showPluginHelp()

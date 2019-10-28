@@ -13,7 +13,6 @@ from PyQt5.QtCore import QObject, pyqtSignal
 from qgis.core import (
     QgsProject,
     QgsMapLayer,
-    QgsMapLayerType,
     QgsSingleSymbolRenderer,
     QgsCategorizedSymbolRenderer,
     QgsGraduatedSymbolRenderer,
@@ -22,7 +21,6 @@ from qgis.core import (
     QgsFeatureRequest,
     QgsUnitTypes,
     QgsRenderContext,
-    QgsMapUnitScale,
 )
 
 from .VectorFieldLayerSettings import VectorFieldLayerSettings
@@ -45,7 +43,7 @@ class VectorFieldLayerManager(QObject):
     def isValidLayerType(layer):
         if layer is None:
             return False
-        if layer.type() != QgsMapLayerType.VectorLayer:
+        if layer.type() != QgsMapLayer.VectorLayer:
             return False
         if layer.geometryType() != QgsWkbTypes.PointGeometry:
             return False
@@ -163,7 +161,7 @@ class VectorFieldLayerManager(QObject):
         """
         if layer is None:
             return None
-        if layer.type() != QgsMapLayerType.VectorLayer:
+        if layer.type() != QgsMapLayer.VectorLayer:
             return None
         renderer = layer.renderer()
         if isinstance(renderer, QgsSingleSymbolRenderer):

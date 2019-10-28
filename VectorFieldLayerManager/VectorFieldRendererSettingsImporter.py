@@ -2,8 +2,6 @@
 
 import os.path
 import xml.etree.ElementTree as et
-from .VectorFieldLayerSettings import VectorFieldLayerSettings
-from qgis.gui import QgsMessageBar
 
 
 class VectorFieldRendererSettingsImporter:

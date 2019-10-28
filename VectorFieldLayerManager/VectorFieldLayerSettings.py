@@ -8,10 +8,8 @@ from qgis.core import (
     QgsArrowSymbolLayer,
     QgsFillSymbol,
     QgsLineSymbol,
-    QgsMapLayerType,
     QgsMarkerLineSymbolLayer,
     QgsMarkerSymbol,
-    QgsSingleSymbolRenderer,
     QgsUnitTypes,
     QgsVectorFieldSymbolLayer,
     QgsEllipseSymbolLayer,
@@ -19,7 +17,6 @@ from qgis.core import (
     QgsSimpleFillSymbolLayer,
     QgsSymbolLayer,
     QgsProperty,
-    QgsWkbTypes,
 )
 
 

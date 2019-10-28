@@ -8,13 +8,13 @@ about=Provides a capability  a point layer with arrows representing vectors.  Th
   error covariance of the vector.  The scale of the arrows can be easily
   changed using buttons on the toolbar.  
 category=Vector
-version=1.0.1
+version=1.0.2
 experimental=True
-qgisMinimumVersion=3.0
+qgisMinimumVersion=3.4
 qgisMaximumVersion=3.99
 homepage=http://github.com/ccrook/QGIS-VectorFieldRenderer-Plugin
 repository=https://github.com/ccrook/QGIS-VectorFieldRenderer-Plugin
 tracker=https://github.com/ccrook/QGIS-VectorFieldRenderer-Plugin/issues
 author=Chris Crook
 email=ccrook@linz.govt.nz
-icon=./VectorFieldLayerManager.png
+icon=./icon/VectorFieldLayerManager.png
