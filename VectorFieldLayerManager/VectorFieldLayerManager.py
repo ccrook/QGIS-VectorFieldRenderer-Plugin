@@ -70,9 +70,12 @@ class VectorFieldLayerManager(QObject):
         settings = VectorFieldLayerSettings(**settings)
         self.applySettingsToLayer(layer, settings)
         if autoscale:
-            scale = self.estimateOptimalScale(layer)
-            if scale is not None:
-                self.setVectorFieldLayerScale(layer, scale, propogate=propogate)
+            self.autoscaleVectorLayer( layer )
+
+    def autoscaleVectorLayer( self, layer, propogate=True ):
+        scale = self.estimateOptimalScale(layer)
+        if scale is not None:
+            self.setVectorFieldLayerScale(layer, scale, propogate=propogate)
 
     def applySettingsToLayer(self, layer, settings):
         if not self.isValidLayerType(layer):
@@ -278,8 +281,8 @@ class VectorFieldLayerManager(QObject):
         if group is None or group == "":
             return
         scale /= factor
-        for target in self._iface.mapCanvas().layers():
-            if target.id() == layer.id():
+        for targetid, target in QgsProject.instance().mapLayers().items():
+            if targetid == layer.id() or target.type() != target.VectorLayer:
                 continue
             tgroup, tfactor = self.vectorFieldScaleGroup(target)
             if tgroup != group:

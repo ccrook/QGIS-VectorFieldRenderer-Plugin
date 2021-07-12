@@ -134,10 +134,10 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
         self.uYFieldLabel.setText(fields[1] if nfields > 1 else "")
         # self.uXField.setExpressionDialogTitle( fields[0] if nfields > 0 else '' )
         # self.uYField.setExpressionDialogTitle( fields[1] if nfields > 1 else '' )
-        if nfields < 1:
-            self.uXField.setField("")
-        if nfields < 2:
-            self.uYField.setField("")
+        # if nfields < 1:
+        #     self.uXField.setField("")
+        # if nfields < 2:
+        #     self.uYField.setField("")
         isPolar = mode == QgsVectorFieldSymbolLayer.Polar
         self.uAngleUnitsGroupBox.setEnabled(isPolar)
         self.uOrientationGroupBox.setEnabled(isPolar)
@@ -172,12 +172,12 @@ class VectorFieldLayerWidget(QWidget, Ui_VectorFieldLayerWidget):
         # self.uEmaxField.setExpressionDialogTitle(fields[0] if nfields > 0 else "")
         # self.uEminField.setExpressionDialogTitle(fields[1] if nfields > 1 else "")
         # self.uEmaxAzimuthField.setExpressionDialogTitle(fields[2] if nfields > 2 else "")
-        if nfields < 1:
-            self.uEmaxField.setField("")
-        if nfields < 2:
-            self.uEminField.setField("")
-        if nfields < 3:
-            self.uEmaxAzimuthField.setField("")
+        # if nfields < 1:
+        #     self.uEmaxField.setField("")
+        # if nfields < 2:
+        #     self.uEminField.setField("")
+        # if nfields < 3:
+        #     self.uEmaxAzimuthField.setField("")
 
         isPolar = mode == VectorFieldLayerSettings.AxesEllipse
         self.uAxisAngleUnitsGroupBox.setEnabled(isPolar)

@@ -132,9 +132,7 @@ class VectorFieldLayerToolbar:
 
     def autoRescale(self):
         layer = self.currentLayer()
-        scale = self._controller.estimateOptimalScale(layer)
-        if scale is not None:
-            self._controller.setVectorFieldLayerScale(layer, scale)
+        scale = self._controller.autoscaleVectorLayer(layer)
 
     def enlarge(self):
         layer = self.currentLayer()

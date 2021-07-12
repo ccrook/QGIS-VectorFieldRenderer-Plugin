@@ -414,8 +414,10 @@
         dxField='dx',
         dyField='dy',
         color='#0000dd',
-        autoscale=True,
+        autoscale=True, # Only works if changing existing layer renderer
         )
+    ...
+    manager.autoscaleVectorLayer(layer)
         
     </pre>
 
