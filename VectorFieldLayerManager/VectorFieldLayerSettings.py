@@ -82,7 +82,11 @@ class VectorFieldLayerSettings:
         "polar": QgsVectorFieldSymbolLayer.Polar,
         "height": QgsVectorFieldSymbolLayer.Height,
     }
-    _ellipseModeCodes = {"axes": AxesEllipse, "circular": CircularEllipse, "height": HeightEllipse}
+    _ellipseModeCodes = {
+        "axes": AxesEllipse,
+        "circular": CircularEllipse,
+        "height": HeightEllipse,
+    }
 
     # Not used in current version of renderer
     # self._vectorIsTrueNorth = True
@@ -112,7 +116,9 @@ class VectorFieldLayerSettings:
             if k == "color":
                 continue
             if k in self._alias:
-                alias = {ak: av if av is not None else v for ak, av in self._alias[k].items()}
+                alias = {
+                    ak: av if av is not None else v for ak, av in self._alias[k].items()
+                }
                 self.set(**alias)
                 continue
             k = self._normalize.get(k, k)
@@ -123,7 +129,9 @@ class VectorFieldLayerSettings:
             if k == "symbolRenderUnit":
                 v, ok = QgsUnitTypes.decodeRenderUnit(v)
             elif k == "arrowMode":
-                v = self._arrowModeCodes.get(v.lower(), QgsVectorFieldSymbolLayer.Cartesian)
+                v = self._arrowModeCodes.get(
+                    v.lower(), QgsVectorFieldSymbolLayer.Cartesian
+                )
             elif k == "ellipseMode":
                 v = self._ellipseModeCodes.get(v.lower(), self.AxesEllipse)
             self._settings[k] = self._types[k](v)
@@ -166,7 +174,10 @@ class VectorFieldLayerSettings:
         if not self.drawArrow() or self.dxField() == "":
             return False
         mode = self.arrowMode()
-        if mode in (QgsVectorFieldSymbolLayer.Cartesian, QgsVectorFieldSymbolLayer.Polar):
+        if mode in (
+            QgsVectorFieldSymbolLayer.Cartesian,
+            QgsVectorFieldSymbolLayer.Polar,
+        ):
             if self.dyField() == "":
                 return False
         return True
@@ -214,7 +225,7 @@ class VectorFieldLayerSettings:
 
     def arrowSymbolLayer(self):
         """
-        Creates a line symbol layer for the arrow.  
+        Creates a line symbol layer for the arrow.
         """
 
         if not self.haveArrow():
@@ -250,32 +261,55 @@ class VectorFieldLayerSettings:
         )
 
         shrinkArrow = self.arrowMaxRelativeHeadSize() > 0
-        needConversion = self.scaleIsMetres() and self.symbolRenderUnit() != QgsUnitTypes.RenderMetersInMapUnits
+        needConversion = (
+            self.scaleIsMetres()
+            and self.symbolRenderUnit() != QgsUnitTypes.RenderMetersInMapUnits
+        )
         # If need a conversion to from vector scale unit to symbol units  then need a metres to units conversion to apply scale
-        if needConversion and (self._metresConversionVariable == "" or self._scaleVariable == ""):
+        if needConversion and (
+            self._metresConversionVariable == "" or self._scaleVariable == ""
+        ):
             shrinkArrow = False
 
         if self.arrowHeadWidth() * self.arrowHeadRelativeLength() <= 0:
             shrinkArrow = False
         if shrinkArrow:
             if self.arrowMode() == QgsVectorFieldSymbolLayer.Cartesian:
-                lengthVar = 'sqrt("{0}"*"{0}"+"{1}"*"{1}")'.format(self.dxField(), self.dyField())
+                lengthVar = 'sqrt("{0}"*"{0}"+"{1}"*"{1}")'.format(
+                    self.dxField(), self.dyField()
+                )
             else:
                 lengthVar = 'abs("{0}")'.format(self.dxField())
             if needConversion:
-                lengthVar = "(@{0}*{1})".format(self._metresConversionVariable, lengthVar)
+                lengthVar = "(@{0}*{1})".format(
+                    self._metresConversionVariable, lengthVar
+                )
             lengthVar = "(@{0}*{1})".format(self._scaleVariable, lengthVar)
-            scaleVar = "min({0}*{1}/{2},1.0)".format(lengthVar, self.arrowMaxRelativeHeadSize(), headLength)
+            scaleVar = "min({0}*{1}/{2},1.0)".format(
+                lengthVar, self.arrowMaxRelativeHeadSize(), headLength
+            )
             widthVar = "{0}*{1}".format(scaleVar, width)
             headWidthVar = "{0}*{1}".format(scaleVar, headWidth)
             headLengthVar = "{0}*{1}".format(scaleVar, headLength)
             outlineWidthVar = "{0}*{1}".format(scaleVar, self.arrowBorderWidth())
-            arrow.setDataDefinedProperty(QgsSymbolLayer.PropertyArrowWidth, QgsProperty.fromExpression(widthVar))
-            arrow.setDataDefinedProperty(QgsSymbolLayer.PropertyArrowStartWidth, QgsProperty.fromExpression(widthVar))
-            arrow.setDataDefinedProperty(QgsSymbolLayer.PropertyArrowHeadThickness, QgsProperty.fromExpression(headWidthVar))
-            arrow.setDataDefinedProperty(QgsSymbolLayer.PropertyArrowHeadLength, QgsProperty.fromExpression(headLengthVar))
+            arrow.setDataDefinedProperty(
+                QgsSymbolLayer.PropertyArrowWidth, QgsProperty.fromExpression(widthVar)
+            )
+            arrow.setDataDefinedProperty(
+                QgsSymbolLayer.PropertyArrowStartWidth,
+                QgsProperty.fromExpression(widthVar),
+            )
+            arrow.setDataDefinedProperty(
+                QgsSymbolLayer.PropertyArrowHeadThickness,
+                QgsProperty.fromExpression(headWidthVar),
+            )
+            arrow.setDataDefinedProperty(
+                QgsSymbolLayer.PropertyArrowHeadLength,
+                QgsProperty.fromExpression(headLengthVar),
+            )
             arrowFillSymbolLayer.setDataDefinedProperty(
-                QgsSymbolLayer.PropertyStrokeWidth, QgsProperty.fromExpression(outlineWidthVar)
+                QgsSymbolLayer.PropertyStrokeWidth,
+                QgsProperty.fromExpression(outlineWidthVar),
             )
 
         arrowFill = QgsFillSymbol()
@@ -320,13 +354,21 @@ class VectorFieldLayerSettings:
             ellipseScale = "(@" + self._scaleVariable + " * " + str(scale) + ")"
         else:
             ellipseScale = str(scale * self.scale())
-        sizeExpression = self.quotedFieldExpression(self.emaxField()) + "*" + ellipseScale
+        sizeExpression = (
+            self.quotedFieldExpression(self.emaxField()) + "*" + ellipseScale
+        )
         tick3 = tick2.clone()
-        tick1.setDataDefinedProperty(QgsSymbolLayer.PropertySize, QgsProperty.fromExpression(sizeExpression))
+        tick1.setDataDefinedProperty(
+            QgsSymbolLayer.PropertySize, QgsProperty.fromExpression(sizeExpression)
+        )
         offset2 = "to_string(0.5*" + sizeExpression + ") || ',0.0'"
         offset3 = "to_string(-0.5*" + sizeExpression + ") || ',0.0'"
-        tick2.setDataDefinedProperty(QgsSymbolLayer.PropertyOffset, QgsProperty.fromExpression(offset2))
-        tick3.setDataDefinedProperty(QgsSymbolLayer.PropertyOffset, QgsProperty.fromExpression(offset3))
+        tick2.setDataDefinedProperty(
+            QgsSymbolLayer.PropertyOffset, QgsProperty.fromExpression(offset2)
+        )
+        tick3.setDataDefinedProperty(
+            QgsSymbolLayer.PropertyOffset, QgsProperty.fromExpression(offset3)
+        )
         return [tick1, tick2, tick3]
 
     def ellipseSymbolLayer(self):
@@ -358,23 +400,45 @@ class VectorFieldLayerSettings:
             ellipseScale = "(@" + self._scaleVariable + " * " + str(scale) + ")"
         else:
             ellipseScale = str(scale * self.scale())
-        widthExpression = self.quotedFieldExpression(self.emaxField()) + "*" + ellipseScale
+        widthExpression = (
+            self.quotedFieldExpression(self.emaxField()) + "*" + ellipseScale
+        )
 
         if self.ellipseMode() == self.AxesEllipse:
-            heightExpression = self.quotedFieldExpression(self.eminField()) + "*" + ellipseScale
-            ellipseLayer.setDataDefinedProperty(QgsSymbolLayer.PropertyWidth, QgsProperty.fromExpression(widthExpression))
-            ellipseLayer.setDataDefinedProperty(QgsSymbolLayer.PropertyHeight, QgsProperty.fromExpression(heightExpression))
+            heightExpression = (
+                self.quotedFieldExpression(self.eminField()) + "*" + ellipseScale
+            )
+            ellipseLayer.setDataDefinedProperty(
+                QgsSymbolLayer.PropertyWidth,
+                QgsProperty.fromExpression(widthExpression),
+            )
+            ellipseLayer.setDataDefinedProperty(
+                QgsSymbolLayer.PropertyHeight,
+                QgsProperty.fromExpression(heightExpression),
+            )
             angleExpression = self.quotedFieldExpression(self.emaxAzimuthField())
             if not self.ellipseDegrees():
                 angleExpression = "radians(" + angleExpression + ")"
             if self.ellipseAngleFromNorth():
                 angleExpression = "(90.0-" + angleExpression + ")"
-            ellipseLayer.setDataDefinedProperty(QgsSymbolLayer.PropertyAngle, QgsProperty.fromExpression(angleExpression))
+            ellipseLayer.setDataDefinedProperty(
+                QgsSymbolLayer.PropertyAngle,
+                QgsProperty.fromExpression(angleExpression),
+            )
         elif self.ellipseMode() == self.CircularEllipse:
-            ellipseLayer.setDataDefinedProperty(QgsSymbolLayer.PropertyWidth, QgsProperty.fromExpression(widthExpression))
-            ellipseLayer.setDataDefinedProperty(QgsSymbolLayer.PropertyHeight, QgsProperty.fromExpression(widthExpression))
+            ellipseLayer.setDataDefinedProperty(
+                QgsSymbolLayer.PropertyWidth,
+                QgsProperty.fromExpression(widthExpression),
+            )
+            ellipseLayer.setDataDefinedProperty(
+                QgsSymbolLayer.PropertyHeight,
+                QgsProperty.fromExpression(widthExpression),
+            )
         elif self.ellipseMode() == self.HeightEllipse:
-            ellipseLayer.setDataDefinedProperty(QgsSymbolLayer.PropertyHeight, QgsProperty.fromExpression(widthExpression))
+            ellipseLayer.setDataDefinedProperty(
+                QgsSymbolLayer.PropertyHeight,
+                QgsProperty.fromExpression(widthExpression),
+            )
         else:
             return None
         return ellipseLayer
@@ -403,7 +467,6 @@ class VectorFieldLayerSettings:
         return ellipseLine
 
     def vectorFieldSymbol(self):
-        scaleUnit = QgsUnitTypes.toAbbreviatedString(self.scaleIsMetres())
         vfl = QgsVectorFieldSymbolLayer()
         vfl.setXAttribute(self.dxField())
         if self.arrowMode() == QgsVectorFieldSymbolLayer.Height:
@@ -417,7 +480,11 @@ class VectorFieldLayerSettings:
             if self.arrowAngleFromNorth()
             else QgsVectorFieldSymbolLayer.AntiClockwiseFromEast
         )
-        angleUnit = QgsVectorFieldSymbolLayer.Degrees if self.arrowAngleDegrees() else QgsVectorFieldSymbolLayer.Radians
+        angleUnit = (
+            QgsVectorFieldSymbolLayer.Degrees
+            if self.arrowAngleDegrees()
+            else QgsVectorFieldSymbolLayer.Radians
+        )
         vfl.setAngleOrientation(angleOrientation)
         vfl.setAngleUnits(angleUnit)
         if self.scaleIsMetres():
@@ -500,19 +567,25 @@ class VectorFieldLayerSettings:
 
     def toString(self, indent=None):
         """
-        Write the layer settings to a string 
+        Write the layer settings to a string
         """
         settings = {
             k: (
                 v.name(QColor.HexArgb)
                 if self._types[k] == QColor
-                else QgsUnitTypes.encodeUnit(QgsUnitTypes.RenderUnit(v)).lower()
-                if k == "symbolRenderUnit"
-                else self.encode(self._arrowModeCodes, v, "xy")
-                if k == "arrowMode"
-                else self.encode(self._ellipseModeCodes, v, "axes")
-                if k == "ellipseMode"
-                else v
+                else (
+                    QgsUnitTypes.encodeUnit(QgsUnitTypes.RenderUnit(v)).lower()
+                    if k == "symbolRenderUnit"
+                    else (
+                        self.encode(self._arrowModeCodes, v, "xy")
+                        if k == "arrowMode"
+                        else (
+                            self.encode(self._ellipseModeCodes, v, "axes")
+                            if k == "ellipseMode"
+                            else v
+                        )
+                    )
+                )
             )
             for k, v in self._settings.items()
         }
@@ -546,4 +619,3 @@ def _createAccessors(key, ktype):
 
 for key, ktype in VectorFieldLayerSettings._types.items():
     _createAccessors(key, ktype)
-
